@@ -1,8 +1,9 @@
 BROWSERIFY = node ./node_modules/browserify/bin/cmd.js
 MOCHA = ./node_modules/.bin/mocha
 UGLIFYJS = ./node_modules/.bin/uglifyjs
-BANNER = "/*! lil-http - v0.1 - MIT License - https://github.com/lil-js/http */"
+BANNER = "/*! lil-resilient - v0.1 - MIT License - https://github.com/lil-js/http */"
 MOCHA_PHANTOM = ./node_modules/.bin/mocha-phantomjs
+KARMA = ./node_modules/karma/bin/karma
 
 define release
 	VERSION=`node -pe "require('./package.json').version"` && \
@@ -27,16 +28,19 @@ browser: uglify
 test: browser mocha
 
 uglify:
-	$(UGLIFYJS) http.js --mangle --preamble $(BANNER) --source-map http.min.js.map > http.min.js
+	$(UGLIFYJS) resilient.js --mangle --preamble $(BANNER) --source-map resilient.min.js.map > resilient.min.js
 
 mocha:
 	bash ./test/run.sh 8888
 
 loc:
-	wc -l http.js
+	wc -l resilient.js
 
 gzip:
-	gzip -c http.js | wc -c
+	gzip -c resilient.js | wc -c
+
+karma:
+	$(KARMA) start
 
 release:
 	@$(call release, patch)

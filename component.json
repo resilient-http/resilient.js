@@ -1,6 +1,6 @@
 {
-  "name": "lil-http",
-  "description": "Tiny, lightweight, full featured HTTP client",
+  "name": "resilient",
+  "description": "Fault tolerant, balanced, full featured HTTP client for modern web applications and distributed systems",
   "version": "0.1.2",
   "license": "MIT",
   "repository": "lil-js/http",
@@ -12,14 +12,15 @@
     "http.min.js.map"
   ],
   "keywords": [
-    "lil",
-    "tiny",
-    "micro",
-    "http",
-    "request",
-    "xhr",
+    "fault",
+    "tolerant",
+    "balance",
     "ajax",
-    "https",
-    "agent"
+    "http",
+    "xhr",
+    "request",
+    "client",
+    "agent",
+    "distributed"
   ]
 }

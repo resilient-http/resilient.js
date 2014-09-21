@@ -1,5 +1,7 @@
 {
   "name": "lil-http",
+  "author": "Tomas Aparicio",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "test": "make test"
@@ -7,12 +9,18 @@
   "devDependencies": {
     "browserify": "^5.9.1",
     "chai": "^1.9.1",
-    "http-server": "^0.6.1",
     "mocha": "^1.21.3",
     "mocha-phantomjs": "^3.4.1",
     "phantomjs": "^1.9.7-9",
     "sinon": "^1.10.3",
     "stubby": "^0.2.6",
-    "uglify-js": "^2.4.15"
+    "uglify-js": "^2.4.15",
+    "karma": "^0.12.23",
+    "karma-chrome-launcher": "^0.1.4",
+    "karma-firefox-launcher": "^0.1.3",
+    "karma-mocha": "^0.1.9",
+    "karma-opera-launcher": "^0.1.0",
+    "karma-phantomjs-launcher": "^0.1.4",
+    "karma-safari-launcher": "^0.1.1"
   }
 }

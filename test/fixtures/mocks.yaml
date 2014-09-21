@@ -1,0 +1,12 @@
+
+- request:
+    url: ^/servers$
+    method:
+      - GET
+  response:
+    - status: 200
+      latency: 100
+      headers:
+        content-type: application/json
+      body: >
+        ["http://localhost:8888/app", "http://localhost:8888/app2", "http://localhost:8888/app3"]

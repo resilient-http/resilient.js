@@ -1,16 +1,22 @@
 {
   "name": "resilient",
-  "description": "Fault tolerant, balance-based, distribution-oriented HTTP client for modern web applications",
+  "description": "Fault tolerant, balanced, full featured HTTP client for modern web applications and distributed systems",
   "version": "0.1.0",
   "license": "MIT",
   "repository": "h2non/resilient",
   "author": "Tomas Aparicio",
   "main": "./resilient.js",
   "keywords": [
-    "lil",
-    "tiny",
-    "micro",
-    "xhr"
+    "fault",
+    "tolerant",
+    "balance",
+    "ajax",
+    "http",
+    "xhr",
+    "request",
+    "client",
+    "agent",
+    "distributed"
   ],
   "ignore": [
     "**/.*",
@@ -26,7 +32,7 @@
     "package.json",
     "component.json"
   ],
-  "dependencies": {
+  "devDependencies": {
     "lil-http": "~0.1.2"
   }
 }
