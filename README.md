@@ -10,7 +10,7 @@ Organisations working in disparate domains are independently discovering pattern
 The system stays responsive in the face of failure.
 This applies not only to highly-available, mission critical systems — any system that is not resilient will be unresponsive after a failure
 
-## What's resilient?
+### What resilient means?
 
 Resilience is achieved by replication, containment, isolation and delegation.
 Failures are contained within each component, isolating components from each other
@@ -19,7 +19,7 @@ compromising the system as a whole. Recovery of each component is delegated to a
 component and high-availability is ensured by replication where necessary.
 The client of a component is not burdened with handling its failures
 
-## Why in the browser?
+### But why in the browser?
 
 Web applications evolved notably in the latest years, achieving and delegating new responsabilities in the client side.
 The Web (and therefore HTTP) is based on a client-server architecture
