@@ -288,9 +288,9 @@ Server.prototype.getBalance = function (operation) {
   var stats = this.getStats(operation)
   var avgLatency = this.getLatency(operation)
   var total = stats.request + stats.error
-  return (((stats.request * 100 / total) * 35)
-    + ((stats.error * 100 / total) * 50)
-    + (avgLatency * 15)) / 100
+  return (((stats.request * 100 / total) * 35) +
+         ((stats.error * 100 / total) * 50) +
+         (avgLatency * 15) / 100)
   //((avgLatency * stats.request) * 100) / ((stats.request + stats.error) * avgLatency)
 }
 
