@@ -2,6 +2,8 @@
 
 <img align="right" height="280" src="https://raw.githubusercontent.com/h2non/resilient/gh-pages/images/resilient.png" />
 
+> **WORK IN PROGRESS**
+
 **resilient** is a fault tolerant, client-based balance and full featured HTTP client
 for modern web applications and distributed systems
 
@@ -26,6 +28,8 @@ The client of a component is not burdened with handling its failures
 Web applications evolved notably in the latest years, achieving and delegating new responsabilities in the client side.
 The Web (and therefore HTTP) is based on a client-server architecture
 
+### How it works?
+
 ## Installation
 
 Via [Bower](http://bower.io)
@@ -47,6 +51,7 @@ Or loading the script remotely
 
 ## Environments
 
+Runs in any [ES5 compliant](http://kangax.github.io/compat-table/es5/) browser.
 Cross-browser support guaranteed running tests with [Karma](http://karma-runner.github.io/) and [BrowserStack](http://browserstack.com/)
 
 - Chrome >= 5

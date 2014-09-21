@@ -25,6 +25,7 @@
     "*.sh",
     "test",
     "Makefile",
+    "karma.conf.js",
     ".editorconfig",
     ".gitignore",
     ".travis.yml",
