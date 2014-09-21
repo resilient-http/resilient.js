@@ -30,7 +30,7 @@ The Web (and therefore HTTP) is based on a client-server architecture
 
 Via [Bower](http://bower.io)
 ```bash
-bower install thread
+bower install resilient
 ```
 Via [Component](http://component.io/)
 ```bash
