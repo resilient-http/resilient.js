@@ -1,13 +1,13 @@
 # resilient [![Build Status](https://api.travis-ci.org/h2non/resilient.svg?branch=master)][travis] [![Stories in Ready](https://badge.waffle.io/h2non/resilient.png?label=ready&title=Ready)](https://waffle.io/h2non/resilient) [![Code Climate](https://codeclimate.com/github/h2non/resilient/badges/gpa.svg)](https://codeclimate.com/github/h2non/resilient) [![Gitter chat](https://badges.gitter.im/h2non/resilient.png)](https://gitter.im/h2non/resilient)
 
-<img align="right" height="280" src="https://raw.githubusercontent.com/h2non/resilient/gh-pages/images/resilient.png" />
-
 > **WORK IN PROGRESS**
 
 **resilient** is a fault tolerant, client-based balance and full featured HTTP client
 for modern web applications and distributed systems
 
 ## Introduction
+
+<img align="right" height="280" src="https://raw.githubusercontent.com/h2non/resilient/gh-pages/images/resilient.png" />
 
 Organisations working in disparate domains are independently discovering patterns for building software that look the same. These systems are more robust, more resilient, more flexible and better positioned to meet modern demands.
 
