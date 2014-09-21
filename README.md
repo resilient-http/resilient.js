@@ -23,12 +23,14 @@ compromising the system as a whole. Recovery of each component is delegated to a
 component and high-availability is ensured by replication where necessary.
 The client of a component is not burdened with handling its failures
 
+<!--
 ### But why in the browser?
 
 Web applications evolved notably in the latest years, achieving and delegating new responsabilities in the client side.
 The Web (and therefore HTTP) is based on a client-server architecture
 
 ### How it works?
+-->
 
 ## Installation
 
