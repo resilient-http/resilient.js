@@ -34,7 +34,7 @@ The Web (and therefore HTTP) is based on a client-server architecture
 
 An algorithm worth more than words
 
-It represents from a high-level the full HTTP request logic flow inside `resilient`
+It represents, from high-level, the complete HTTP request flow and logic encapsuled in `resilient`
 
 <img src="http://rawgit.com/h2non/resilient/master/algorithm.svg" />
 
