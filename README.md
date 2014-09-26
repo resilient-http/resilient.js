@@ -28,9 +28,15 @@ The client of a component is not burdened with handling its failures
 
 Web applications evolved notably in the latest years, achieving and delegating new responsabilities in the client side.
 The Web (and therefore HTTP) is based on a client-server architecture
+-->
 
 ### How it works?
--->
+
+An algorithm worth more than words
+
+It represents from a high-level the full HTTP request logic flow inside `resilient`
+
+<img src="http://rawgit.com/h2non/resilient/master/algorithm.svg" />
 
 ## Installation
 
