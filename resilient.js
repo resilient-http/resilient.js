@@ -14,13 +14,14 @@
   }
 }(this, function (exports) {
   'use strict'
-  var VERSION = '0.1.7'
+  var VERSION = '0.1.8'
   var toStr = Object.prototype.toString
   var slicer = Array.prototype.slice
   var hasOwn = Object.prototype.hasOwnProperty
   var origin = location.origin
   var originRegex = /^(http[s]?:\/\/[a-z0-9\-\.\:]+)[\/]?/i
   var hasDomainRequest = typeof XDomainRequest !== 'undefined'
+  var noop = function () {}
 
   var defaults = {
     method: 'GET',
@@ -33,11 +34,11 @@
   }
 
   function isObj(o) {
-    return o && toStr.call(o) === '[object Object]'
+    return o && toStr.call(o) === '[object Object]' || false
   }
 
   function isArr(o) {
-    return o && toStr.call(o) === '[object Array]'
+    return o && toStr.call(o) === '[object Array]' || false
   }
 
   function extend(target) {
@@ -192,10 +193,7 @@
         }
       }
 
-      if (typeof cb !== 'function')
-        throw new TypeError('callback function argument is required')
-
-      return request(config, cb, progress)
+      return request(config, cb || noop, progress)
     }
   }
 
