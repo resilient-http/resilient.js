@@ -4,7 +4,7 @@
 
 A browser and node.js fault tolerant, balanced, configurable and full featured HTTP client for distributed and reactive systems
 
-For more information about the **resilient**, see the [project site](http://resilient-http.github.io)
+For more information about the **resilient** and how it works, see the [project site](http://resilient-http.github.io)
 
 ## Features
 
@@ -40,7 +40,7 @@ compromising the system as a whole. Recovery of each component is delegated to a
 component and high-availability is ensured by replication where necessary.
 The client of a component is not burdened with handling its failures
 
-### A client-side balancer?
+## A client-side balancer?
 
 Yes. `resilient` aims to delegate a part of the balance logic responsabilities on the client-side,
 
@@ -54,6 +54,7 @@ An algorithm worth more than words
 The following diagram represents from high level point of view the complete HTTP request flow and logic encapsulated in `resilient`
 
 <img src="http://rawgit.com/resilient-http/resilient.js/master/algorithm.svg" />
+
 -->
 
 ## Installation
@@ -83,6 +84,9 @@ Runs in any [ES5 compliant](http://kangax.github.io/compat-table/es5/) engine
 - Safari >= 5
 - Opera >= 10
 - IE >= 9
+
+## How it works?
+
 
 ## Basic usage
 
