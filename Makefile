@@ -1,8 +1,9 @@
 BROWSERIFY = node ./node_modules/browserify/bin/cmd.js
 MOCHA = ./node_modules/.bin/mocha
 UGLIFYJS = ./node_modules/.bin/uglifyjs
-BANNER = "/*! resilient - v0.1 - MIT License - https://github.com/h2non/resilient */"
+BANNER = "/*! resilient - v0.1 - MIT License - https://github.com/resilient-http/resilient.js */"
 MOCHA_PHANTOM = ./node_modules/.bin/mocha-phantomjs
+CUCUMBER = ./node_modules/.bin/cucumber-js
 KARMA = ./node_modules/karma/bin/karma
 
 define release
@@ -34,14 +35,15 @@ browserify:
 	$(BROWSERIFY) \
 		--exports require \
 		--standalone resilient \
-		--entry ./src/resilient.js >> ./resilient.js
+		--ignore request \
+		--entry ./lib/index.js >> ./resilient.js
 
 uglify:
 	$(UGLIFYJS) resilient.js --mangle --preamble $(BANNER) --source-map resilient.min.js.map > resilient.min.js
 
 mocha:
-	$(MOCHA) --reporter spec --ui tdd ./test/server ./test/servers
-	#bash ./test/run.sh 8888
+	$(MOCHA) --reporter spec --ui tdd --timeout 2000
+	#$(CUCUMBER) -f pretty -r features/support -r features/step_definitions
 
 loc:
 	wc -l resilient.js

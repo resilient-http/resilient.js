@@ -3,7 +3,7 @@
   "description": "Fault tolerant, balanced, full featured HTTP client for modern web applications and distributed systems",
   "version": "0.1.0",
   "license": "MIT",
-  "repository": "h2non/resilient",
+  "repository": "resilient-http/resilient",
   "author": "Tomas Aparicio",
   "main": "./resilient.js",
   "keywords": [
@@ -34,6 +34,7 @@
     "component.json"
   ],
   "devDependencies": {
-    "lil-http": "~0.1.2"
+    "lil-http": "~0.1.2",
+    "jquery": "~2.1.1"
   }
 }

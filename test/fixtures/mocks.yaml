@@ -1,6 +1,77 @@
+- request:
+    url: ^/discovery/valid/([0-9])
+    method:
+      - GET
+      - POST
+  response:
+    - status: 200
+      latency: 300
+      headers:
+        content-type: application/json
+      body: >
+        [
+          "http://localhost:8882/server/unavailable",
+          "http://localhost:8882/server/timeout",
+          "http://localhost:8882/server/delay",
+          "http://localhost:8882/server/1"
+        ]
 
 - request:
-    url: ^/servers$
+    url: ^/discovery/fail/([0-9])
+    method:
+      - GET
+      - POST
+  response:
+    - status: 500
+      latency: 100
+
+- request:
+    url: ^/discovery/timeout/([0-9])
+    method:
+      - GET
+      - POST
+  response:
+    - status: 500
+      latency: 5000
+
+- request:
+    url: ^/server/unavailable
+    method:
+      - GET
+  response:
+    - status: 503
+      latency: 100
+      headers:
+        content-type: application/json
+      body: >
+        {"status": "unavailable"}
+
+- request:
+    url: ^/server/timeout
+    method:
+      - GET
+  response:
+    - status: 502
+      latency: 10000
+      headers:
+        content-type: application/json
+      body: >
+        {"status": "unavailable"}
+
+- request:
+    url: ^/server/delay
+    method:
+      - GET
+  response:
+    - status: 202
+      latency: 500
+      headers:
+        content-type: application/json
+      body: >
+        {"hello": "world"}
+
+- request:
+    url: ^/server/([0-9])
     method:
       - GET
   response:
@@ -9,4 +80,18 @@
       headers:
         content-type: application/json
       body: >
-        ["http://localhost:8888/app", "http://localhost:8888/app2", "http://localhost:8888/app3"]
+        {"hello": "world"}
+
+- request:
+    url: ^/app/([0-9]+)$
+    method:
+      - GET
+      - POST
+      - DELETE
+      - PUT
+  response:
+    - status: 200
+      latency: 100
+      headers:
+        content-type: application/json
+

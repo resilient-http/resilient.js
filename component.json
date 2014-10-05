@@ -1,15 +1,15 @@
 {
   "name": "resilient",
   "description": "Fault tolerant, balanced, full featured HTTP client for modern web applications and distributed systems",
-  "version": "0.1.2",
+  "version": "0.1.0",
   "license": "MIT",
-  "repository": "lil-js/http",
+  "repository": "resilient-http/resilient",
   "author": "Tomas Aparicio",
-  "license": "MIT",
+  "main": "./resilient.js",
   "scripts": [
-    "http.js",
-    "http.min.js",
-    "http.min.js.map"
+    "resilient.js",
+    "resilient.min.js",
+    "resilient.min.js.map"
   ],
   "keywords": [
     "fault",
@@ -22,5 +22,5 @@
     "client",
     "agent",
     "distributed"
-  ]
+  ],
 }
