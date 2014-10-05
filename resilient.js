@@ -951,6 +951,10 @@ Resilient.prototype.balancer = function () {
   return this.getOptions('balancer')
 }
 
+Resilient.prototype.client = function () {
+  return this._client
+}
+
 Resilient.prototype.send = Resilient.prototype.http = function (path, options, cb) {
   return this._client.send(path, options, cb)
 }

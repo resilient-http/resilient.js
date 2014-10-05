@@ -134,7 +134,7 @@ describe('utils', function () {
       _.delay(function () {
         expect((Date.now() - start) >= 50).to.be.true
         done()
-      }, 51)
+      }, 60)
     })
   })
 })

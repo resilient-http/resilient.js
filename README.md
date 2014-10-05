@@ -1,6 +1,6 @@
 # resilient.js [![Build Status](https://api.travis-ci.org/resilient-http/resilient.js.svg?branch=master)][travis] [![Stories in Ready](https://badge.waffle.io/resilient-http/resilient.js.png?label=ready&title=Ready)](https://waffle.io/resilient-http/resilient.js) [![Code Climate](https://codeclimate.com/github/resilient-http/resilient.js/badges/gpa.svg)](https://codeclimate.com/github/resilient-http/resilient.js) [![Gitter chat](https://badges.gitter.im/resilient-http/resilient.js.png)](https://gitter.im/resilient-http/resilient.js)
 
-<img align="right" height="280" src="https://raw.githubusercontent.com/resilient-http/resilient.js/gh-pages/images/resilient.png" />
+<img align="right" height="260" src="http://rawgit.com/resilient-http/resilient-http.github.io/master/images/logo.svg" />
 
 A browser and node.js fault tolerant, balanced, configurable and full featured HTTP client for distributed and reactive systems
 
@@ -52,9 +52,6 @@ The Web (and therefore HTTP) is based on a client-server architecture
 An algorithm worth more than words
 
 The following diagram represents from high level point of view the complete HTTP request flow and logic encapsulated in `resilient`
-
-<img src="http://rawgit.com/resilient-http/resilient.js/master/algorithm.svg" />
-
 -->
 
 ## Installation
@@ -87,6 +84,7 @@ Runs in any [ES5 compliant](http://kangax.github.io/compat-table/es5/) engine
 
 ## How it works?
 
+<img src="http://rawgit.com/resilient-http/resilient-http.github.io/master/images/algorithm.svg" />
 
 ## Basic usage
 
