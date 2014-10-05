@@ -6,6 +6,8 @@ A browser and [node.js](http://nodejs.org) fault tolerant, balanced, configurabl
 
 For more information about the **resilient** and how it works, see the [project site](http://resilient-http.github.io)
 
+**Note**: resilient is still a beta preview version
+
 ## Features
 
 - Fault tolerant, transparent fallback
