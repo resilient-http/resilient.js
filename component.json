@@ -21,6 +21,8 @@
     "request",
     "client",
     "agent",
-    "distributed"
+    "distributed",
+    "resilience",
+    "reactive"
   ],
 }
