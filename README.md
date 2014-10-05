@@ -9,12 +9,15 @@ For more information about the **resilient**, see the [project site](http://resi
 ## Features
 
 - Fault tolerant, transparent fallback
-- Client side smart balancer based on server latency and errors
-- Built-in support for servers caching for more reilability
+- Client-side based balancer using a simple best availability algorithm
+- Smart balancer logic based on server stats (lantency, errors, requests...)
+- Configurable balancer policy and weight
 - Servers discovering based on the resilient high-level protocol
-- Parallel discovering built-in support for a faster service discovery
+- Built-in support for servers caching for improve reliability
+- Parallel servers discovering for a faster
 - Highly configurable (timeout, retry times, cache, implicit delay...)
 - Cross-engine (browsers and node.js)
+- Full HTTP features support (it uses [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http))
 
 <!--
 ## Introduction
@@ -128,7 +131,7 @@ var servers = [
 Create a new client and set the discovering servers
 ```js
 var client = Resilient({ service: { basePath: '/api/1.0' }})
-client.setDiscoveryServers(servers)
+client.discoveryServers(servers)
 ```
 
 Perform the request (the best available server will be use)
@@ -152,7 +155,6 @@ The options `object` has three different blocks and levels of configuration
 
 There are specific config options for the servers of the client service.
 Resilient is a resource-oriented HTTP client, which could be ideal for RESTful Web services
-
 
 - **servers** `array` - A list of valid URIs of servers to reach for the given service. Default `null`
 - **expires** `number` - Servers list expiration time to live in miliseconds. Default `60` seconds
@@ -196,19 +198,47 @@ Specific configuration for discovery servers requests, behavior and logic
 - **method** `string` - Request HTTP method. Default to `GET`
 - **data** `mixed` - Optional data to send as payload to discovery servers. Default `null`
 
-### resilient#get(options, callback)
+### resilient#send(path, options, callback)
 
-### resilient#post(options, callback)
+### resilient#get(path, options, callback)
 
-### resilient#put(options, callback)
+### resilient#post(path, options, callback)
 
-### resilient#del(options, callback)
+### resilient#put(path, options, callback)
 
-### resilient#patch(options, callback)
+### resilient#del(path, options, callback)
 
-### resilient#head(options, callback)
+### resilient#patch(path, options, callback)
 
-### resilient#setOptions(type, options)
+### resilient#head(path, options, callback)
+
+### resilient#setOptions(options)
+
+### resilient#getOptions()
+
+### resilient#setServiceOptions(options)
+
+### resilient#setDiscoveryOptions(options)
+
+### resilient#getHttpOptions(type)
+
+### resilient#getHttpOptions(type)
+
+### resilient#getServers(type)
+
+### resilient#discoveryServers([ servers ])
+
+### resilient#discoverServers(callback)
+
+### resilient#updateServers([ callback ])
+
+### resilient#flushCache()
+
+### resilient#client()
+
+### resilient#areServersUpdated()
+
+### resilient#balancer()
 
 ### resilient.VERSION
 Type: `string`

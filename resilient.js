@@ -652,10 +652,10 @@ function isJSONContent(res) {
 
 },{"../bower_components/lil-http/http":1,"request":17}],9:[function(require,module,exports){
 var Resilient = require('./resilient')
-var Client = require('./client')
 var Options = require('./options')
 var defaults = require('./defaults')
 var Servers = require('./servers')
+var http = require('./http')
 
 module.exports = ResilientFactory
 
@@ -665,11 +665,11 @@ function ResilientFactory(options) {
 
 ResilientFactory.VERSION = '0.1.0-beta.0'
 ResilientFactory.defaults = defaults
-ResilientFactory.Client = Client
 ResilientFactory.Options = Options
 ResilientFactory.Servers = Servers
+ResilientFactory.request = http
 
-},{"./client":3,"./defaults":4,"./options":10,"./resilient":12,"./servers":15}],10:[function(require,module,exports){
+},{"./defaults":4,"./http":8,"./options":10,"./resilient":12,"./servers":15}],10:[function(require,module,exports){
 var _ = require('./utils')
 var defaults = require('./defaults')
 var Servers = require('./servers')
@@ -804,7 +804,7 @@ function Requester(resilient) {
 
   function retry(servers, options, cb) {
     return function () {
-      var discovery = resilient.getDiscoveryServers()
+      var discovery = resilient.discoveryServers()
       if (discovery && discovery.exists()) {
         options.retry -= 1
         request(servers, options, cb)
@@ -896,13 +896,9 @@ Resilient.prototype.setDiscoveryOptions = function (options) {
   return this
 }
 
-Resilient.prototype.setClientOptions = function (options) {
-  this.setOptions('client', options)
+Resilient.prototype.setServiceOptions = function (options) {
+  this.setOptions('service', options)
   return this
-}
-
-Resilient.prototype.balancer = function (options) {
-  return this.getOptions('balancer')
 }
 
 Resilient.prototype.getOptions = function (type) {
@@ -919,13 +915,12 @@ Resilient.prototype.getServers = function (type) {
   if (options) return options.servers()
 }
 
-Resilient.prototype.getDiscoveryServers = function () {
-  return this.getServers('discovery')
-}
-
-Resilient.prototype.setDiscoveryServers = function (list) {
-  this.options.get('discovery').servers(list)
-  return this
+Resilient.prototype.discoveryServers = function (list) {
+  if (_.isArr(list)) {
+    this.options.get('discovery').servers(list)
+  } else {
+    return this.getServers('discovery')
+  }
 }
 
 Resilient.prototype.setServers = function (list) {
@@ -950,6 +945,10 @@ Resilient.prototype.flushCache = function () {
 
 Resilient.prototype.areServersUpdated = function () {
   return this.getServers('service').lastUpdate() < (this.getOptions('service').get('refresh') || 0)
+}
+
+Resilient.prototype.balancer = function () {
+  return this.getOptions('balancer')
 }
 
 Resilient.prototype.send = Resilient.prototype.http = function (path, options, cb) {
