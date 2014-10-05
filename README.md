@@ -1,6 +1,6 @@
 # resilient.js [![Build Status](https://api.travis-ci.org/resilient-http/resilient.js.svg?branch=master)][travis] [![Stories in Ready](https://badge.waffle.io/resilient-http/resilient.js.png?label=ready&title=Ready)](https://waffle.io/resilient-http/resilient.js) [![Code Climate](https://codeclimate.com/github/resilient-http/resilient.js/badges/gpa.svg)](https://codeclimate.com/github/resilient-http/resilient.js) [![Gitter chat](https://badges.gitter.im/resilient-http/resilient.js.png)](https://gitter.im/resilient-http/resilient.js)
 
-<img align="right" height="260" src="resilient-http/resilient-http.github.io/blob/master/images/logo.png" />
+<img align="right" height="260" src="//rawgit.com/resilient-http/resilient-http.github.io/blob/master/images/logo.png" />
 
 A browser and node.js fault tolerant, balanced, configurable and full featured HTTP client for distributed and reactive systems
 
