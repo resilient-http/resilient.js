@@ -25,10 +25,6 @@ describe('Servers', function () {
     })
   })
 
-  it('should get the best available server', function () {
-    expect(servers.bestAvailable('read').url).to.be.equal(list[2])
-  })
-
   it('should find an existent server', function () {
     expect(servers.find('http://1.server.com')).to.be.an('object')
   })

@@ -22,7 +22,7 @@ describe('Resilient discovery', function () {
         .get('/')
         .reply(503)
       nock('http://timeout')
-        .filteringPath(/\?(.*)/g, '')
+        .filteringPath(function () { return '/' })
         .get('/')
         .delayConnection(100)
         .reply(500)
@@ -35,10 +35,6 @@ describe('Resilient discovery', function () {
         .reply(200, { hello: 'world' })
     })
 
-    after(function () {
-      nock.cleanAll()
-    })
-
     it('should fallback to the request', function (done) {
       resilient.get('/hello', function (err, res) {
         expect(err).to.be.null
@@ -49,11 +45,11 @@ describe('Resilient discovery', function () {
     })
   })
 
-  xdescribe('timeout discovery servers with retry', function() {
+  describe('timeout discovery servers with retry', function() {
     var resilient = Resilient({
       discovery: {
         timeout: 50,
-        retry: 3,
+        retry: 2,
         retryWait: 50,
         servers: [
           'http://timeout/1',
@@ -65,9 +61,9 @@ describe('Resilient discovery', function () {
 
     before(function () {
       nock('http://timeout')
-        .persist()
         .filteringPath(function () { return '/' })
         .get('/')
+        .times(9)
         .delayConnection(100)
         .reply(503)
     })
@@ -78,16 +74,18 @@ describe('Resilient discovery', function () {
 
     it('should fallback to the request', function (done) {
       var start = Date.now()
-      var end = 50 * 3 * 4
+      var end = 50 * 3 * 3
       resilient.get('/hello', function (err, res) {
         expect(err.status).to.be.equal(1000)
+        expect(err.code).to.be.equal('ETIMEDOUT')
+        console.log(Date.now() - start, end)
         expect(Date.now() - start > end).to.be.true
         done()
       })
     })
   })
 
-  xdescribe('unavailable discovery servers with retry support', function() {
+  describe('unavailable discovery servers with retry support', function() {
     var resilient = Resilient({
       discovery: {
         timeout: 50,
@@ -125,13 +123,14 @@ describe('Resilient discovery', function () {
     })
   })
 
-  xdescribe('timeout discovery servers parallel', function () {
+  describe('timeout discovery servers parallel', function () {
     var resilient = Resilient({
       discovery: {
-        timeout: 200,
+        timeout: 50,
         parallel: true,
         servers: [
           'http://timeout/1',
+          'http://timeout/2',
           'http://timeout/2',
           'http://valid'
         ]
@@ -140,9 +139,9 @@ describe('Resilient discovery', function () {
 
     before(function () {
       nock('http://timeout')
-        .persist()
         .filteringPath(function () { return '/' })
         .get('/')
+        .times(3)
         .delayConnection(100)
         .reply(503)
       nock('http://valid')
@@ -159,7 +158,7 @@ describe('Resilient discovery', function () {
       nock.cleanAll()
     })
 
-    it('should fallback to the request', function (done) {
+    it('should resolve with a vlaid status', function (done) {
       var start = Date.now()
       resilient.get('/hello', function (err, res) {
         expect(err).to.be.null

@@ -28,21 +28,21 @@ describe('Server', function () {
 
   describe('stats reporting', function () {
     it('should report the requests', function () {
-      server.report('read', 'request', 100)
+      server.report('read', 100)
       expect(server.getStats('read', 'request')).to.be.equal(1)
       expect(server.getStats('read', 'latency')).to.be.equal(100)
-      server.report('read', 'request', 50)
+      server.report('read', 50)
       expect(server.getStats('read', 'request')).to.be.equal(2)
       expect(server.getStats('read', 'latency')).to.be.equal(75)
-      server.report('read', 'request', 50)
+      server.report('read', 50)
       expect(server.getStats('read', 'request')).to.be.equal(3)
       expect(server.getStats('read', 'latency')).to.be.equal(41.67)
     })
     it('should report the errors', function () {
-      server.report('read', 'error', 100)
+      server.reportError('read', 100)
       expect(server.getStats('read', 'error')).to.be.equal(1)
       expect(server.getStats('read', 'latency')).to.be.equal(35.42)
-      server.report('read', 'error', 50)
+      server.reportError('read', 50)
       expect(server.getStats('read', 'error')).to.be.equal(2)
       expect(server.getStats('read', 'latency')).to.be.equal(17.08)
     })
