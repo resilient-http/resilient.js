@@ -58,6 +58,14 @@ The following diagram represents from high level point of view the complete HTTP
 
 ## Installation
 
+#### Node.js
+
+```bash
+npm install resilient
+```
+
+#### Browser
+
 Via [Bower](http://bower.io)
 ```bash
 bower install resilient
