@@ -11,21 +11,33 @@ module.exports = function () {
     return options[type] = options[type] || {}
   }
 
+  function parseValue(str) {
+    if (/[0-9]+/.test(str)) {
+      return parseInt(str, 10)
+    } else if (str === 'true') {
+      return true
+    } else if (str === 'false') {
+      return false
+    } else {
+      return str
+    }
+  }
+
   function setOptionsTable(options, table, field) {
     options[field] = options[field] || {}
     table.rows().forEach(function () {})
   }
 
-  function defineMock(row, discovery) {
+  function defineMock(row) {
     var url = row[0]
     var status = parseInt(row[1], 10)
     var method = row[2].toLowerCase()
-    var path = row[3]
-    var delay = parseInt(row[4], 3)
-    var body = row[5] === 'none' ? null : JSON.parse(row[5])
-    var mock = this.mock(url).persist()
-    if (discovery) mock = mock.filteringPath(/(\?(.*))/g, '')
-    mock[method](path)
+    var delay = parseInt(row[3], 3)
+    var body = row[4] === 'none' ? null : JSON.parse(row[4])
+    this.mock(url)
+      .persist()
+      .filteringPath(function () { return '/' })
+      [method]('/')
       .delayConnection(delay)
       .reply(status, body)
   }
@@ -33,7 +45,7 @@ module.exports = function () {
   Given(/^the following ([a-z]+) options values:$/, function (type, data, done) {
     var options = getOptions.call(type)
     data.rows().forEach(function (pairs) {
-      options[pairs.shift()] = pairs.shift()
+      options[pairs.shift()] = parseValue(pairs.shift())
     })
     done()
   })
@@ -48,7 +60,7 @@ module.exports = function () {
     done()
   })
 
-  Given(/^the configure the stub enpoints:$/, function (data, done) {
+  Given(/^the following the service servers stubs:$/, function (data, done) {
     data.rows().forEach(defineMock.bind(this))
     done()
   })
@@ -65,15 +77,24 @@ module.exports = function () {
 
   When(/^performs the request$/, function (done) {
     this.client.send(this.config, function (err, res) {
-      console.log(err)
-      expect(err).to.be.null
+      this.error = err
       this.response = res
       done()
     }.bind(this))
   })
 
-  Then(/^response status code should be ([0-9]{3})$/, function (status, done) {
-    expect(this.response.status).to.be.equal(parseInt(status, 10))
+  Then(/^the request has no errors$/, function (done) {
+    expect(this.error).to.be.null
+    done()
+  })
+
+  Then(/^the request has failed$/, function (done) {
+    expect(this.error).to.be.an('object')
+    done()
+  })
+
+  Then(/^(.*) status code should be ([0-9]{3,4})$/, function (type, status, done) {
+    expect(this[type].status).to.be.equal(parseInt(status, 10))
     done()
   })
 
