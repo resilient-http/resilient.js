@@ -16,8 +16,8 @@ describe('Resilient', function () {
       expect(Resilient.defaults).to.be.an('object')
     })
 
-    it('should expose the Client constructor', function () {
-      expect(Resilient.Client).to.be.a('function')
+    it('should expose the http client', function () {
+      expect(Resilient.request).to.be.a('function')
     })
 
     it('should expose the Servers constructor', function () {
