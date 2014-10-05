@@ -221,33 +221,38 @@ var _ = require('./utils')
 
 module.exports = Cache
 
-function Cache(resilient) {
-  this._resilient = resilient
-  this.buf = {}
+function Cache() {
+  this.store = {}
 }
 
-Cache.prototype.flush = function () {
-  this.buf = {}
+Cache.prototype.flush = function (key) {
+  if (key) {
+    this.store[key] = null
+  } else {
+    this.store = {}
+  }
 }
 
 Cache.prototype.get = function (key) {
-  return key ? this.buf[key] : this.buf
+  return key ? this.store[key] : _.clone(this.store)
 }
 
-Cache.prototype.set = function (key, value) {
-  var self = this
-  if (value) {
-    this.buf[key] = { data: value, updated: _.now() }
-  } else if (_.isObj(key)) {
-    Object.keys(_.extend({}, key)).forEach(function (name) {
-      self.set(name, key[name])
-    })
+Cache.prototype.time = function (key) {
+  if (key && this.store[key]) {
+    return this.store[key].time
+  }
+}
+
+Cache.prototype.set = function (key, data) {
+  if (key && data) {
+    this.store[key] = { data: data, time: _.now() }
   }
 }
 
 },{"./utils":16}],3:[function(require,module,exports){
 var _ = require('./utils')
 var resolver = require('./resolver')
+var http = require('./http')
 
 module.exports = Client
 
@@ -257,7 +262,11 @@ function Client(resilient) {
 
 Client.prototype.send = function (path, options, cb, method) {
   var args = normalizeArgs.call(this, path, options, cb, method)
-  return resolver.apply(null, [ this._resilient ].concat(args))
+  if (isFullUrl(args[0])) {
+    return plainHttp.apply(null, args)
+  } else {
+    return resolver.apply(null, [ this._resilient ].concat(args))
+  }
 }
 
 Client.prototype.get = function (path, options, cb) {
@@ -301,23 +310,29 @@ function mergeHttpOptions(options) {
   return _.extend(defaults, options)
 }
 
-},{"./resolver":13,"./utils":16}],4:[function(require,module,exports){
+function isFullUrl(options) {
+  return options && (_.isURI(options.path) || _.isURI(options.url)) || false
+}
+
+function plainHttp(options, cb) {
+  options.url = options.path
+  return http.call(null, options, cb)
+}
+
+},{"./http":8,"./resolver":13,"./utils":16}],4:[function(require,module,exports){
 var defaults = module.exports = {}
 
 defaults.service = {
   method: 'GET',
   timeout: 2 * 1000,
   servers: null,
-  cache: true,
   retry: 0,
   retryUpdate: true,
-  refresh: 60 * 1000,
-  cacheExpiration: 60 * 10 * 1000
+  refresh: 60 * 1000
 }
 
 defaults.balancer = {
   enable: true,
-  roundRobin: false,
   weight: {
     request: 25,
     error: 50,
@@ -352,6 +367,7 @@ var _ = require('./utils')
 var ResilientError = require('./error')
 var Servers = require('./servers')
 var Requester = require('./requester')
+var DiscoveryServers = require('./discovery-servers')
 
 module.exports = DiscoveryResolver
 
@@ -360,12 +376,16 @@ function DiscoveryResolver(resilient) {
     return resilient.getOptions('discovery')
   }
 
+  function getServers() {
+    return getOptions().servers()
+  }
+
   function isUpdating() {
     return resilient._updating || resilient._queue.length > 0
   }
 
   function hasDiscoveryServers() {
-    var servers = getOptions().servers()
+    var servers = getServers()
     return (servers && servers.exists()) || false
   }
 
@@ -395,12 +415,12 @@ function DiscoveryResolver(resilient) {
     if (options.parallel) {
       updateServersInParallel(options, cb)
     } else {
-      Requester(resilient)(getOptions().servers(), options, onUpdateServers(cb))
+      Requester(resilient)(getServers(), options, onUpdateServers(cb))
     }
   }
 
   function updateServersInParallel(options, cb) {
-    var buf = [], servers = getOptions().servers().sort()
+    var buf = [], servers = getServers().sort()
 
     servers.slice(0, 3).forEach(function (server, index) {
       server = [ server ]
@@ -413,7 +433,6 @@ function DiscoveryResolver(resilient) {
 
     function onUpdate(index) {
       return function (err, res) {
-        //console.log('ERROR >', err)
         if (err) buf[index] = null
         if (res || isEmptyBuffer(buf)) {
           onUpdateServers(cb, buf)(err, res)
@@ -445,6 +464,22 @@ function DiscoveryResolver(resilient) {
 
 Requester.DiscoveryResolver = DiscoveryResolver
 
+DiscoveryResolver.update = function (resilient, cb) {
+  DiscoveryResolver(resilient)
+    (DiscoveryServers(resilient)
+      (cb))
+}
+
+DiscoveryResolver.get = function (resilient, cb) {
+  DiscoveryResolver(resilient)(function (err, res) {
+    if (err) cb(err)
+    else {
+      if (res && res.data) cb(null, res.data)
+      else cb(new ResilientError(1001, res))
+    }
+  })
+}
+
 function addTimeStamp(path) {
   path = path || ''
   path += path.indexOf('?') === -1 ? '?' : '&'
@@ -466,7 +501,7 @@ function isEmptyBuffer(buf) {
   return !buf || buf.filter(function (request) { return _.isObj(request) }).length === 0
 }
 
-},{"./error":7,"./requester":11,"./servers":15,"./utils":16}],6:[function(require,module,exports){
+},{"./discovery-servers":6,"./error":7,"./requester":11,"./servers":15,"./utils":16}],6:[function(require,module,exports){
 var _ = require('./utils')
 var ResilientError = require('./error')
 
@@ -475,12 +510,10 @@ module.exports = DiscoveryServers
 function DiscoveryServers(resilient) {
   function defineServers(cb) {
     return function (err, res) {
-      if (err) {
-        cb(err)
-      } else if (isValidResponse(res)) {
+      if (!err && isValidResponse(res)) {
         setServers(res, cb)
       } else {
-        cb(new ResilientError(1001, res))
+        handlerError(err, cb)
       }
     }
   }
@@ -488,13 +521,57 @@ function DiscoveryServers(resilient) {
   function setServers(res, cb) {
     if (res.data.length) {
       resilient.setServers(res.data)
+      refreshCache(res.data)
       cb(null, res)
     } else {
       cb(new ResilientError(1004, res))
     }
   }
 
+  function handlerError(err, cb) {
+    if (isCacheEnabled()) {
+      getFromCache(err, cb)
+    } else {
+      resolveWithError(err, cb)
+    }
+  }
+
+  function getFromCache(err, cb) {
+    var expiration, cache = getCache()
+    if (cache && _.isArr(cache.data)) {
+      expiration = resilient.getOptions('discovery').cacheExpiration
+      if ((_.now() - cache.time) > expiration) {
+        //resilient.setServers(cache.data)
+        cb(null, { status: 200, _cache: true, data: cache.data })
+      } else {
+        resilient._cache.flush('discovery')
+        resolveWithError(err, cb)
+      }
+    } else {
+      resolveWithError(err, cb)
+    }
+  }
+
+  function refreshCache(data) {
+    if (isCacheEnabled()) {
+      resilient._cache.set('discovery', data)
+    }
+  }
+
+  function isCacheEnabled() {
+    return resilient.getOptions('discovery').cache
+  }
+
+  function getCache() {
+    return resilient._cache.get('discovery')
+  }
+
   return defineServers
+}
+
+function resolveWithError(err, cb) {
+  err = err || { status: 1000 }
+  return cb(new ResilientError(err.status, err))
 }
 
 function isValidResponse(res) {
@@ -578,6 +655,7 @@ var Resilient = require('./resilient')
 var Client = require('./client')
 var Options = require('./options')
 var defaults = require('./defaults')
+var Servers = require('./servers')
 
 module.exports = ResilientFactory
 
@@ -585,13 +663,13 @@ function ResilientFactory(options) {
   return new Resilient(options)
 }
 
-Resilient.VERSION = '0.1.0'
-Resilient.defaults = defaults
-Resilient.Client = Client
-Resilient.Resilient = Resilient
-Resilient.Options = Options
+ResilientFactory.VERSION = '0.1.0-beta.0'
+ResilientFactory.defaults = defaults
+ResilientFactory.Client = Client
+ResilientFactory.Options = Options
+ResilientFactory.Servers = Servers
 
-},{"./client":3,"./defaults":4,"./options":10,"./resilient":12}],10:[function(require,module,exports){
+},{"./client":3,"./defaults":4,"./options":10,"./resilient":12,"./servers":15}],10:[function(require,module,exports){
 var _ = require('./utils')
 var defaults = require('./defaults')
 var Servers = require('./servers')
@@ -690,7 +768,7 @@ function Requester(resilient) {
     options = _.clone(options)
 
     function next(previousError) {
-      var handler, request, server = serversList.shift()
+      var handler, server = serversList.shift()
       if (server) {
         handler = requestHandler(server, operation, cb, next)
         options.url = _.join(server.url, options.basePath, options.path)
@@ -791,6 +869,7 @@ var _ = require('./utils')
 var Options = require('./options')
 var Client = require('./client')
 var Cache = require('./cache')
+var DiscoveryResolver = require('./discovery-resolver')
 
 var VERBS = ['get', 'post', 'put', 'del', 'head', 'patch']
 
@@ -800,7 +879,7 @@ function Resilient(options) {
   this._queue = []
   this._updating = false
   this._client = new Client(this)
-  this._cache = new Cache(this)
+  this._cache = new Cache()
   this.setOptions(options)
 }
 
@@ -856,21 +935,23 @@ Resilient.prototype.setServers = function (list) {
   return this
 }
 
+Resilient.prototype.discoverServers = function (cb) {
+  DiscoveryResolver.get(this)(cb)
+  return this
+}
+
+Resilient.prototype.updateServers = function (cb) {
+  DiscoveryResolver.update(this, cb || _.noop)
+  return this
+}
+
 Resilient.prototype.flushCache = function () {
   this._cache.flush()
   return this
 }
 
-Resilient.prototype.areServersUpdated = function (type) {
-  if (type === 'discovery') {
-    return true
-  } else {
-    return this.getServers(type).lastUpdate() < (this.getOptions(type).get('refresh') || 0)
-  }
-}
-
-Resilient.prototype.updateServers = function () {
-  // to do
+Resilient.prototype.areServersUpdated = function () {
+  return this.getServers('service').lastUpdate() < (this.getOptions('service').get('refresh') || 0)
 }
 
 Resilient.prototype.send = Resilient.prototype.http = function (path, options, cb) {
@@ -885,18 +966,19 @@ function defineMethodProxy(verb) {
   }
 }
 
-},{"./cache":2,"./client":3,"./options":10,"./utils":16}],13:[function(require,module,exports){
+},{"./cache":2,"./client":3,"./discovery-resolver":5,"./options":10,"./utils":16}],13:[function(require,module,exports){
 var _ = require('./utils')
 var ResilientError = require('./error')
 var Requester = require('./requester')
 var DiscoveryResolver = require('./discovery-resolver')
 var DiscoveryServers = require('./discovery-servers')
+var Servers = require('./servers')
 
 module.exports = Resolver
 
 function Resolver(resilient, options, cb) {
   try {
-    resolve(nextResolve)
+    resolve(resolver)
   } catch (err) {
     cb(new ResilientError(1006, err))
   }
@@ -906,9 +988,7 @@ function Resolver(resilient, options, cb) {
       next()
     } else {
       if (hasServers('discovery')) {
-        DiscoveryResolver(resilient)
-          (DiscoveryServers(resilient)
-            (next))
+        DiscoveryResolver.update(resilient, next)
       } else {
         next(new ResilientError(1002))
       }
@@ -920,28 +1000,35 @@ function Resolver(resilient, options, cb) {
     type = type || 'service'
     servers = resilient.getServers(type)
     if (servers && servers.exists()) {
-      if (type !== 'discovery') {
-        valid = servers.lastUpdate() < (resilient.getOptions(type).get('refresh') || 0)
-      } else {
-        valid = true
-      }
+      valid = type !== 'discovery' ? isUpToDate(servers, type) : true
     }
     return valid
   }
 
-  function nextResolve(err) {
+  function isUpToDate(servers, type) {
+    return servers.lastUpdate() < (resilient.getOptions(type).get('refresh') || 0)
+  }
+
+  function resolver(err, res) {
     if (err) {
       cb(err)
-    } else if (!hasServers()) {
-      // to do: resolve from cache
-      cb(new ResilientError(1003))
     } else {
-      Requester(resilient)(resilient.getServers(), options, cb)
+      handleResolution(res)
     }
+  }
+
+  function handleResolution(res) {
+    var servers = resilient.getServers()
+    if (res && res._cache) {
+      servers = new Servers(res.data)
+    } else if (!hasServers()) {
+      return cb(new ResilientError(1003))
+    }
+    Requester(resilient)(servers, options, cb)
   }
 }
 
-},{"./discovery-resolver":5,"./discovery-servers":6,"./error":7,"./requester":11,"./utils":16}],14:[function(require,module,exports){
+},{"./discovery-resolver":5,"./discovery-servers":6,"./error":7,"./requester":11,"./servers":15,"./utils":16}],14:[function(require,module,exports){
 var _ = require('./utils')
 
 module.exports = Server
@@ -1021,14 +1108,12 @@ function round(number) {
 },{"./utils":16}],15:[function(require,module,exports){
 var _ = require('./utils')
 var Server = require('./server')
-var uriRegex = /^http[s]?\:\/\/(.+)/i
 
 module.exports = Servers
 
-function Servers(servers, options) {
+function Servers(servers) {
   this.servers = []
   this.updated = 0
-  this.options = options
   this.set(servers)
 }
 
@@ -1070,7 +1155,7 @@ Servers.prototype.exists = function () {
 
 function isValidURI(uri) {
   if (_.isObj(uri)) uri = uri.url || uri.uri
-  return typeof uri === 'string' && uriRegex.test(uri)
+  return _.isURI(uri)
 }
 
 function mapServers(servers) {
@@ -1095,8 +1180,9 @@ var _ = exports
 var toStr = Object.prototype.toString
 var slice = Array.prototype.slice
 var hasOwn = Object.prototype.hasOwnProperty
-var isArrayNative = Array.isArray
 var bind = Function.prototype.bind
+var isArrayNative = Array.isArray
+var uriRegex = /^http[s]?\:\/\/(.+)/i
 
 _.noop = function () {}
 
@@ -1152,22 +1238,12 @@ _.omit = function (obj, keys) {
   return buf
 }
 
-_.pick = function (obj, keys) {
-  var buf = {}
-  if (_.isObj(obj)) {
-    Object.keys(obj)
-      .filter(function (key) {
-        return keys.indexOf(key) !== -1
-      })
-      .forEach(function (key) {
-        return buf[key] = obj[key]
-      })
-  }
-  return buf
-}
-
 _.delay = function (fn, ms) {
   return setTimeout(fn, ms || 1)
+}
+
+_.isURI = function (str) {
+  return typeof str === 'string' && uriRegex.test(str)
 }
 
 _.join = function (base) {
@@ -1175,7 +1251,6 @@ _.join = function (base) {
     .filter(function (part) { return typeof part === 'string' && part.length > 0 })
     .join(''))
 }
-
 
 },{}],17:[function(require,module,exports){
 

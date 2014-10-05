@@ -4,11 +4,6 @@ var Resilient = require('../')
 
 describe('Static servers', function () {
 
-  it('should expose the resilient object as global', function () {
-    expect(Resilient).to.be.a('function')
-  })
-
-
   describe('missing servers', function () {
     it('should have resolve with a missing servers error', function (done) {
       Resilient().get('/test', function (err) {
@@ -84,6 +79,34 @@ describe('Static servers', function () {
         expect(err.status).to.be.equal(1000)
         expect(err.code).to.be.equal('ETIMEDOUT')
         expect(res).to.be.undefined
+        done()
+      })
+    })
+  })
+
+  describe('define client with base path', function () {
+    var resilient = Resilient({
+      service: {
+        basePath: '/base',
+        servers: ['http://server']
+      }
+    })
+
+    before(function () {
+      nock('http://server')
+        .get('/base/hello')
+        .reply(200, { name: 'Chuck' })
+    })
+
+    after(function () {
+      nock.cleanAll()
+    })
+
+    it('should resolve with valid status', function (done) {
+      resilient.get('/hello', function (err, res) {
+        expect(err).to.be.null
+        expect(res.status).to.be.equal(200)
+        expect(res.data).to.deep.equal({ name: 'Chuck' })
         done()
       })
     })

@@ -113,6 +113,21 @@ describe('utils', function () {
     })
   })
 
+  describe('isURI', function () {
+    it('should match a valid URIs', function () {
+      expect(_.isURI('http://test.org')).to.be.true
+      expect(_.isURI('https://test.org')).to.be.true
+    })
+
+    it('should match a non valid URIs', function () {
+      expect(_.isURI('/test.org')).to.be.false
+      expect(_.isURI('https://')).to.be.false
+      expect(_.isURI('ftp://')).to.be.false
+      expect(_.isURI('app')).to.be.false
+      expect(_.isURI(null)).to.be.false
+    })
+  })
+
   describe('delay', function () {
     it('should delay function execution the given miliseconds', function (done) {
       var start = Date.now()

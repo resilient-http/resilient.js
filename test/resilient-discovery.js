@@ -2,9 +2,9 @@ var expect = require('chai').expect
 var nock = require('nock')
 var Resilient = require('../')
 
-describe('Resilient discovery', function () {
+describe('Discovery', function () {
 
-  describe('discovery servers', function() {
+  describe('servers', function() {
     var resilient = Resilient({
       discovery: {
         timeout: 50,
@@ -35,7 +35,11 @@ describe('Resilient discovery', function () {
         .reply(200, { hello: 'world' })
     })
 
-    it('should fallback to the request', function (done) {
+    after(function () {
+      nock.cleanAll()
+    })
+
+    it('should resolve with a valid status', function (done) {
       resilient.get('/hello', function (err, res) {
         expect(err).to.be.null
         expect(res.status).to.be.equal(200)
@@ -45,7 +49,7 @@ describe('Resilient discovery', function () {
     })
   })
 
-  describe('timeout discovery servers with retry', function() {
+  describe('timeout with retry attempts', function() {
     var resilient = Resilient({
       discovery: {
         timeout: 50,
@@ -72,20 +76,19 @@ describe('Resilient discovery', function () {
       nock.cleanAll()
     })
 
-    it('should fallback to the request', function (done) {
+    it('should resolve with error timeout status', function (done) {
       var start = Date.now()
       var end = 50 * 3 * 3
       resilient.get('/hello', function (err, res) {
         expect(err.status).to.be.equal(1000)
         expect(err.code).to.be.equal('ETIMEDOUT')
-        console.log(Date.now() - start, end)
         expect(Date.now() - start > end).to.be.true
         done()
       })
     })
   })
 
-  describe('unavailable discovery servers with retry support', function() {
+  describe('unavailable discovery servers with retry attempts', function() {
     var resilient = Resilient({
       discovery: {
         timeout: 50,
@@ -112,7 +115,7 @@ describe('Resilient discovery', function () {
       nock.cleanAll()
     })
 
-    it('should fallback to the request', function (done) {
+    it('should resolve with a unavailable status', function (done) {
       var start = Date.now()
       var end = 10 * 3 * 4
       resilient.get('/hello', function (err, res) {
@@ -158,7 +161,7 @@ describe('Resilient discovery', function () {
       nock.cleanAll()
     })
 
-    it('should resolve with a vlaid status', function (done) {
+    it('should resolve with a valid status', function (done) {
       var start = Date.now()
       resilient.get('/hello', function (err, res) {
         expect(err).to.be.null

@@ -16,15 +16,16 @@ module.exports = function () {
     table.rows().forEach(function () {})
   }
 
-  function defineMock(row) {
+  function defineMock(row, discovery) {
     var url = row[0]
     var status = parseInt(row[1], 10)
     var method = row[2].toLowerCase()
     var path = row[3]
     var delay = parseInt(row[4], 3)
     var body = row[5] === 'none' ? null : JSON.parse(row[5])
-    this.mock(url)
-      .filteringPath(/\?(.*)/g, '')[method](path)
+    var mock = this.mock(url).persist()
+    if (discovery) mock = mock.filteringPath(/(\?(.*))/g, '')
+    mock[method](path)
       .delayConnection(delay)
       .reply(status, body)
   }
@@ -42,7 +43,7 @@ module.exports = function () {
     options.servers = []
     data.rows().forEach(function (row) {
       options.servers.push(row[0])
-      defineMock.call(this, row)
+      defineMock.call(this, row, true)
     }.bind(this))
     done()
   })
@@ -64,6 +65,7 @@ module.exports = function () {
 
   When(/^performs the request$/, function (done) {
     this.client.send(this.config, function (err, res) {
+      console.log(err)
       expect(err).to.be.null
       this.response = res
       done()

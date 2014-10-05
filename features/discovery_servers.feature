@@ -14,7 +14,7 @@ Feature: Servers discovery
       | http://valid           | 200    | GET    | /    | 50    | ["http://server"] |
     And the configure the stub enpoints:
       | URI           | Status | Method | Path  | Delay | Body              |
-      | http://server | 200    | GET    | /user | Delay | {"name": "Chuck"} |
+      | http://server | 200    | GET    | /user | 100   | {"name": "Chuck"} |
     And new client is configured
     When define a GET request to "/user"
     And performs the request
