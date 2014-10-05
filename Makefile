@@ -43,7 +43,7 @@ uglify:
 
 mocha:
 	$(MOCHA) --reporter spec --ui tdd --timeout 2000
-	#$(CUCUMBER) -f pretty -r features/support -r features/step_definitions
+	$(CUCUMBER) -f pretty -r features/support -r features/step_definitions
 
 loc:
 	wc -l resilient.js

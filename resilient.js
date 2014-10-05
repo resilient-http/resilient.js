@@ -327,7 +327,7 @@ defaults.service = {
   timeout: 2 * 1000,
   servers: null,
   retry: 0,
-  retryUpdate: true,
+  updateOnRetry: true,
   refresh: 60 * 1000
 }
 
@@ -348,6 +348,7 @@ defaults.discovery = {
   retryWait: 1000,
   timeout: 2 * 1000,
   parallel: false,
+  updateOnRetry: false,
   cacheExpiration: 60 * 10 * 1000
 }
 
@@ -359,7 +360,7 @@ defaults.resilientOptions = [
   'cacheExpiration',
   'cache',
   'refresh',
-  'retryUpdate'
+  'updateOnRetry'
 ]
 
 },{}],5:[function(require,module,exports){
@@ -381,7 +382,7 @@ function DiscoveryResolver(resilient) {
   }
 
   function isUpdating() {
-    return resilient._updating || resilient._queue.length > 0
+    return resilient._updating
   }
 
   function hasDiscoveryServers() {
@@ -421,22 +422,21 @@ function DiscoveryResolver(resilient) {
 
   function updateServersInParallel(options, cb) {
     var buf = [], servers = getServers().sort()
-
     servers.slice(0, 3).forEach(function (server, index) {
       server = [ server ]
       if (index === 2 && servers.length > 3) {
         server = server.concat(servers.slice(3))
       }
       options.retry = 0
-      Requester(resilient)(new Servers(server), options, onUpdate(index), buf)
+      Requester(resilient)(new Servers(server), options, onUpdateInParallel(index, buf, cb), buf)
     })
+  }
 
-    function onUpdate(index) {
-      return function (err, res) {
-        if (err) buf[index] = null
-        if (res || isEmptyBuffer(buf)) {
-          onUpdateServers(cb, buf)(err, res)
-        }
+  function onUpdateInParallel(index, buf, cb) {
+    return function (err, res) {
+      if (err) buf[index] = null
+      if (res || isEmptyBuffer(buf)) {
+        onUpdateServers(cb, buf)(err, res)
       }
     }
   }
@@ -470,7 +470,7 @@ DiscoveryResolver.update = function (resilient, cb) {
       (cb))
 }
 
-DiscoveryResolver.get = function (resilient, cb) {
+DiscoveryResolver.fetch = function (resilient, cb) {
   DiscoveryResolver(resilient)(function (err, res) {
     if (err) cb(err)
     else {
@@ -785,11 +785,9 @@ function Requester(resilient) {
     var retry = null
     if (options.retry) {
       retry = delayRetry(servers, options, cb)
-      if (options.retryUpdate) {
+      if (options.updateOnRetry) {
         resilient._updating = false
-        Requester.DiscoveryResolver(resilient)
-          (DiscoveryServers(resilient)
-            (retry))
+        Requester.DiscoveryResolver.update(resilient, retry)
       } else {
         retry()
       }
@@ -936,7 +934,7 @@ Resilient.prototype.setServers = function (list) {
 }
 
 Resilient.prototype.discoverServers = function (cb) {
-  DiscoveryResolver.get(this)(cb)
+  DiscoveryResolver.fetch(this, cb)
   return this
 }
 
@@ -971,7 +969,6 @@ var _ = require('./utils')
 var ResilientError = require('./error')
 var Requester = require('./requester')
 var DiscoveryResolver = require('./discovery-resolver')
-var DiscoveryServers = require('./discovery-servers')
 var Servers = require('./servers')
 
 module.exports = Resolver
@@ -1028,8 +1025,9 @@ function Resolver(resilient, options, cb) {
   }
 }
 
-},{"./discovery-resolver":5,"./discovery-servers":6,"./error":7,"./requester":11,"./servers":15,"./utils":16}],14:[function(require,module,exports){
+},{"./discovery-resolver":5,"./error":7,"./requester":11,"./servers":15,"./utils":16}],14:[function(require,module,exports){
 var _ = require('./utils')
+var defaults = require('./defaults')
 
 module.exports = Server
 
@@ -1037,14 +1035,6 @@ function Server(url, options) {
   this.url = url
   this.setStats()
   this.setOptions(options)
-}
-
-Server.prototype.defaults = {
-  weight: {
-    request: 25,
-    error: 50,
-    latency: 25
-  }
 }
 
 Server.prototype.report = function (operation, latency, type) {
@@ -1079,7 +1069,7 @@ Server.prototype.getStats = function (operation, field) {
 }
 
 Server.prototype.setOptions = function (options) {
-  this.options = _.extend({}, this.defaults, options)
+  this.options = _.extend({}, defaults.balancer, options)
 }
 
 Server.prototype.setStats = function (stats) {
@@ -1105,7 +1095,7 @@ function round(number) {
   return Math.round(number * 100) / 100
 }
 
-},{"./utils":16}],15:[function(require,module,exports){
+},{"./defaults":4,"./utils":16}],15:[function(require,module,exports){
 var _ = require('./utils')
 var Server = require('./server')
 

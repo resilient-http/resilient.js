@@ -49,19 +49,65 @@ describe('Resilient', function () {
     })
   })
 
-  xdescribe('servers status', function () {
-    var resilient = Resilient()
-
-    before(function () {
-      nock(url).get('/hello').reply(200)
+  describe('force discover servers', function () {
+    var resilient = Resilient({
+      discovery: {
+        servers: ['http://server']
+      }
     })
 
-    it('should not have discovery servers configured', function () {
-      expect(resilient.getOptions())
-      resilient.get('/hello', function (err, res) {
+    before(function () {
+      nock('http://server')
+        .filteringPath(/\?(.*)/g, '')
+        .get('/')
+        .reply(200, ['http://api'])
+    })
+
+    after(function () {
+      nock.cleanAll()
+    })
+
+    it('should not have discovery servers configured', function (done) {
+      resilient.discoverServers(function (err, servers) {
+        expect(err).to.be.null
+        expect(servers).to.be.deep.equal(['http://api'])
+        done()
+      })
+    })
+  })
+
+  describe('force update servers', function () {
+    var resilient = Resilient({
+      discovery: {
+        servers: ['http://server']
+      }
+    })
+
+    before(function () {
+      nock('http://server')
+        .filteringPath(/\?(.*)/g, '')
+        .get('/')
+        .reply(200, ['http://api'])
+    })
+
+    after(function () {
+      nock.cleanAll()
+    })
+
+    it('should not have service servers', function () {
+      expect(resilient.getServers()).to.be.null
+    })
+
+    it('should update service servers', function (done) {
+      resilient.updateServers(function (err, res) {
         expect(err).to.be.null
         expect(res.status).to.be.equal(200)
+        done()
       })
+    })
+
+    it('should have service servers stored', function () {
+      expect(resilient.getServers().servers[0].url).to.be.equal('http://api')
     })
   })
 })
