@@ -202,6 +202,42 @@ Specific configuration for discovery servers requests, behavior and logic
 - **method** `string` - Request HTTP method. Default to `GET`
 - **data** `mixed` - Optional data to send as payload to discovery servers. Default `null`
 
+#### Response object
+
+##### Browser
+
+- **data** `mixed` - Body response. If the MIME type is `JSON-compatible`, it will be transparently parsed
+- **status** `number` - HTTP response status code
+- **headers** `object` - Response headers
+- **xhr** `object` - Original XHR instance
+- **error** `mixed` - Error info, usually an `Error` instance (in case that an error happens)
+
+##### Node.js
+
+See [http.IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage)
+
+#### Error object
+
+It will be an `Error` instance with the following members
+
+- **message** `string` - Human readable error message
+- **status** `number` - Internal error code or HTTP status
+- **code** `number` - Optional error code (node.js only)
+- **stack** `string` - Optional stack error trace
+- **request** `object` - Original response object (node.js only). Optional
+- **error** `Error` - Original throwed error object (node.js only). Optional
+- **xhr** ``
+
+##### Built-in error codes
+
+- **1000** - All requests failed. No servers available
+- **1001** - Cannot update discovery servers. Empty or invalid response body
+- **1002** - Missing discovery servers. Cannot resolve the server
+- **1003** - Cannot resolve servers. Missing data
+- **1004** - Discovery server response is invalid or empty
+- **1005** - Missing discovery servers during retry process
+- **1006** - Internal state error (usually by an unexpected exception)
+
 ### resilient#send(path, options, callback)
 
 ### resilient#get(path, options, callback)
