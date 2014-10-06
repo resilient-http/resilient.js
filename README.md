@@ -15,7 +15,8 @@ For more information about the **resilient** and how it works, see the [project 
 - Smart balancer logic based on server stats (lantency, errors, requests...)
 - Configurable balancer policy and weight
 - Servers discovering based on the resilient high-level protocol
-- Built-in support for servers caching for improve reliability
+- Server-side dynamic client configuration support (experimental)
+- Built-in support for servers caching to improve reliability
 - Parallel servers discovering for a faster
 - Highly configurable (timeout, retry times, cache, implicit delay...)
 - Cross-engine (browsers and node.js)
@@ -83,7 +84,7 @@ Or loading the script remotely
 
 ## Environments
 
-Runs in any [ES5 compliant](http://kangax.github.io/compat-table/es5/) engine
+It runs properly in any [ES5 compliant](http://kangax.github.io/compat-table/es5/) engine
 
 - Node.js >= 0.6
 - Chrome >= 5
@@ -283,6 +284,7 @@ It will be an `Error` instance with the following members
 ### resilient#flushCache()
 
 ### resilient#client()
+Return: `Client`
 
 ### resilient#areServersUpdated()
 
@@ -306,9 +308,15 @@ Create a new servers store
 
 Create a new options store
 
+### resilient.Client(resilient)
+
+Creates a new resilient HTTP public API client
+
+Useful to provide encapsulation to the resilient API and expose only the HTTP client (the common interface the developers want to consum)
+
 ### resilient.request(options [, cb])
 
-Create a new options store
+Use the plain HTTP client
 
 ## Contributing
 
