@@ -653,6 +653,7 @@ var Resilient = require('./resilient')
 var Options = require('./options')
 var defaults = require('./defaults')
 var Servers = require('./servers')
+var Client = require('./client')
 var http = require('./http')
 
 module.exports = ResilientFactory
@@ -665,9 +666,10 @@ ResilientFactory.VERSION = '0.1.0-beta.0'
 ResilientFactory.defaults = defaults
 ResilientFactory.Options = Options
 ResilientFactory.Servers = Servers
+ResilientFactory.Client = Client
 ResilientFactory.request = http
 
-},{"./defaults":4,"./http":8,"./options":10,"./resilient":12,"./servers":15}],10:[function(require,module,exports){
+},{"./client":3,"./defaults":4,"./http":8,"./options":10,"./resilient":12,"./servers":15}],10:[function(require,module,exports){
 var _ = require('./utils')
 var defaults = require('./defaults')
 var Servers = require('./servers')
