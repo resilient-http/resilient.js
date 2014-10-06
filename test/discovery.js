@@ -8,6 +8,7 @@ describe('Discovery', function () {
     var resilient = Resilient({
       discovery: {
         timeout: 50,
+        parallel: false,
         servers: [
           'http://unavailable',
           'http://timeout',
@@ -55,6 +56,7 @@ describe('Discovery', function () {
         timeout: 50,
         retry: 2,
         retryWait: 50,
+        parallel: false,
         servers: [
           'http://timeout/1',
           'http://timeout/2',
@@ -94,6 +96,7 @@ describe('Discovery', function () {
         timeout: 50,
         retry: 3,
         retryWait: 50,
+        parallel: false,
         servers: [
           'http://unavailable/1',
           'http://unavailable/2',

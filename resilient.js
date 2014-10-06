@@ -322,9 +322,10 @@ var defaults = module.exports = {}
 
 defaults.service = {
   method: 'GET',
-  timeout: 2 * 1000,
+  timeout: 10 * 1000,
   servers: null,
   retry: 0,
+  retryWait: 1000,
   updateOnRetry: true,
   refresh: 60 * 1000
 }
@@ -345,8 +346,7 @@ defaults.discovery = {
   retry: 0,
   retryWait: 1000,
   timeout: 2 * 1000,
-  parallel: false,
-  updateOnRetry: false,
+  parallel: true,
   cacheExpiration: 60 * 10 * 1000
 }
 
@@ -1019,7 +1019,12 @@ function Resolver(resilient, options, cb) {
   }
 
   function isUpToDate(servers, type) {
-    return servers.lastUpdate() < (resilient.getOptions(type).get('refresh') || 0)
+    var servers = resilient.getServers('discovery')
+    if (servers && servers.exists()) {
+      return servers.lastUpdate() < (resilient.getOptions(type).get('refresh') || 0)
+    } else {
+      return true
+    }
   }
 
   function resolver(err, res) {

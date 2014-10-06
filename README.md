@@ -171,13 +171,14 @@ There are specific config options for the servers of the client service.
 Resilient is a resource-oriented HTTP client, which could be ideal for RESTful Web services
 
 - **servers** `array` - A list of valid URIs of servers to reach for the given service. Default `null`
-- **expires** `number` - Servers list expiration time to live in miliseconds. Default `60` seconds
-- **cache** `boolean` - Enable/disable servers cache in case of global fallback. Default `false`
+- **refresh** `number` - Servers list expiration time to live in miliseconds. Default `60` seconds. Once the time expired, will try to discovery it from discovery servers
+- **retry** `number` - Number of times to retry if all requests failed.  Default `0`
+- **retryWait** `number` - Number of milisenconds to wait before retry. Default to `1000`
 
 - **path** `string` - Server request path as part of the final URL
 - **data** `mixed` - Payload data to send as body request
 - **headers** `object` - Map of strings representing HTTP headers to send to the server
-- **timeout** `number` - Request maximum timeout in miliseconds before to abort it. Default to 30 seconds
+- **timeout** `number` - Request maximum timeout in miliseconds before to abort it. Default to 10 seconds
 - **auth** `object` - Authentication credentials to the server. Object must have the `user` and `password` properties
 - **async** `boolean` - Set to `false` if the request must be performed as synchronous operation (not recommended, browser only)
 - **withCredentials** `boolean` - Whether to set the withCredentials flag on the XHR object. See [MDN][withcredentials] for more information
@@ -205,7 +206,7 @@ Specific configuration for discovery servers requests, behavior and logic
 - **cache** `boolean` - Enable/disable discovery servers cache in case of global fallback. Default `true`
 - **path** `string` - Server request path as part of the final URL
 - **expires** `number` - Discovery servers list expiration time to live in miliseconds. Default `180` seconds
-- **timeout** `number` - Server discovery network timeout in miliseconds. Default `2000`
+- **timeout** `number` - Server discovery network timeout in miliseconds. Default `2` seconds
 - **cache** `boolean` - Enable/disable discovery servers cache in case of fallback. Default `true`
 - **auth** `object` - Authentication credentials required for the discovery server. Object must have the `user` and `password` properties
 - **headers** `object` - Map of strings representing HTTP headers to send to the discovery server

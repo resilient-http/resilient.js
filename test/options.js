@@ -13,12 +13,15 @@ describe('Options', function () {
     expect(options.get('timeout')).to.be.equal(10)
   })
 
-  it('should have a default inherited properties', function () {
-    expect(options.get('parallel')).to.be.false
+  it('should have a default parallel properties', function () {
+    expect(options.get('parallel')).to.be.true
+  })
+
+  it('should have a default retry property', function () {
     expect(options.get('retry')).to.be.equal(0)
   })
 
-  it('should have a default inherited properties', function () {
+  it('should have a default cache', function () {
     expect(options.get('cache')).to.be.true
   })
 
