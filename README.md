@@ -180,17 +180,21 @@ Specific shared configuration options for the HTTP client for final service requ
 
 - **path** `string` - Server request path as part of the final URL
 - **basePath** `string` - Server resource base path to share between all requests
+- **method** `string` - Request HTTP method. Default to `GET`
 - **data** `mixed` - Payload data to send as body request
 - **headers** `object` - Map of strings representing HTTP headers to send to the server
 - **timeout** `number` - Request maximum timeout in miliseconds before to abort it. Default to 10 seconds
 - **auth** `object` - Authentication credentials to the server. Object must have the `user` and `password` properties
+
+Browser-specific options
+
 - **async** `boolean` - Set to `false` if the request must be performed as synchronous operation (not recommended, browser only)
 - **withCredentials** `boolean` - Whether to set the withCredentials flag on the XHR object. See [MDN][withcredentials] for more information
-- **method** `string` - Request HTTP method. Default to `GET`
 - **responseType** `string` - Define how to handle the response data. Allowed values are: `text`, `arraybuffer`, `blob` or `document`
-- **proxy** `string` - URI for the HTTP proxy to use (`node.js` only)
 
-See aditional HTTP options for `node.js` [here](https://github.com/mikeal/request#requestoptions-callback)
+Node.js specific options
+
+See all HTTP options supported for `node.js` [here](https://github.com/mikeal/request#requestoptions-callback)
 
 ##### Balancer
 
