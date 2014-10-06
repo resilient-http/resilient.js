@@ -295,6 +295,11 @@ Type: `string`
 
 Current library version
 
+### resilient.CLIENT_VERSION
+Type: `string`
+
+Current HTTP client library version
+
 ### resilient.defaults
 Type: `object`
 

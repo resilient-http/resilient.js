@@ -615,6 +615,8 @@ function client() {
   return http.apply(null, arguments)
 }
 
+client.VERSION = http.VERSION
+
 function resolveModule() {
   if (typeof window === 'object' && window) {
     return require('../bower_components/lil-http/http')
@@ -625,9 +627,9 @@ function resolveModule() {
 
 function requestWrapper(request) {
   return function (options, cb) {
-    if (options && options.data) {
-      options.body = options.data
-    }
+    if (typeof options === 'string') options = { url: options }
+    options = setUserAgent(options)
+    if (options.data) options.body = options.data
     return request.call(null, options, mapResponse(cb))
   }
 }
@@ -648,6 +650,17 @@ function isJSONContent(res) {
   return res.headers['content-type'] === 'application/json'
 }
 
+function setUserAgent(options) {
+  options = options || {}
+  options.headers = options.headers || {}
+  options.headers['User-Agent'] = options.headers['User-Agent'] || getUserAgent()
+  return options
+}
+
+function getUserAgent() {
+  return 'resilient-http ' + client.LIBRARY_VERSION + ' (node)'
+}
+
 },{"../bower_components/lil-http/http":1,"request":17}],9:[function(require,module,exports){
 var Resilient = require('./resilient')
 var Options = require('./options')
@@ -663,11 +676,13 @@ function ResilientFactory(options) {
 }
 
 ResilientFactory.VERSION = '0.1.0-beta.0'
+ResilientFactory.CLIENT_VERSION = http.VERSION
 ResilientFactory.defaults = defaults
 ResilientFactory.Options = Options
 ResilientFactory.Servers = Servers
 ResilientFactory.Client = Client
 ResilientFactory.request = http
+http.LIBRARY_VERSION = ResilientFactory.VERSION
 
 },{"./client":3,"./defaults":4,"./http":8,"./options":10,"./resilient":12,"./servers":15}],10:[function(require,module,exports){
 var _ = require('./utils')
@@ -748,6 +763,7 @@ function defineDefaults(options, store) {
 },{"./defaults":4,"./servers":15,"./utils":16}],11:[function(require,module,exports){
 var _ = require('./utils')
 var http = require('./http')
+var resilientOptions = require('./defaults').resilientOptions
 var ResilientError = require('./error')
 var DiscoveryServers = require('./discovery-servers')
 
@@ -838,7 +854,7 @@ function requestHandler(server, operation, cb, next) {
 function sendRequest(options, handler, buf) {
   var request = null
   try {
-    request = http(options, handler)
+    request = http(_.omit(options, resilientOptions), handler)
     if (buf) buf.push(request)
   } catch (err) {
     handler(err)
@@ -862,7 +878,7 @@ function getOperation(method) {
   return !method || method.toUpperCase() === 'GET' ? 'read' : 'write'
 }
 
-},{"./discovery-servers":6,"./error":7,"./http":8,"./utils":16}],12:[function(require,module,exports){
+},{"./defaults":4,"./discovery-servers":6,"./error":7,"./http":8,"./utils":16}],12:[function(require,module,exports){
 var _ = require('./utils')
 var Options = require('./options')
 var Client = require('./client')
