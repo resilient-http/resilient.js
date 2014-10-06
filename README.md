@@ -80,7 +80,7 @@ component install resilient-http/resilient.js
 
 Or loading the script remotely
 ```html
-<script src="//cdn.rawgit.com/resilient-http/resilient.js/0.1.0-beta.2/resilient.js"></script>
+<script src="//cdn.rawgit.com/resilient-http/resilient.js/0.1.0-beta.3/resilient.js"></script>
 ```
 
 ## Environments
@@ -95,6 +95,8 @@ It runs properly in any [ES5 compliant](http://kangax.github.io/compat-table/es5
 - IE >= 9
 
 ## How it works?
+
+An algorithm diagram worth more than words
 
 <img src="http://rawgit.com/resilient-http/resilient-http.github.io/master/images/algorithm.svg" />
 
