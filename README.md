@@ -170,12 +170,16 @@ The options `object` has three different blocks and levels of configuration
 There are specific config options for the servers of the client service.
 Resilient is a resource-oriented HTTP client, which could be ideal for RESTful Web services
 
-- **servers** `array` - A list of valid URIs of servers to reach for the given service. Default `null`
+- **servers** `array` - A list of valid URIs of servers to reach for the given service. Default `null`. It's recommended you use discovery servers instead
 - **refresh** `number` - Servers list expiration time to live in miliseconds. Default `60` seconds. Once the time expired, will try to discovery it from discovery servers
 - **retry** `number` - Number of times to retry if all requests failed.  Default `0`
 - **retryWait** `number` - Number of milisenconds to wait before retry. Default to `1000`
+- **updateOnRetry** `boolean` - Force to update service servers from discovery servers on each retry attempt. Recommended. You must define the discovery servers to use this feature. Default `true`
+
+Specific shared configuration options for the HTTP client for final service requests
 
 - **path** `string` - Server request path as part of the final URL
+- **basePath** `string` - Server resource base path to share between all requests
 - **data** `mixed` - Payload data to send as body request
 - **headers** `object` - Map of strings representing HTTP headers to send to the server
 - **timeout** `number` - Request maximum timeout in miliseconds before to abort it. Default to 10 seconds
@@ -202,12 +206,18 @@ See aditional HTTP options for `node.js` [here](https://github.com/mikeal/reques
 
 Specific configuration for discovery servers requests, behavior and logic
 
-- **servers** `array` - A list of valid URIs of endpoints to use as discovery servers. Default `null`
+- **servers** `array` - A list of valid URIs of endpoints to use as discovery servers
 - **cache** `boolean` - Enable/disable discovery servers cache in case of global fallback. Default `true`
+- **cacheExpiration** `number` - Maximum cache time to live. Default to `10` minutes
+- **retry** `number` - Number of times to retry if all requests failed.  Default `0`
+- **retryWait** `number` - Number of milisenconds to wait before retry. Default to `1000`
+- **parallel** `boolean` - Discover servers in parallel. Improve service availability and decrement delay times. Recommended. Default `true`
+
+Specific shared configuration options for the HTTP client in discovering processes
+
 - **path** `string` - Server request path as part of the final URL
-- **expires** `number` - Discovery servers list expiration time to live in miliseconds. Default `180` seconds
+- **basePath** `string` - Server resource base path to share between all requests
 - **timeout** `number` - Server discovery network timeout in miliseconds. Default `2` seconds
-- **cache** `boolean` - Enable/disable discovery servers cache in case of fallback. Default `true`
 - **auth** `object` - Authentication credentials required for the discovery server. Object must have the `user` and `password` properties
 - **headers** `object` - Map of strings representing HTTP headers to send to the discovery server
 - **method** `string` - Request HTTP method. Default to `GET`
