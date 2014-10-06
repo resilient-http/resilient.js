@@ -260,11 +260,8 @@ function Client(resilient) {
 
 Client.prototype.send = function (path, options, cb, method) {
   var args = normalizeArgs.call(this, path, options, cb, method)
-  if (isFullUrl(args[0])) {
-    return plainHttp.apply(null, args)
-  } else {
-    return resolver.apply(null, [ this._resilient ].concat(args))
-  }
+  this._resilient.emit('start', args[0], this._resilient)
+  requester.apply(this, args)
 }
 
 Client.prototype.get = function (path, options, cb) {
@@ -291,6 +288,14 @@ Client.prototype.head = function (path, options, cb) {
   return this.send(path, options, cb, 'HEAD')
 }
 
+function requester(options, cb) {
+  if (isFullUrl(options)) {
+    return plainHttp.call(null, options, cb)
+  } else {
+    return resolver.call(null, this._resilient, options, cb)
+  }
+}
+
 function normalizeArgs(path, options, cb, method) {
   if (typeof options === 'function') {
     cb = options
@@ -300,7 +305,14 @@ function normalizeArgs(path, options, cb, method) {
   if (typeof path === 'string') options.path = path
   if (typeof method === 'string') options.method = method
   if (typeof cb !== 'function') cb = _.noop
-  return [ options, cb ]
+  return [ options, wrapCallback(this._resilient, cb) ]
+}
+
+function wrapCallback(resilient, cb) {
+  return function (err, res) {
+    resilient.emit('request.finish', err, res, resilient)
+    cb(err, res)
+  }
 }
 
 function mergeHttpOptions(options) {
@@ -425,7 +437,6 @@ function DiscoveryResolver(resilient) {
       if (index === 2 && servers.length > 3) {
         server = server.concat(servers.slice(3))
       }
-      options.retry = 0
       Requester(resilient)(new Servers(server), options, onUpdateInParallel(index, buf, cb), buf)
     })
   }
@@ -506,49 +517,49 @@ module.exports = DiscoveryServers
 function DiscoveryServers(resilient) {
   function defineServers(cb) {
     return function (err, res) {
-      if (!err && isValidResponse(res)) {
-        setServers(res, cb)
-      } else {
+      if (err) {
         handlerError(err, cb)
+      } else if (isValidResponse(res)) {
+        saveServers(res, cb)
+      } else {
+        cb(new ResilientError(1004, res))
       }
     }
   }
 
-  function setServers(res, cb) {
-    if (res.data.length) {
-      resilient.setServers(res.data)
-      refreshCache(res.data)
-      cb(null, res)
-    } else {
-      cb(new ResilientError(1004, res))
-    }
+  function saveServers(res, cb) {
+    var data = res.data
+    emit('refresh', data)
+    resilient.setServers(data)
+    refreshCache(data)
+    cb(null, res)
   }
 
   function handlerError(err, cb) {
     if (isCacheEnabled()) {
-      getFromCache(err, cb)
+      resolveFromCache(err, cb)
     } else {
       resolveWithError(err, cb)
     }
   }
 
-  function getFromCache(err, cb) {
-    var expiration, cache = getCache()
-    if (cache && _.isArr(cache.data)) {
-      expiration = resilient.getOptions('discovery').cacheExpiration
-      if ((_.now() - cache.time) > expiration) {
-        cb(null, { status: 200, _cache: true, data: cache.data })
-      } else {
-        resilient._cache.flush('discovery')
-        resolveWithError(err, cb)
-      }
+  function resolveFromCache(err, cb) {
+    var cache = getCache()
+    if (hasValidCache(cache)) {
+      cb(null, { status: 200, _cache: true, data: cache.data })
     } else {
       resolveWithError(err, cb)
     }
+  }
+
+  function hasValidCache(cache) {
+    var valid = false, expires = resilient.getOptions('discovery').cacheExpiration
+    return cache && _.isArr(cache.data) && (_.now() - cache.time) > expires || false
   }
 
   function refreshCache(data) {
     if (isCacheEnabled()) {
+      emit('cache', data)
       resilient._cache.set('discovery', data)
     }
   }
@@ -561,6 +572,10 @@ function DiscoveryServers(resilient) {
     return resilient._cache.get('discovery')
   }
 
+  function emit(name, data) {
+    resilient.emit('discovery.' + name, data, resilient)
+  }
+
   return defineServers
 }
 
@@ -570,7 +585,7 @@ function resolveWithError(err, cb) {
 }
 
 function isValidResponse(res) {
-  return res && _.isArr(res.data) || false
+  return (res && _.isArr(res.data) && res.data.length > 0) || false
 }
 
 },{"./error":7,"./utils":16}],7:[function(require,module,exports){
@@ -781,11 +796,10 @@ function Requester(resilient) {
     options = _.clone(options)
 
     function next(previousError) {
-      var handler, server = serversList.shift()
+      var server = serversList.shift()
       if (server) {
-        handler = requestHandler(server, operation, cb, next)
         options.url = _.join(server.url, options.basePath, options.path)
-        sendRequest(options, handler, buf)
+        sendRequest(options, requestHandler(server, operation, cb, next), buf)
       } else {
         handleMissingServers(servers, options, previousError, cb)
       }
@@ -827,25 +841,25 @@ function Requester(resilient) {
     }
   }
 
+  function requestHandler(server, operation, cb, next) {
+    var start = _.now()
+    return function (err, res) {
+      var latency = _.now() - start
+      if (isUnavailableStatus(err, res)) {
+        server.reportError(operation, latency)
+        next(err)
+      } else {
+        server.report(operation, latency)
+        cb(null, res)
+      }
+    }
+  }
+
   function getOptions(type) {
     return resilient.options.get(type || 'service')
   }
 
   return request
-}
-
-function requestHandler(server, operation, cb, next) {
-  var start = _.now()
-  return function (err, res) {
-    var latency = _.now() - start
-    if (isUnavailableStatus(err, res) || res == undefined) {
-      server.reportError(operation, latency)
-      next(err)
-    } else {
-      server.report(operation, latency)
-      cb(null, res)
-    }
-  }
 }
 
 function sendRequest(options, handler, buf) {
@@ -860,15 +874,11 @@ function sendRequest(options, handler, buf) {
 }
 
 function isUnavailableStatus(err, res) {
-  if (err) {
-    return err.code !== undefined || isInvalidStatus(err)
-  } else if (_.isObj(res)) {
-    return isInvalidStatus(res)
-  }
+  return (err && err.code !== undefined) || res == undefined || isInvalidStatus(err || res) || false
 }
 
 function isInvalidStatus(res) {
-  return res.status >= 429 || res.status === 0
+  return res && res.status >= 429 || res.status === 0 || false
 }
 
 function getOperation(method) {
@@ -881,6 +891,7 @@ var Options = require('./options')
 var Client = require('./client')
 var Cache = require('./cache')
 var DiscoveryResolver = require('./discovery-resolver')
+var EventBus = require('lil-event')
 
 var VERBS = ['get', 'post', 'put', 'del', 'head', 'patch']
 
@@ -893,6 +904,8 @@ function Resilient(options) {
   this._cache = new Cache()
   this.setOptions(options)
 }
+
+Resilient.prototype = Object.create(EventBus.prototype)
 
 Resilient.prototype.setOptions = function (type, options) {
   var store = null
@@ -980,7 +993,7 @@ function defineMethodProxy(verb) {
   }
 }
 
-},{"./cache":2,"./client":3,"./discovery-resolver":5,"./options":10,"./utils":16}],13:[function(require,module,exports){
+},{"./cache":2,"./client":3,"./discovery-resolver":5,"./options":10,"./utils":16,"lil-event":18}],13:[function(require,module,exports){
 var _ = require('./utils')
 var ResilientError = require('./error')
 var Requester = require('./requester')
@@ -1264,6 +1277,95 @@ _.join = function (base) {
 }
 
 },{}],17:[function(require,module,exports){
+
+},{}],18:[function(require,module,exports){
+/*! lil-event - v0.1 - MIT License - https://github.com/lil-js/event */
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define(['exports'], factory)
+  } else if (typeof exports === 'object') {
+    factory(exports)
+    if (typeof module === 'object' && module !== null) {
+      module.exports = exports.Event
+    }
+  } else {
+    factory((root.lil = root.lil || {}))
+  }
+}(this, function (exports) {
+  'use strict'
+  var VERSION = '0.1.3'
+  var slice = Array.prototype.slice
+  var hasOwn = Object.prototype.hasOwnProperty
+
+  function Event() {}
+
+  Event.prototype.constructor = Event
+
+  Event.prototype.addListener = Event.prototype.on = function (event, fn, once) {
+    if (typeof event !== 'string') throw new TypeError('First argument must be a string')
+    if (typeof fn !== 'function') throw new TypeError('Second argument must be a function')
+    if (!findListener.call(this, event, fn)) {
+      getListeners.call(this, event).push({ fn: fn, once: once || false })
+    }
+    return this
+  }
+
+  Event.prototype.removeListener = Event.prototype.off = function (event, fn) {
+    var index
+    var listeners = getListeners.call(this, event)
+    var listener = findListener.call(this, event, fn)
+    if (listener) {
+      index = listeners.indexOf(listener)
+      if (index >= 0) listeners.splice(index, 1)
+    }
+    return this
+  }
+
+  Event.prototype.addOnceListener = Event.prototype.once = function (event, fn, once) {
+    this.addListener(event, fn, true)
+    return this
+  }
+
+  Event.prototype.emit = Event.prototype.fire = function (event) {
+    var i, l, listener, args = slice.call(arguments).slice(1)
+    var listeners = getListeners.call(this, event)
+    if (event) {
+      for (i = 0, l = listeners.length; i < l; i += 1) {
+        listener = listeners[i]
+        if (listener.once) listeners.splice(i, 1)
+        listener.fn.apply(null, args)
+      }
+    }
+    return this
+  }
+
+  Event.prototype.removeAllListeners = Event.prototype.offAll = function (event) {
+    if (event && hasOwn.call(this._events, event)) {
+      this._events[event].splice(0)
+    }
+    return this
+  }
+
+  function findListener(event, fn) {
+    var i, l, listener, listeners = getListeners.call(this, event)
+    for (i = 0, l = listeners.length; i < l; i += 1) {
+      listener = listeners[i]
+      if (listener.fn === fn) return listener
+    }
+  }
+
+  function getListeners(event, fn) {
+    var events = getEvents.call(this)
+    return hasOwn.call(events, event) ? events[event] : (events[event] = [])
+  }
+
+  function getEvents() {
+    return this._events || (this._events = {})
+  }
+
+  Event.VERSION = VERSION
+  exports.Event = Event
+}))
 
 },{}]},{},[9])(9)
 });

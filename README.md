@@ -263,7 +263,44 @@ It will be an `Error` instance with the following members
 - **1005** - Missing discovery servers during retry process
 - **1006** - Internal state error (usually by an unexpected exception)
 
+#### Fired events
+
+Resilient client has a built-in support for internal states event dispacher and notifier to the public interface
+
+This could be useful really useful while using an interceptor pattern in order to detect states and data changes.
+You can intercept and change any request configuration and response subscribing to the pre/post hooks.
+Note that mutation is required, you should modify it by reference and do not lose it
+
+##### discovery.refresh
+Arguments: `servers<Array>`, `resilient<Resilient>`
+
+Fired every time that servers are updated from discovery servers
+
+##### discovery.cache
+Arguments: `servers<Array>`, `resilient<Resilient>`
+
+Fired every time that servers cache is updated
+
+##### request.start
+Arguments: `options<Object>`, `resilient<Resilient>`
+
+Fired as before a request is created
+
+You can intercept and modify the request options on the fly,
+but you must mutate it and do not lose its reference
+
+##### request.finish
+Arguments: `error<Error>`, `response<Object|http.IncomingMessage>`, `resilient<Resilient>`
+
+Fired as after a request was completed
+
+You can intercept and modify the error/response on the fly,
+but you must mutate it and do not lose its reference
+
 ### resilient#send(path, options, callback)
+
+Performs a custom request with the given options.
+It's recommended using as generic interface to make multi verb requests
 
 ### resilient#get(path, options, callback)
 
@@ -297,24 +334,49 @@ It will be an `Error` instance with the following members
 
 ### resilient#updateServers([ callback ])
 
+### resilient#on(event, handler)
+
+Subscribe to an event
+
+### resilient#off(event, handler)
+
+Unsubscribe a given event and its handler
+
+### resilient#once(event, handler)
+
+Subscribe to an event with a given handler just once time.
+After fired, the handler will be removed
+
 ### resilient#flushCache()
+
+Force to flush cached server data
 
 ### resilient#client()
 Return: `Client`
 
+Returns an HTTP client-only interface.
+Useful to provide encapsulation from public usage and
+avoid resilient-specific configuration methods
+
 ### resilient#areServersUpdated()
+Return: `boolean`
+
+Returns `true` if servers are up-to-date. Otherwise `false`
 
 ### resilient#balancer()
+Return: `object`
+
+Returns the current balancer config options
 
 ### resilient.VERSION
 Type: `string`
 
-Current library version
+Current semver library version
 
 ### resilient.CLIENT_VERSION
 Type: `string`
 
-Current HTTP client library version
+Current semver HTTP client library version
 
 ### resilient.defaults
 Type: `object`
