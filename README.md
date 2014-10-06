@@ -21,6 +21,7 @@ For more information about the **resilient** and how it works, see the [project 
 - Highly configurable (timeout, retry times, cache, implicit delay...)
 - Cross-engine (browsers and node.js)
 - Full HTTP features support (it uses [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http))
+- Lightweight library (just 7KB gzipped)
 
 <!--
 ## Introduction
@@ -79,7 +80,7 @@ component install resilient-http/resilient.js
 
 Or loading the script remotely
 ```html
-<script src="//cdn.rawgit.com/resilient-http/resilient.js/0.1.0-beta.0/resilient.js"></script>
+<script src="//cdn.rawgit.com/resilient-http/resilient.js/0.1.0-beta.1/resilient.js"></script>
 ```
 
 ## Environments

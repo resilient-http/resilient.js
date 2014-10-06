@@ -539,7 +539,6 @@ function DiscoveryServers(resilient) {
     if (cache && _.isArr(cache.data)) {
       expiration = resilient.getOptions('discovery').cacheExpiration
       if ((_.now() - cache.time) > expiration) {
-        //resilient.setServers(cache.data)
         cb(null, { status: 200, _cache: true, data: cache.data })
       } else {
         resilient._cache.flush('discovery')
@@ -675,7 +674,7 @@ function ResilientFactory(options) {
   return new Resilient(options)
 }
 
-ResilientFactory.VERSION = '0.1.0-beta.0'
+ResilientFactory.VERSION = '0.1.0-beta.1'
 ResilientFactory.CLIENT_VERSION = http.VERSION
 ResilientFactory.defaults = defaults
 ResilientFactory.Options = Options
