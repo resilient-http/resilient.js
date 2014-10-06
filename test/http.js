@@ -88,6 +88,23 @@ describe('HTTP', function () {
     })
   })
 
+  describe('HEAD', function () {
+    before(function () {
+      nock('http://server')
+        .head('/hello')
+        .reply(200, { hello: 'world' })
+    })
+
+    it('should perform a valid request', function (done) {
+      http({ url: 'http://server/hello', method: 'HEAD' }, function (err, res) {
+        expect(err).to.be.null
+        expect(res.status).to.be.equal(200)
+        expect(res.data).to.be.deep.equal({ hello: 'world' })
+        done()
+      })
+    })
+  })
+
   describe('custom headers', function () {
     before(function () {
       nock('http://server')
