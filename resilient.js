@@ -260,7 +260,7 @@ function Client(resilient) {
 
 Client.prototype.send = function (path, options, cb, method) {
   var args = normalizeArgs.call(this, path, options, cb, method)
-  this._resilient.emit('start', args[0], this._resilient)
+  this._resilient.emit('request.start', args[0], this._resilient)
   requester.apply(this, args)
 }
 

@@ -110,4 +110,57 @@ describe('Resilient', function () {
       expect(resilient.getServers().servers[0].url).to.be.equal('http://api')
     })
   })
+
+  describe('event listeners', function () {
+    var options, response, eventResponse
+    var resilient = Resilient({
+      discovery: {
+        servers: ['http://server']
+      }
+    })
+
+    before(function () {
+      nock('http://server')
+        .filteringPath(/\?(.*)/g, '')
+        .get('/')
+        .reply(200, ['http://api'])
+      nock('http://api')
+        .get('/chuck')
+        .reply(200, { hello: 'world' })
+    })
+
+    after(function () {
+      nock.cleanAll()
+    })
+
+    it('should subscribe to request start event and change request path', function () {
+      resilient.on('request.start', function (opts) {
+        opts.path = '/chuck'
+        options = opts
+      })
+    })
+
+    it('should subscribe to request finish event', function () {
+      resilient.on('request.finish', function (err, res) {
+        eventResponse = res
+      })
+    })
+
+    it('should not have service servers', function (done) {
+      resilient.get('/hello', function (err, res) {
+        expect(err).to.be.null
+        response = res
+        done()
+      })
+    })
+
+    it('should have a valid options object from listener', function () {
+      expect(options.path).to.be.equal('/chuck')
+      expect(options.method).to.be.equal('GET')
+    })
+
+    it('should have a valid response object form listener', function () {
+      expect(response).to.be.equal(eventResponse)
+    })
+  })
 })

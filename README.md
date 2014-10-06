@@ -161,7 +161,7 @@ client.get('/users', function (err, res) {
 
 Creates a new `resilient` client with a custom config
 
-#### Options
+### Options
 
 The options `object` has three different blocks and levels of configuration
 
@@ -227,7 +227,12 @@ Specific shared configuration options for the HTTP client in discovering process
 - **method** `string` - Request HTTP method. Default to `GET`
 - **data** `mixed` - Optional data to send as payload to discovery servers. Default `null`
 
-#### Response object
+### Request callback arguments
+
+- **error** [Error|ResilientError](#error) - Response error, if happends. Otherwise `null`
+- **response** [Object](#browser)|[http.IncomingMessage][httpMessage] - Response object
+
+#### Response
 
 ##### Browser
 
@@ -239,9 +244,9 @@ Specific shared configuration options for the HTTP client in discovering process
 
 ##### Node.js
 
-See [http.IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage)
+See [http.IncomingMessage][httpMessage]
 
-#### Error object
+#### Error
 
 It will be an `Error` instance with the following members
 
@@ -263,7 +268,7 @@ It will be an `Error` instance with the following members
 - **1005** - Missing discovery servers during retry process
 - **1006** - Internal state error (usually by an unexpected exception)
 
-#### Fired events
+#### Events
 
 Resilient client has a built-in support for internal states event dispacher and notifier to the public interface
 
@@ -304,52 +309,83 @@ It's recommended using as generic interface to make multi verb requests
 
 ### resilient#get(path, options, callback)
 
+Creates a GET request with optional custom options
+
 ### resilient#post(path, options, callback)
+
+Creates a POST request with optional custom options
 
 ### resilient#put(path, options, callback)
 
+Creates a PUT request with optional custom options
+
 ### resilient#del(path, options, callback)
+
+Creates a DELETE request with optional custom options
 
 ### resilient#patch(path, options, callback)
 
+Creates a PATCH request with optional custom options
+
 ### resilient#head(path, options, callback)
+
+Creates a HEAD request with optional custom options
 
 ### resilient#setOptions(options)
 
+Define custom options. See [supported options](#options)
+
 ### resilient#getOptions()
+Return: `Options`
+
+Retrieve the current options
 
 ### resilient#setServiceOptions(options)
 
+Define custom [service-level options](#service)
+
 ### resilient#setDiscoveryOptions(options)
 
-### resilient#getHttpOptions(type)
+Define custom [service-level options](#discovery)
 
 ### resilient#getHttpOptions(type)
+Return: `object`
 
-### resilient#getServers(type)
+Get a map of HTTP specific options
+
+### resilient#getServers([ type = 'servicee' ])
+Return: `Servers`
+
+Return a the current servers list. Allowed types are: `service` and `discovery`
 
 ### resilient#discoveryServers([ servers ])
+Return: `Servers`
 
-### resilient#discoverServers(callback)
+Setter/Getter for discovery servers list
 
 ### resilient#updateServers([ callback ])
 
+Force to update the servers list from discovery servers, if they are defined,
+optionally passing a callback to handle the result
+
 ### resilient#on(event, handler)
 
-Subscribe to an event
+Subscribe to an event. See [supported events](#events)
 
 ### resilient#off(event, handler)
 
-Unsubscribe a given event and its handler
+Unsubscribe a given event and its handler. See [supported events](#events)
 
 ### resilient#once(event, handler)
 
 Subscribe to an event with a given handler just once time.
 After fired, the handler will be removed
 
+See [supported events](#events)
+
 ### resilient#flushCache()
 
-Force to flush cached server data
+Force to flush servers cache
 
 ### resilient#client()
 Return: `Client`
@@ -393,7 +429,7 @@ Create a new options store
 
 ### resilient.Client(resilient)
 
-Creates a new resilient HTTP public API client
+Creates a new resilient HTTP client with public API
 
 Useful to provide encapsulation to the resilient API and expose only the HTTP client (the common interface the developers want to consum)
 
@@ -447,3 +483,4 @@ $ make karma
 [MIT](http://opensource.org/licenses/MIT) © Tomas Aparicio and contributors
 
 [travis]: http://travis-ci.org/resilient-http/resilient.js
+[httpMessage]: http://nodejs.org/api/http.html#http_http_incomingmessage
