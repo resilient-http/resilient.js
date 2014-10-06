@@ -186,7 +186,7 @@ Specific shared configuration options for the HTTP client for final service requ
 - **timeout** `number` - Request maximum timeout in miliseconds before to abort it. Default to 10 seconds
 - **auth** `object` - Authentication credentials to the server. Object must have the `user` and `password` properties
 
-Browser-specific options
+Browser specific options
 
 - **async** `boolean` - Set to `false` if the request must be performed as synchronous operation (not recommended, browser only)
 - **withCredentials** `boolean` - Whether to set the withCredentials flag on the XHR object. See [MDN][withcredentials] for more information
