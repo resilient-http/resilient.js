@@ -21,7 +21,7 @@ For more information about the **resilient** and how it works, see the [project 
 - Highly configurable (timeout, retry times, cache, implicit delay...)
 - Cross-engine (browsers and node.js)
 - Full HTTP features support (it uses [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http))
-- Lightweight library (just 7KB gzipped)
+- Lightweight library (just 8KB gzipped)
 
 <!--
 ## Introduction
