@@ -10,7 +10,7 @@ For more information about the **resilient** and how it works, see the [project 
 
 ## Features
 
-- Fault tolerant, transparent fallback
+- Fault tolerant, transparent server fallback
 - Client-side based balancer using a simple best availability algorithm
 - Smart balancer logic based on server stats (lantency, errors, requests...)
 - Configurable balancer policy and weight
@@ -18,7 +18,7 @@ For more information about the **resilient** and how it works, see the [project 
 - Server-side dynamic client configuration support (experimental)
 - Built-in support for servers caching to improve reliability
 - Parallel servers discovering for a faster
-- Highly configurable (timeout, retry times, cache, implicit delay...)
+- Highly configurable (timeout, retry times, cache, wait delay fallback...)
 - Cross-engine (browsers and node.js)
 - Full HTTP features support (it uses [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http))
 - Lightweight library (just 8KB gzipped)
