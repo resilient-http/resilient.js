@@ -955,7 +955,7 @@ Resilient.prototype.client = function () {
   return this._client
 }
 
-Resilient.prototype.send = Resilient.prototype.http = function (path, options, cb) {
+Resilient.prototype.send = Resilient.prototype.request = function (path, options, cb) {
   return this._client.send(path, options, cb)
 }
 
