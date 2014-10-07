@@ -694,7 +694,7 @@ function ResilientFactory(options) {
   return new Resilient(options)
 }
 
-ResilientFactory.VERSION = '0.1.0-beta.4'
+ResilientFactory.VERSION = '0.1.0'
 ResilientFactory.CLIENT_VERSION = http.VERSION
 ResilientFactory.defaults = defaults
 ResilientFactory.Options = Options
