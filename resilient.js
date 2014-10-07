@@ -345,7 +345,7 @@ defaults.service = {
 defaults.balancer = {
   enable: true,
   roundRobin: true,
-  size: 3,
+  roundRobinSize: 3,
   weight: {
     request: 25,
     error: 50,
@@ -1248,9 +1248,9 @@ function mapServer(data) {
 }
 
 function roundRobinSort(servers, options) {
-  var size = 0, sorted
+  var size = 0
   if (options && options.roundRobin) {
-    size = options.size > servers.length ? servers.length : options.size
+    size = options.roundRobinSize > servers.length ? servers.length : options.roundRobinSize
     if (size > 1) servers = RoundRobin(servers, size)
   }
   return servers
