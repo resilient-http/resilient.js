@@ -1,17 +1,16 @@
 var Resilient = require('../')
 
 var client = Resilient({
-  service: {
+  discovery: {
     servers: [
       'http://localhost:8882/unavailable',
       'http://localhost:8882/timeout',
-      'http://localhost:8882/server'
+      'http://localhost:8882/valid'
     ],
-    timeout: 1000,
-    basePath: '/api',
+    timeout: 2000,
+    parallel: true,
+    basePath: '/discovery/myapp',
     method: 'POST',
-    retry: 3,
-    retryWait: 500,
     headers: {
       Authorization: 'Bearer 0b79bab50daca910b000d4f1a2b675d604257e42'
     }
