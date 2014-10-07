@@ -202,7 +202,10 @@ See all HTTP options supported for `node.js` [here](https://github.com/mikeal/re
 ##### Balancer
 
 - **enable** `boolean` - Enable/disable the smart client balancer. Default `true`
-- **weight** `object` - Balacer point percentage weight for server scoring policy. Default to 25 (response), 25 (latency) and 50 (errors)
+- **weight** `object` - Balacer point percentage weight for server scoring policy:
+  - **success** `number` - Percentage weight for success request. Default to `15`
+  - **error** `number` - Percentage weight for failed request. Default to `50`
+  - **latency** `number` - Percentage weight for request average latency. Default to `35`
 
 <!--
 - **middleware** `function` - Balancer map middleware result (to do)
