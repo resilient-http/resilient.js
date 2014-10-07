@@ -250,5 +250,10 @@ describe('Resilient', function () {
       expect(spy.calledOnce).to.be.true
       expect(spy.calledWith(_err_, _res_)).to.be.true
     })
+
+    it('should restore to the native HTTP client', function () {
+      resilient.restoreHttpClient()
+      expect(resilient._httpClient).to.be.null
+    })
   })
 })
