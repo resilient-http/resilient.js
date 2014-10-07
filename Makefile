@@ -52,7 +52,7 @@ karma:
 	$(KARMA) start
 
 gzip:
-	gzip -c resilient.js | wc -c
+	gzip -c resilient.min.js | wc -c
 
 release:
 	@$(call release, patch)

@@ -1,4 +1,5 @@
 var expect = require('chai').expect
+var sinon = require('sinon')
 var nock = require('nock')
 var Resilient = require('../')
 
@@ -202,6 +203,52 @@ describe('Resilient', function () {
         expect(res.status).to.be.equal(200)
         done()
       })
+    })
+  })
+
+  describe('custom http client', function () {
+    var spy = null, _err_, _res_
+    function httpClient(options, cb) {
+      spy = sinon.spy()
+      require('request')(options, function (err, res) {
+        spy(err, res)
+        cb(err, res)
+      })
+    }
+
+    var resilient = Resilient({
+      discovery: { servers: ['http://server'] }
+    })
+
+    resilient.setHttpClient(httpClient)
+
+    before(function () {
+      nock('http://server')
+        .filteringPath(/\?(.*)/g, '')
+        .get('/')
+        .reply(200, ['http://api'])
+      nock('http://api')
+        .get('/hello')
+        .reply(200, { hello: 'world' })
+    })
+
+    after(function () {
+      nock.cleanAll()
+    })
+
+    it('should perform a request a valid request', function (done) {
+      resilient.get('/hello', function (err, res) {
+        expect(err).to.be.null
+        expect(res.status).to.be.equal(200)
+        _err_ = err
+        _res_ = res
+        done()
+      })
+    })
+
+    it('should use the HTTP proxy client', function () {
+      expect(spy.calledOnce).to.be.true
+      expect(spy.calledWith(_err_, _res_)).to.be.true
     })
   })
 })

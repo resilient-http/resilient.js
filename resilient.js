@@ -587,7 +587,9 @@ function resolveWithError(err, cb) {
 }
 
 function isValidResponse(res) {
-  return (res && _.isArr(res.data) && res.data.length > 0) || false
+  return (res
+    && _.isArr(res.data)
+    && res.data.length > 0) || false
 }
 
 },{"./error":7,"./utils":17}],7:[function(require,module,exports){
@@ -630,6 +632,7 @@ function client() {
 }
 
 client.VERSION = http.VERSION
+client.mapResponse = mapResponse
 
 function resolveModule() {
   if (typeof window === 'object' && window) {
@@ -651,7 +654,9 @@ function requestWrapper(request) {
 function mapResponse(cb) {
   return function (err, res, body) {
     if (res) {
-      res.status = res.statusCode
+      if (res.statusCode) {
+        res.status = res.statusCode
+      }
       if (body) {
         res.data = isJSONContent(res) ? JSON.parse(body) : body
       }
@@ -801,7 +806,7 @@ function Requester(resilient) {
       var server = serversList.shift()
       if (server) {
         options.url = _.join(server.url, options.basePath, options.path)
-        sendRequest(options, requestHandler(server, operation, cb, next), buf)
+        sendRequest(resilient, options, requestHandler(server, operation, cb, next), buf)
       } else {
         handleMissingServers(servers, options, previousError, cb)
       }
@@ -852,9 +857,13 @@ function Requester(resilient) {
         next(err)
       } else {
         server.report(operation, latency)
-        cb(null, res)
+        resolve(res, cb)
       }
     }
+  }
+
+  function resolve(res, cb) {
+    http.mapResponse(cb)(null, res, res.body)
   }
 
   function getOptions(type) {
@@ -864,15 +873,19 @@ function Requester(resilient) {
   return request
 }
 
-function sendRequest(options, handler, buf) {
+function sendRequest(resilient, options, handler, buf) {
   var request = null
   try {
-    request = http(_.omit(options, resilientOptions), handler)
+    request = getHttpClient(resilient)(_.omit(options, resilientOptions), handler)
     if (buf) buf.push(request)
   } catch (err) {
     handler(err)
   }
   options = buf = null
+}
+
+function getHttpClient(resilient) {
+  return resilient._httpClient ? resilient._httpClient : http
 }
 
 function isUnavailableStatus(err, res) {
@@ -885,6 +898,11 @@ function isInvalidStatus(res) {
 
 function getOperation(method) {
   return !method || method.toUpperCase() === 'GET' ? 'read' : 'write'
+}
+
+function mapResponse(res) {
+  if (res && res.body && !res.data) res.data = res.body
+  return res
 }
 
 },{"./defaults":4,"./discovery-servers":6,"./error":7,"./http":8,"./utils":17}],12:[function(require,module,exports){
@@ -969,6 +987,16 @@ Resilient.prototype.updateServers = function (cb) {
 Resilient.prototype.flushCache = function () {
   this._cache.flush()
   return this
+}
+
+Resilient.prototype.setHttpClient = function (client) {
+  if (typeof client === 'function') {
+    this._httpClient = client
+  }
+}
+
+Resilient.prototype.restoreHttpClient = function () {
+  this._httpClient = null
 }
 
 Resilient.prototype.areServersUpdated = function () {
@@ -1068,7 +1096,7 @@ function resolver(arr, size) {
   return RoundRobin(size, arr)[getRandom(size)][0]
 }
 
-function RoundRobin(n, ps) { // n = num players
+function RoundRobin(n, ps) {
   var k, j, i, rs = [] // rs = round array
   if (!ps) {
     ps = []

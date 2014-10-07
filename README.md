@@ -374,6 +374,22 @@ Setter/Getter for discovery servers list
 Force to update the servers list from discovery servers, if they are defined,
 optionally passing a callback to handle the result
 
+### resilient#setHttpClient(fn)
+
+Use a custom HTTP client as proxy instead of the embedded `resilient` native HTTP client.
+
+Useful to define use proxy for custom frameworks or libraries in your existent project when you need to deal with some complex HTTP pre/post hooks logic and exploit custom HTTP client features
+
+If defined, all the outgoing requests through Resilient client will be proxied to it
+
+Arguments passed to the client function:
+- **options** `object` - Resilient HTTP [service options](#service)
+- **callback** `function` - Request status handler. Expected arguments are: `error`, `response`
+
+### resilient#restoreHttpClient()
+
+Restore the native `resilient` HTTP client
+
 ### resilient#on(event, handler)
 
 Subscribe to an event. See [supported events](#events)
