@@ -247,7 +247,7 @@ Cache.prototype.set = function (key, data) {
   }
 }
 
-},{"./utils":16}],3:[function(require,module,exports){
+},{"./utils":17}],3:[function(require,module,exports){
 var _ = require('./utils')
 var resolver = require('./resolver')
 var http = require('./http')
@@ -329,7 +329,7 @@ function plainHttp(options, cb) {
   return http.call(null, options, cb)
 }
 
-},{"./http":8,"./resolver":13,"./utils":16}],4:[function(require,module,exports){
+},{"./http":8,"./resolver":13,"./utils":17}],4:[function(require,module,exports){
 var defaults = module.exports = {}
 
 defaults.service = {
@@ -344,6 +344,8 @@ defaults.service = {
 
 defaults.balancer = {
   enable: true,
+  roundRobin: true,
+  size: 3,
   weight: {
     request: 25,
     error: 50,
@@ -431,7 +433,7 @@ function DiscoveryResolver(resilient) {
   }
 
   function updateServersInParallel(options, cb) {
-    var buf = [], servers = getServers().sort()
+    var buf = [], servers = getServers().sort('read', resilient.balancer())
     servers.slice(0, 3).forEach(function (server, index) {
       server = [ server ]
       if (index === 2 && servers.length > 3) {
@@ -508,7 +510,7 @@ function isEmptyBuffer(buf) {
   return !buf || buf.filter(function (request) { return _.isObj(request) }).length === 0
 }
 
-},{"./discovery-servers":6,"./error":7,"./requester":11,"./servers":15,"./utils":16}],6:[function(require,module,exports){
+},{"./discovery-servers":6,"./error":7,"./requester":11,"./servers":16,"./utils":17}],6:[function(require,module,exports){
 var _ = require('./utils')
 var ResilientError = require('./error')
 
@@ -588,7 +590,7 @@ function isValidResponse(res) {
   return (res && _.isArr(res.data) && res.data.length > 0) || false
 }
 
-},{"./error":7,"./utils":16}],7:[function(require,module,exports){
+},{"./error":7,"./utils":17}],7:[function(require,module,exports){
 module.exports = ResilientError
 
 var MESSAGES = {
@@ -673,7 +675,7 @@ function getUserAgent() {
   return 'resilient-http ' + client.LIBRARY_VERSION + ' (node)'
 }
 
-},{"../bower_components/lil-http/http":1,"request":17}],9:[function(require,module,exports){
+},{"../bower_components/lil-http/http":1,"request":18}],9:[function(require,module,exports){
 var Resilient = require('./resilient')
 var Options = require('./options')
 var defaults = require('./defaults')
@@ -696,7 +698,7 @@ ResilientFactory.Client = Client
 ResilientFactory.request = http
 http.LIBRARY_VERSION = ResilientFactory.VERSION
 
-},{"./client":3,"./defaults":4,"./http":8,"./options":10,"./resilient":12,"./servers":15}],10:[function(require,module,exports){
+},{"./client":3,"./defaults":4,"./http":8,"./options":10,"./resilient":12,"./servers":16}],10:[function(require,module,exports){
 var _ = require('./utils')
 var defaults = require('./defaults')
 var Servers = require('./servers')
@@ -772,7 +774,7 @@ function defineDefaults(options, store) {
   }
 }
 
-},{"./defaults":4,"./servers":15,"./utils":16}],11:[function(require,module,exports){
+},{"./defaults":4,"./servers":16,"./utils":17}],11:[function(require,module,exports){
 var _ = require('./utils')
 var http = require('./http')
 var resilientOptions = require('./defaults').resilientOptions
@@ -786,7 +788,7 @@ function Requester(resilient) {
     if (resilient.balancer().enabled) {
       return servers.servers.slice()
     } else {
-      return servers.sort(operation)
+      return servers.sort(operation, resilient.balancer())
     }
   }
 
@@ -885,7 +887,7 @@ function getOperation(method) {
   return !method || method.toUpperCase() === 'GET' ? 'read' : 'write'
 }
 
-},{"./defaults":4,"./discovery-servers":6,"./error":7,"./http":8,"./utils":16}],12:[function(require,module,exports){
+},{"./defaults":4,"./discovery-servers":6,"./error":7,"./http":8,"./utils":17}],12:[function(require,module,exports){
 var _ = require('./utils')
 var Options = require('./options')
 var Client = require('./client')
@@ -993,7 +995,7 @@ function defineMethodProxy(verb) {
   }
 }
 
-},{"./cache":2,"./client":3,"./discovery-resolver":5,"./options":10,"./utils":16,"lil-event":18}],13:[function(require,module,exports){
+},{"./cache":2,"./client":3,"./discovery-resolver":5,"./options":10,"./utils":17,"lil-event":19}],13:[function(require,module,exports){
 var _ = require('./utils')
 var ResilientError = require('./error')
 var Requester = require('./requester')
@@ -1059,7 +1061,43 @@ function Resolver(resilient, options, cb) {
   }
 }
 
-},{"./discovery-resolver":5,"./error":7,"./requester":11,"./servers":15,"./utils":16}],14:[function(require,module,exports){
+},{"./discovery-resolver":5,"./error":7,"./requester":11,"./servers":16,"./utils":17}],14:[function(require,module,exports){
+module.exports = resolver
+
+function resolver(arr, size) {
+  return RoundRobin(size, arr)[getRandom(size)][0]
+}
+
+function RoundRobin(n, ps) { // n = num players
+  var k, j, i, rs = [] // rs = round array
+  if (!ps) {
+    ps = []
+    for (k = 1; k <= n; k += 1) ps.push(k)
+  } else {
+    ps = ps.slice()
+  }
+  if (n % 2 === 1) {
+    ps.push(-1) // so we can match algorithm for even numbers
+    n += 1
+  }
+  for (j = 0; j < n - 1; j += 1) {
+    rs[j] = [] // create inner match array for round j
+    for (i = 0; i < n / 2; i += 1) {
+      if (ps[i] !== -1 && ps[n - 1 - i] !== -1) {
+        rs[j].push([ps[i], ps[n - 1 - i]]) // insert pair as a match
+      }
+    }
+    ps.splice(1, 0, ps.pop()) // permutate for next round
+  }
+  return rs
+}
+
+function getRandom(max) {
+  max = max > 0 ? max - 1 : max
+  return Math.round(Math.random() * (max - 0) + 0)
+}
+
+},{}],15:[function(require,module,exports){
 var _ = require('./utils')
 var defaults = require('./defaults')
 
@@ -1085,10 +1123,10 @@ Server.prototype.reportError = function (operation, latency) {
   this.report(operation, latency, 'error')
 }
 
-Server.prototype.getBalance = function (operation) {
+Server.prototype.getBalance = function (operation, options) {
   var stats = this.getStats(operation)
+  var weight = this.applyOptions(options).weight
   var total = stats.request + stats.error
-  var weight = this.options.weight
   var balance = total === 0 ? 0 : round(
     (((stats.request * 100 / total) * weight.request) +
     ((stats.error * 100 / total) * weight.error) +
@@ -1104,6 +1142,14 @@ Server.prototype.getStats = function (operation, field) {
 
 Server.prototype.setOptions = function (options) {
   this.options = _.merge({}, defaults.balancer, options)
+}
+
+Server.prototype.applyOptions = function (options) {
+  if (_.isObj(options)) {
+    return _.merge({}, this.options, options)
+  } else {
+    return this.options
+  }
 }
 
 Server.prototype.setStats = function (stats) {
@@ -1129,9 +1175,10 @@ function round(number) {
   return Math.round(number * 100) / 100
 }
 
-},{"./defaults":4,"./utils":16}],15:[function(require,module,exports){
+},{"./defaults":4,"./utils":17}],16:[function(require,module,exports){
 var _ = require('./utils')
 var Server = require('./server')
+var RoundRobin = require('./roundrobin')
 
 module.exports = Servers
 
@@ -1141,10 +1188,11 @@ function Servers(servers) {
   this.set(servers)
 }
 
-Servers.prototype.sort = function (operation) {
-  return this.servers.slice(0).sort(function (x, y) {
-    return x.getBalance(operation) - y.getBalance(operation)
+Servers.prototype.sort = function (operation, options) {
+  var servers = this.servers.slice(0).sort(function (x, y) {
+    return x.getBalance(operation, options) - y.getBalance(operation, options)
   })
+  return roundRobinSort(servers, options)
 }
 
 Servers.prototype.find = function (url) {
@@ -1199,7 +1247,16 @@ function mapServer(data) {
   return server
 }
 
-},{"./server":14,"./utils":16}],16:[function(require,module,exports){
+function roundRobinSort(servers, options) {
+  var size = 0, sorted
+  if (options && options.roundRobin) {
+    size = options.size > servers.length ? servers.length : options.size
+    if (size > 1) servers = RoundRobin(servers, size)
+  }
+  return servers
+}
+
+},{"./roundrobin":14,"./server":15,"./utils":17}],17:[function(require,module,exports){
 var _ = exports
 var toStr = Object.prototype.toString
 var slice = Array.prototype.slice
@@ -1297,9 +1354,9 @@ function merger(target, key, value) {
   }
 }
 
-},{}],17:[function(require,module,exports){
-
 },{}],18:[function(require,module,exports){
+
+},{}],19:[function(require,module,exports){
 /*! lil-event - v0.1 - MIT License - https://github.com/lil-js/event */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {

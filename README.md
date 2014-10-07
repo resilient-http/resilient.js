@@ -13,13 +13,14 @@ For more information about the **resilient** and how it works, see the [project 
 - Fault tolerant, transparent server fallback
 - Client-side based balancer using a simple best availability algorithm
 - Smart balancer logic based on server stats (latency, errors, requests...)
-- Configurable balancer policy and weight
-- Servers discovering based on the resilient high-level protocol
+- Configurable balancer policy by weight
+- Highly configurable (timeout, retry times, cache, wait delay fallback...)
 - Server-side dynamic client configuration support (experimental)
 - Built-in support for servers caching to improve reliability
 - Parallel servers discovering for a faster
-- Highly configurable (timeout, retry times, cache, wait delay fallback...)
-- Cross-engine (browsers and node.js)
+- Support for round robin scheduling algorithm (experimental)
+- Cross engine (node.js and browsers ES5 compliant)
+- Servers discovering based on the resilient high-level protocol
 - Full HTTP features support (it uses [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http))
 - Lightweight library (just 8KB gzipped)
 

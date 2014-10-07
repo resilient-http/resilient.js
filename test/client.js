@@ -4,6 +4,7 @@ var Resilient = require('../')
 
 describe('Client', function () {
   var client = Resilient({
+    balancer: { roundRobin: false },
     discovery: {
       timeout: 50,
       servers: [
