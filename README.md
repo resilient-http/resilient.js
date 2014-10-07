@@ -17,7 +17,8 @@ For more information about the **resilient** and how it works, see the [project 
 - Highly configurable (timeout, retry times, cache, wait delay fallback...)
 - Server-side dynamic client configuration support (experimental)
 - Built-in support for servers caching to improve reliability
-- Parallel servers discovering for a faster
+- Parallel servers discovering for a faster communication
+- Allows to define an external HTTP client to use as proxy for requests traffic
 - Support for round robin scheduling algorithm (experimental)
 - Cross engine (node.js and browsers ES5 compliant)
 - Servers discovering based on the resilient high-level protocol
@@ -380,11 +381,13 @@ Use a custom HTTP client as proxy instead of the embedded `resilient` native HTT
 
 Useful to define use proxy for custom frameworks or libraries in your existent project when you need to deal with some complex HTTP pre/post hooks logic and exploit custom HTTP client features
 
-If defined, all the outgoing requests through Resilient client will be proxied to it
+If defined, all the outgoing requests through Resilient client will be proxied to it.
 
 Arguments passed to the client function:
 - **options** `object` - Resilient HTTP [service options](#service)
 - **callback** `function` - Request status handler. Expected arguments are: `error`, `response`
+
+Note: `error` and `response` objects must be compatible with the [current interface](#request-callback-arguments)
 
 ### resilient#restoreHttpClient()
 
