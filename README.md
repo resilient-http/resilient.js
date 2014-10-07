@@ -12,7 +12,7 @@ For more information about the **resilient** and how it works, see the [project 
 
 - Fault tolerant, transparent server fallback
 - Client-side based balancer using a simple best availability algorithm
-- Smart balancer logic based on server stats (lantency, errors, requests...)
+- Smart balancer logic based on server stats (latency, errors, requests...)
 - Configurable balancer policy and weight
 - Servers discovering based on the resilient high-level protocol
 - Server-side dynamic client configuration support (experimental)
