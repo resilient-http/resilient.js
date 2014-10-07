@@ -163,4 +163,45 @@ describe('Resilient', function () {
       expect(response).to.be.equal(eventResponse)
     })
   })
+
+  describe('merge default and custom options', function () {
+    var resilient = Resilient({
+      service: {
+        headers: {
+          accept: 'application/json'
+        }
+      },
+      discovery: {
+        servers: ['http://server'],
+        headers: {
+          accept: 'application/json'
+        }
+      }
+    })
+
+    before(function () {
+      nock('http://server')
+        .filteringPath(/\?(.*)/g, '')
+        .matchHeader('accept', 'application/json')
+        .get('/')
+        .reply(200, ['http://api'])
+      nock('http://api')
+        .matchHeader('accept', 'application/json')
+        .matchHeader('client', 'resilient')
+        .get('/hello')
+        .reply(200, { hello: 'world' })
+    })
+
+    after(function () {
+      nock.cleanAll()
+    })
+
+    it('should perform a request with custom headers', function (done) {
+      resilient.get('/hello', { headers: { client: 'resilient' }}, function (err, res) {
+        expect(err).to.be.null
+        expect(res.status).to.be.equal(200)
+        done()
+      })
+    })
+  })
 })

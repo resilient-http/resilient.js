@@ -87,6 +87,22 @@ describe('utils', function () {
     })
   })
 
+  describe('merge', function () {
+    it('should deeply merge two nested objects', function () {
+      var o = {x: {y:1}, y:1}
+      expect(_.merge(o, {x:{z:1},z:1})).to.be.equal(o)
+      expect(_.merge(o, {x:{z:1},z:1})).to.be.deep.equal({
+        x: {y:1, z:1}, y:1, z:1
+      })
+    })
+
+    it('should union members from multiple objects', function () {
+      var o = {x:1}
+      expect(_.extend(o, {y:1}, {z:1})).to.be.equal(o)
+      expect(_.extend(o, {y:1}, {z:1})).to.be.deep.equal({x:1, y:1, z:1})
+    })
+  })
+
   describe('clone', function () {
     it('should be clone an object', function () {
       var o = {}

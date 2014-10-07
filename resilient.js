@@ -317,7 +317,7 @@ function wrapCallback(resilient, cb) {
 
 function mergeHttpOptions(options) {
   var defaults = this._resilient.getHttpOptions()
-  return _.extend(defaults, options)
+  return _.merge(defaults, options)
 }
 
 function isFullUrl(options) {
@@ -1103,7 +1103,7 @@ Server.prototype.getStats = function (operation, field) {
 }
 
 Server.prototype.setOptions = function (options) {
-  this.options = _.extend({}, defaults.balancer, options)
+  this.options = _.merge({}, defaults.balancer, options)
 }
 
 Server.prototype.setStats = function (stats) {
@@ -1236,17 +1236,9 @@ _.each = function (obj, fn) {
     for (i in obj) if (hasOwn.call(obj, i)) fn(i, obj[i])
 }
 
-_.extend = function (target) {
-  var args = slice.call(arguments, 1)
-  _.each(args, function (obj) {
-    if (_.isObj(obj)) {
-      _.each(obj, function (key, value) {
-        target[key] = value
-      })
-    }
-  })
-  return target
-}
+_.extend = objIterator(extender)
+
+_.merge = objIterator(merger)
 
 _.clone = function (obj) {
   return _.extend({}, obj)
@@ -1274,6 +1266,35 @@ _.join = function (base) {
   return (base || '') + (slice.call(arguments, 1)
     .filter(function (part) { return typeof part === 'string' && part.length > 0 })
     .join(''))
+}
+
+function extender(target, key, value) {
+  target[key] = value
+}
+
+function objIterator(iterator) {
+  return function (target) {
+    _.each(slice.call(arguments, 1), eachArgument(target, iterator))
+    return target
+  }
+}
+
+function eachArgument(target, iterator) {
+  return function (obj) {
+    if (_.isObj(obj)) {
+      _.each(obj, function (key, value) {
+        iterator(target, key, value)
+      })
+    }
+  }
+}
+
+function merger(target, key, value) {
+  if (_.isObj(value) && _.isObj(target[key])) {
+    _.merge(target[key], value)
+  } else {
+    extender(target, key, value)
+  }
 }
 
 },{}],17:[function(require,module,exports){
