@@ -421,7 +421,7 @@ Return: `boolean`
 
 Returns `true` if servers are up-to-date. Otherwise `false`
 
-### resilient#balancer()
+### resilient#balancer([ options ])
 Return: `object`
 
 Returns the current balancer config options

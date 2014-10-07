@@ -790,10 +790,10 @@ module.exports = Requester
 
 function Requester(resilient) {
   function getServersList(servers, operation) {
-    if (resilient.balancer().enabled) {
-      return servers.servers.slice()
-    } else {
+    if (resilient.balancer().get('enable')) {
       return servers.sort(operation, resilient.balancer())
+    } else {
+      return servers.get()
     }
   }
 
@@ -1003,8 +1003,12 @@ Resilient.prototype.areServersUpdated = function () {
   return this.getServers('service').lastUpdate() < (this.getOptions('service').get('refresh') || 0)
 }
 
-Resilient.prototype.balancer = function () {
-  return this.getOptions('balancer')
+Resilient.prototype.balancer = function (options) {
+  if (options) {
+    this.options.get('balancer').set(options)
+  } else {
+    return this.getOptions('balancer')
+  }
 }
 
 Resilient.prototype.client = function () {
@@ -1232,6 +1236,10 @@ Servers.prototype.find = function (url) {
     }
   }
   return server
+}
+
+Servers.prototype.get = function () {
+  return this.servers.slice()
 }
 
 Servers.prototype.set = function (servers) {

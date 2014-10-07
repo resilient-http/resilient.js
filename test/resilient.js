@@ -50,6 +50,31 @@ describe('Resilient', function () {
     })
   })
 
+  describe('define balancer options', function () {
+    var resilient = Resilient()
+
+    it('should fetch the default balancer params', function () {
+      var balancer = resilient.balancer()
+      expect(balancer.get('roundRobin')).to.be.true
+      expect(balancer.get('roundRobinSize')).to.be.equal(3)
+      expect(balancer.get('enable')).to.be.true
+      expect(balancer.get('weight').error).to.be.equal(50)
+    })
+
+    it('should define a custom balancer params', function () {
+      var balancer = resilient.balancer()
+      resilient.balancer({
+        roundRobin: false,
+        roundRobinSize: 0,
+        weight: { error: 30 }
+      })
+      expect(balancer.get('roundRobin')).to.be.false
+      expect(balancer.get('roundRobinSize')).to.be.equal(0)
+      expect(balancer.get('enable')).to.be.true
+      expect(balancer.get('weight')).to.be.deep.equal({ error: 30 })
+    })
+  })
+
   describe('force discover servers', function () {
     var resilient = Resilient({
       discovery: {
