@@ -50,7 +50,7 @@ describe('Server', function () {
 
   describe('stats server balance', function () {
     it('should have a valid balance', function () {
-      expect(server.getBalance()).to.be.equal(39.27)
+      expect(server.getBalance()).to.be.equal(34.98)
     })
 
     it('should have a valid latency average per request', function () {

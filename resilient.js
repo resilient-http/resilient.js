@@ -347,9 +347,9 @@ defaults.balancer = {
   roundRobin: true,
   roundRobinSize: 3,
   weight: {
-    request: 25,
+    success: 15,
     error: 50,
-    latency: 25
+    latency: 35
   }
 }
 
@@ -1112,7 +1112,7 @@ function Server(url, options) {
 Server.prototype.report = function (operation, latency, type) {
   var stats = this.getStats(operation)
   if (stats) {
-    stats[type || 'request'] += 1
+    stats[type || 'request'] += 1
     if (latency) {
       stats.latency = calculateAvgLatency(latency, stats)
     }
@@ -1128,14 +1128,14 @@ Server.prototype.getBalance = function (operation, options) {
   var weight = this.applyOptions(options).weight
   var total = stats.request + stats.error
   var balance = total === 0 ? 0 : round(
-    (((stats.request * 100 / total) * weight.request) +
+    (((stats.request * 100 / total) * weight.success) +
     ((stats.error * 100 / total) * weight.error) +
     (stats.latency * weight.latency)) / 100)
   return balance
 }
 
 Server.prototype.getStats = function (operation, field) {
-  var stats = this.stats[operation || 'read']
+  var stats = this.stats[operation || 'read']
   if (stats && field) stats = stats[field]
   return stats
 }
@@ -1153,7 +1153,7 @@ Server.prototype.applyOptions = function (options) {
 }
 
 Server.prototype.setStats = function (stats) {
-  this.stats = stats || {
+  this.stats = stats || {
     read: createStats(),
     write: createStats()
   }
