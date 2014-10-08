@@ -123,7 +123,9 @@ client.discoveryServers(servers)
 Perform a request (and that's all)
 ```js
 client.get('/users', function (err, res) {
-  // ...
+  if (res.status === 200) {
+    console.log('Success:', res.data)
+  }
 })
 ```
 
