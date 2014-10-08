@@ -18,7 +18,7 @@ For more information about the **resilient**, see the [project site](http://resi
 - Server-side dynamic client configuration support (experimental)
 - Built-in support for request traffic listeners and interceptors
 - Built-in support for servers caching to improve reliability for fallback
-- Parallel servers discovering for a faster communication
+- Parallel servers discovering for a faster availability
 - Allows to define an external HTTP client to use as proxy for requests traffic
 - Support for round robin scheduling algorithm (experimental)
 - Cross engine (node.js and browsers ES5 compliant)
