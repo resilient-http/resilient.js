@@ -16,7 +16,8 @@ For more information about the **resilient**, see the [project site](http://resi
 - Configurable balancer policy by weight
 - Highly configurable (timeout, retry times, cache, wait delay fallback...)
 - Server-side dynamic client configuration support (experimental)
-- Built-in support for servers caching to improve reliability
+- Built-in support for request traffic listeners and interceptors
+- Built-in support for servers caching to improve reliability for fallback
 - Parallel servers discovering for a faster communication
 - Allows to define an external HTTP client to use as proxy for requests traffic
 - Support for round robin scheduling algorithm (experimental)
