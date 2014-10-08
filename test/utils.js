@@ -148,9 +148,9 @@ describe('utils', function () {
     it('should delay function execution the given miliseconds', function (done) {
       var start = Date.now()
       _.delay(function () {
-        expect((Date.now() - start) >= 50).to.be.true
+        expect((Date.now() - start) >= 40).to.be.true
         done()
-      }, 60)
+      }, 50)
     })
   })
 })

@@ -4,9 +4,9 @@
 
 A browser and [node.js](http://nodejs.org) fault tolerant, balanced, configurable and full featured HTTP client for distributed and reactive systems
 
-For more information about the **resilient** and how it works, see the [project site](http://resilient-http.github.io)
+For more information about the **resilient**, see the [project site](http://resilient-http.github.io)
 
-**Note**: resilient is still a beta preview version
+**Note**: resilient.js is still beta
 
 ## Features
 
@@ -55,7 +55,7 @@ Or loading the script remotely
 
 It runs properly in any [ES5 compliant](http://kangax.github.io/compat-table/es5/) engine
 
-- Node.js >= 0.6
+- Node.js
 - Chrome >= 5
 - Firefox >= 3
 - Safari >= 5
@@ -97,13 +97,15 @@ client.setServers(servers)
 Perform the request (the best available server will be use)
 ```js
 client.get('/users', function (err, res) {
-  // ...
+  if (res.status === 200) {
+    console.log('Success:', res.data)
+  }
 })
 ```
 
 #### Dynamic servers discovering
 
-Define your discovering servers pool
+Define the discovery servers pool
 ```js
 var servers = [
   'http://discover1.server.com',
@@ -118,7 +120,7 @@ var client = Resilient({ service: { basePath: '/api/1.0' }})
 client.discoveryServers(servers)
 ```
 
-Perform the request (the best available server will be use)
+Perform a request (and that's all)
 ```js
 client.get('/users', function (err, res) {
   // ...
