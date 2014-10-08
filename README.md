@@ -23,7 +23,7 @@ For more information about the **resilient** and how it works, see the [project 
 - Cross engine (node.js and browsers ES5 compliant)
 - Servers discovering based on the resilient high-level protocol
 - Full HTTP features support (it uses [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http))
-- Lightweight library (just 8KB gzipped)
+- Lightweight library (just 6KB gzipped)
 
 <!--
 ## Introduction
