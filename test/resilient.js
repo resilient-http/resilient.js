@@ -121,7 +121,7 @@ describe('Resilient', function () {
     })
 
     it('should not have service servers', function () {
-      expect(resilient.getServers()).to.be.null
+      expect(resilient.servers()).to.be.null
     })
 
     it('should update service servers', function (done) {
@@ -133,7 +133,7 @@ describe('Resilient', function () {
     })
 
     it('should have service servers stored', function () {
-      expect(resilient.getServers().servers[0].url).to.be.equal('http://api')
+      expect(resilient.servers().servers[0].url).to.be.equal('http://api')
     })
   })
 

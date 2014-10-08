@@ -19,6 +19,15 @@ describe('Cache', function () {
     expect(cache.get('test').data).to.be.deep.equal([1,2])
   })
 
+  it('should exists the key value', function () {
+    cache.set('test', [1,2])
+    expect(cache.exists('test')).to.be.true
+  })
+
+  it('should not exists the key', function () {
+    expect(cache.exists('invalid')).to.be.false
+  })
+
   it('should write an object in the cache buffer', function () {
     cache.set('test', {x:1})
     expect(cache.get('test').data).to.be.deep.equal({x:1})

@@ -1,6 +1,6 @@
 {
   "name": "resilient",
-  "description": "Fault tolerant, balanced, full featured HTTP client for modern web applications and distributed systems",
+  "description": "Fault tolerant, server discovering, balanced and full featured HTTP client for distributed systems",
   "version": "0.1.0",
   "license": "MIT",
   "repository": "resilient-http/resilient",

@@ -25,40 +25,6 @@ For more information about the **resilient** and how it works, see the [project 
 - Full HTTP features support (it uses [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http))
 - Lightweight library (just 6KB gzipped)
 
-<!--
-## Introduction
-
-Organisations working in disparate domains are independently discovering patterns
-for building software that look the same.
-These systems are more robust, more resilient, more flexible and better positioned to meet modern demands.
-
-The system stays responsive in the face of failure.
-This applies not only to highly-available, mission critical systems — any system that is not resilient will be unresponsive after a failure
-
-### What resilient means?
-
-Acording to the [reactive manifiesto](http://reactivemanifiesto.org), a good description for could be:
-
-Resilience is achieved by replication, containment, isolation and delegation.
-Failures are contained within each component, isolating components from each other
-and thereby ensuring that parts of the system can fail and recover without
-compromising the system as a whole. Recovery of each component is delegated to another (external)
-component and high-availability is ensured by replication where necessary.
-The client of a component is not burdened with handling its failures
-
-## A client-side balancer?
-
-Yes. `resilient` aims to delegate a part of the balance logic responsabilities on the client-side,
-
-Web applications evolved notably in the latest years, achieving and delegating new responsabilities in the client side.
-The Web (and therefore HTTP) is based on a client-server architecture
-
-### How does it works?
-
-An algorithm worth more than words
-
-The following diagram represents from high level point of view the complete HTTP request flow and logic encapsulated in `resilient`
--->
 
 ## Installation
 
@@ -175,10 +141,9 @@ There are specific config options for the servers of the client service.
 Resilient is a resource-oriented HTTP client, which could be ideal for RESTful Web services
 
 - **servers** `array` - A list of valid URIs of servers to reach for the given service. Default `null`. It's recommended you use discovery servers instead
-- **refresh** `number` - Servers list expiration time to live in miliseconds. Default `60` seconds. Once the time expired, will try to discovery it from discovery servers
 - **retry** `number` - Number of times to retry if all requests failed.  Default `0`
 - **retryWait** `number` - Number of milisenconds to wait before retry. Default to `1000`
-- **updateOnRetry** `boolean` - Force to update service servers from discovery servers on each retry attempt. Recommended. You must define the discovery servers to use this feature. Default `true`
+- **discoverBeforeRetry** `boolean` - Force to refresh service servers list from asking for discovery servers on each retry attempt. You must define the discovery servers in order to use this feature. Default `true`
 
 Specific shared configuration options for the HTTP client for final service requests
 
@@ -203,15 +168,12 @@ See all HTTP options supported for `node.js` [here](https://github.com/mikeal/re
 ##### Balancer
 
 - **enable** `boolean` - Enable/disable the smart client balancer. Default `true`
+- **roundRobin** `boolean` - Enable RobinRobin scheudle algorithm (experimental)
+- **roundRobinSize** `number` - Round robin round size. Useful to increase requests distribution across different servers. Default to `3` servers
 - **weight** `object` - Balacer point percentage weight for server scoring policy:
   - **success** `number` - Percentage weight for success request. Default to `15`
   - **error** `number` - Percentage weight for failed request. Default to `50`
   - **latency** `number` - Percentage weight for request average latency. Default to `35`
-
-<!--
-- **middleware** `function` - Balancer map middleware result (to do)
-- **policy** `string` - Balancer priority policy. Supported values are: `latency` or `errors`. Detault `errors`
--->
 
 ##### Discovery
 
@@ -360,7 +322,7 @@ Return: `object`
 
 Get a map of HTTP specific options
 
-### resilient#getServers([ type = 'servicee' ])
+### resilient#servers([ type = 'servicee' ])
 Return: `Servers`
 
 Return a the current servers list. Allowed types are: `service` and `discovery`

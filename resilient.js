@@ -241,6 +241,14 @@ Cache.prototype.time = function (key) {
   }
 }
 
+Cache.prototype.exists = function (key) {
+  var value = this.store[key]
+  return _.isObj(value)
+    && ((_.isArr(value.data) && value.data.length > 0)
+    || _.isObj(value.data))
+    || false
+}
+
 Cache.prototype.set = function (key, data) {
   if (key && data) {
     this.store[key] = { data: data, time: _.now() }
@@ -338,8 +346,7 @@ defaults.service = {
   servers: null,
   retry: 0,
   retryWait: 1000,
-  updateOnRetry: true,
-  refresh: 60 * 1000
+  discoverBeforeRetry: true
 }
 
 defaults.balancer = {
@@ -360,6 +367,7 @@ defaults.discovery = {
   retry: 0,
   retryWait: 1000,
   timeout: 2 * 1000,
+  refresh: 60 * 1000,
   parallel: true,
   cacheExpiration: 60 * 10 * 1000
 }
@@ -372,7 +380,7 @@ defaults.resilientOptions = [
   'cacheExpiration',
   'cache',
   'refresh',
-  'updateOnRetry'
+  'discoverBeforeRetry'
 ]
 
 },{}],5:[function(require,module,exports){
@@ -390,7 +398,7 @@ function DiscoveryResolver(resilient) {
   }
 
   function getServers() {
-    return getOptions().servers()
+    return resilient.servers('discovery')
   }
 
   function isUpdating() {
@@ -562,16 +570,16 @@ function DiscoveryServers(resilient) {
   function refreshCache(data) {
     if (isCacheEnabled()) {
       emit('cache', data)
-      resilient._cache.set('discovery', data)
+      resilient._cache.set('servers', data)
     }
   }
 
   function isCacheEnabled() {
-    return resilient.getOptions('discovery').cache
+    return resilient.getOptions('discovery').get('cache')
   }
 
   function getCache() {
-    return resilient._cache.get('discovery')
+    return resilient._cache.get('servers')
   }
 
   function emit(name, data) {
@@ -819,7 +827,7 @@ function Requester(resilient) {
     var retry = null
     if (options.retry) {
       retry = delayRetry(servers, options, cb)
-      if (options.updateOnRetry) {
+      if (options.discoverBeforeRetry) {
         resilient._updating = false
         Requester.DiscoveryResolver.update(resilient, retry)
       } else {
@@ -956,7 +964,7 @@ Resilient.prototype.getHttpOptions = function (type) {
   if (options) return options.http()
 }
 
-Resilient.prototype.getServers = function (type) {
+Resilient.prototype.servers = function (type) {
   var options = this.options.get(type || 'service')
   if (options) return options.servers()
 }
@@ -965,7 +973,7 @@ Resilient.prototype.discoveryServers = function (list) {
   if (_.isArr(list)) {
     this.options.get('discovery').servers(list)
   } else {
-    return this.getServers('discovery')
+    return this.servers('discovery')
   }
 }
 
@@ -1000,7 +1008,7 @@ Resilient.prototype.restoreHttpClient = function () {
 }
 
 Resilient.prototype.areServersUpdated = function () {
-  return this.getServers('service').lastUpdate() < (this.getOptions('service').get('refresh') || 0)
+  return this.servers('service').lastUpdate() < (this.getOptions('discovery').get('refresh') || 0)
 }
 
 Resilient.prototype.balancer = function (options) {
@@ -1058,20 +1066,20 @@ function Resolver(resilient, options, cb) {
   function hasServers(type) {
     var servers, valid = false
     type = type || 'service'
-    servers = resilient.getServers(type)
+    servers = resilient.servers(type)
     if (servers && servers.exists()) {
-      valid = type !== 'discovery' ? isUpToDate(servers, type) : true
+      valid = type !== 'discovery' ? isUpToDate(servers) : true
     }
     return valid
   }
 
   function isUpToDate(servers, type) {
-    var servers = resilient.getServers('discovery')
+    var updated = true
+    var servers = resilient.servers('discovery')
     if (servers && servers.exists()) {
-      return servers.lastUpdate() < (resilient.getOptions(type).get('refresh') || 0)
-    } else {
-      return true
+      updated = servers.forceUpdate() || servers.lastUpdate() < (resilient.getOptions('discovery').get('refresh') || 0)
     }
+    return updated
   }
 
   function resolver(err, res) {
@@ -1083,7 +1091,7 @@ function Resolver(resilient, options, cb) {
   }
 
   function handleResolution(res) {
-    var servers = resilient.getServers()
+    var servers = resilient.servers()
     if (res && res._cache) {
       servers = new Servers(res.data)
     } else if (!hasServers()) {
@@ -1097,6 +1105,7 @@ function Resolver(resilient, options, cb) {
 module.exports = resolver
 
 function resolver(arr, size) {
+  size = size < 2 ? 2 : size
   return RoundRobin(size, arr)[getRandom(size)][0]
 }
 
@@ -1160,8 +1169,7 @@ Server.prototype.getBalance = function (operation, options) {
   var weight = this.applyOptions(options).weight
   var total = stats.request + stats.error
   var balance = total === 0 ? 0 : round(
-    (((stats.request * 100 / total) * weight.success) +
-    ((stats.error * 100 / total) * weight.error) +
+    (calculateStatsBalance(stats, weight, total) +
     (stats.latency * weight.latency)) / 100)
   return balance
 }
@@ -1199,6 +1207,15 @@ function createStats() {
   }
 }
 
+function getWeightAvg() {
+  return (stats.request * 100 / total) * weight.success
+}
+
+function calculateStatsBalance(stats, weight, total) {
+  return ((stats.request * 100 / total) * weight.success) +
+         ((stats.error * 100 / total) * weight.error)
+}
+
 function calculateAvgLatency(latency, stats) {
   return round((latency + stats.latency) / (stats.request + stats.error))
 }
@@ -1217,6 +1234,7 @@ module.exports = Servers
 function Servers(servers) {
   this.servers = []
   this.updated = 0
+  this.force = false
   this.set(servers)
 }
 
@@ -1239,11 +1257,12 @@ Servers.prototype.find = function (url) {
 }
 
 Servers.prototype.get = function () {
-  return this.servers.slice()
+  return this.servers.slice(0)
 }
 
 Servers.prototype.set = function (servers) {
   if (_.isArr(servers)) {
+    this.force = true
     this.updated = _.now()
     this.servers = mapServers.call(this, servers)
   }
@@ -1259,6 +1278,12 @@ Servers.prototype.empty = function () {
 
 Servers.prototype.exists = function () {
   return this.servers.length > 0
+}
+
+Servers.prototype.forceUpdate = function () {
+  var force = this.force
+  if (force) this.force = false
+  return force
 }
 
 function isValidURI(uri) {
