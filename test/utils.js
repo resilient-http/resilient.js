@@ -48,6 +48,16 @@ describe('utils', function () {
     })
   })
 
+  describe('once', function () {
+    var times = 0
+    it('should execute a function once time', function () {
+      var fn = _.once(function () { times += 1 })
+      fn()
+      fn()
+      expect(times).to.be.equal(1)
+    })
+  })
+
   describe('each', function () {
     it('should be iterate an array ', function () {
       var times = 0

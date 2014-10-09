@@ -447,7 +447,7 @@ function DiscoveryResolver(resilient) {
       if (index === 2 && servers.length > 3) {
         server = server.concat(servers.slice(3))
       }
-      Requester(resilient)(new Servers(server), options, onUpdateInParallel(index, buf, cb), buf)
+      Requester(resilient)(new Servers(server), options, _.once(onUpdateInParallel(index, buf, cb)), buf)
     })
   }
 
@@ -1352,6 +1352,16 @@ _.each = function (obj, fn) {
     for (i = 0, l = obj.length; i < l; i += 1) fn(obj[i], i)
   else if (_.isObj(obj))
     for (i in obj) if (hasOwn.call(obj, i)) fn(i, obj[i])
+}
+
+_.once = function (fn) {
+  var called = false
+  return function () {
+    if (called === false) {
+      called = true
+      fn.apply(null, arguments)
+    }
+  }
 }
 
 _.extend = objIterator(extender)
