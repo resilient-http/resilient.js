@@ -508,7 +508,7 @@ function close(client) {
   if (client) {
     if (client.xhr) {
       if (client.xhr.readyState !== 4) client.xhr.abort()
-    } else {
+    } else if (typeof client.abort === 'function') {
       client.abort()
     }
   }

@@ -15,7 +15,6 @@ For more information about the **resilient**, see the [project site](http://resi
 - Smart balancer logic based on server stats (latency, errors, requests...)
 - Configurable balancer policy by weight
 - Highly configurable (timeout, retry times, cache, wait delay fallback...)
-- Server-side dynamic client configuration support (experimental)
 - Built-in support for request traffic listeners and interceptors
 - Built-in support for servers caching to improve reliability for fallback
 - Parallel servers discovering for a faster availability
@@ -23,6 +22,7 @@ For more information about the **resilient**, see the [project site](http://resi
 - Support for round robin scheduling algorithm (experimental)
 - Cross engine (node.js and browsers ES5 compliant)
 - Servers discovering based on the resilient high-level protocol
+- Server-side dynamic client configuration support (experimental)
 - Full HTTP features support (it uses [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http))
 - Lightweight library (just 6KB gzipped)
 
