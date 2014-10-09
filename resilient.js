@@ -307,7 +307,7 @@ function requester(options, cb) {
 function normalizeArgs(path, options, cb, method) {
   if (typeof options === 'function') {
     cb = options
-    options = arguments[1]
+    options = arguments[0]
   }
   options = mergeHttpOptions.call(this, options)
   if (typeof path === 'string') options.path = path
