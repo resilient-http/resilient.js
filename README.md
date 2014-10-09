@@ -4,7 +4,7 @@
 
 A browser and [node.js](http://nodejs.org) fault tolerant, balanced, configurable and full featured HTTP client for distributed and reactive systems
 
-For more information about the **resilient**, see the [project site](http://resilient-http.github.io)
+For more information about **Resilient**, see the [project site](http://resilient-http.github.io)
 
 **Note**: resilient.js is still beta
 
@@ -49,7 +49,7 @@ component install resilient-http/resilient.js
 
 Or loading the script remotely
 ```html
-<script src="//cdn.rawgit.com/resilient-http/resilient.js/0.1.1/resilient.js"></script>
+<script src="//cdn.rawgit.com/resilient-http/resilient.js/0.1.2/resilient.js"></script>
 ```
 
 ## Environments
