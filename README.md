@@ -12,18 +12,18 @@ For more information about **Resilient**, see the [project site](http://resilien
 
 - Fault tolerant, transparent server fallback
 - Client-side based balancer using a simple best availability algorithm
-- Smart balancer logic based on server stats (latency, errors, requests...)
+- Smart balancer logic based on server stats (latency, errors and succesfull requests)
 - Configurable balancer policy by weight
-- Highly configurable (timeout, retry times, cache, wait delay fallback...)
 - Built-in support for request traffic listeners and interceptors
 - Built-in support for servers caching to improve reliability for fallback
+- Highly configurable (timeout, retry loop, cache, wait delay fallback...)
 - Parallel servers discovering for a faster availability
-- Allows to define an external HTTP client to use as proxy for requests traffic
-- Support for round robin scheduling algorithm (experimental)
-- Cross engine (node.js and browsers ES5 compliant)
-- Servers discovering based on the resilient high-level protocol
+- Allows to define an custom HTTP client to it use as forward proxy
+- Cross engine (node.js and browsers. ES5 compliant)
+- Servers discovering based on the resilient high-level protocol (see [spec](https://github.com/resilient-http/spec))
 - Server-side dynamic client configuration support (experimental)
-- Full HTTP features support (it uses [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http))
+- Full HTTP features support (it uses internally [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http) for the browser)
+- Support for round robin scheduling algorithm (experimental)
 - Lightweight library (just 6KB gzipped)
 
 ## Installation
