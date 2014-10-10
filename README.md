@@ -26,7 +26,6 @@ For more information about **Resilient**, see the [project site](http://resilien
 - Full HTTP features support (it uses [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http))
 - Lightweight library (just 6KB gzipped)
 
-
 ## Installation
 
 #### Node.js
@@ -266,7 +265,7 @@ Arguments: `options<Object>`, `resilient<Resilient>`
 Fired as before a request is created
 
 You can intercept and modify the request options on the fly,
-but you must mutate it and do not lose its reference
+but you must mutate the options `object` and do not lose its reference
 
 ##### request.finish
 Arguments: `error<Error>`, `response<Object|http.IncomingMessage>`, `resilient<Resilient>`
@@ -274,7 +273,7 @@ Arguments: `error<Error>`, `response<Object|http.IncomingMessage>`, `resilient<R
 Fired as after a request was completed
 
 You can intercept and modify the error/response on the fly,
-but you must mutate it and do not lose its reference
+but you must mutate the options `object` and do not lose its reference
 
 ### resilient#send(path, options, callback)
 
