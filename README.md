@@ -14,17 +14,17 @@ For more information about **Resilient**, see the [project site](http://resilien
 - Client-side based balancer using a simple best availability algorithm
 - Smart balancer logic based on server stats (latency, errors and succesfull requests)
 - Configurable balancer policy by weight
-- Built-in support for request traffic listeners and interceptors
-- Built-in support for servers caching to improve reliability for fallback
+- Built-in support for in/out traffic interceptors
+- Built-in support for servers caching to improve reliability in fallback
 - Highly configurable (timeout, retry loop, cache, wait delay fallback...)
 - Parallel servers discovering for a faster availability
-- Allows to define an custom HTTP client to it use as forward proxy
 - Cross engine (node.js and browsers. ES5 compliant)
-- Servers discovering based on the resilient high-level protocol (see [spec](https://github.com/resilient-http/spec))
-- Server-side dynamic client configuration support (experimental)
+- Configurable alternative HTTP client to use as forward proxy (instead of using the embeded one)
+- Dynamic servers discovery (based on the resilient [specification](https://github.com/resilient-http/spec) protocol)
 - Full HTTP features support (it uses internally [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http) for the browser)
-- Support for round robin scheduling algorithm (experimental)
-- Lightweight library (just 6KB gzipped)
+- Server-side dynamic client configuration support (experimental)
+- Support round robin scheduling algorithm for traffic distribution (experimental)
+- Lightweight library (just 7KB gzipped)
 
 ## Installation
 
@@ -79,7 +79,7 @@ var Resilient = require('resilient')
 
 #### Static servers
 
-Define your server pool
+Define your servers pool
 ```js
 var servers = [
   'http://api1.server.com',
@@ -88,13 +88,13 @@ var servers = [
 ]
 ```
 
-Create a new client and set the servers
+Create a new client and set the servers to balance
 ```js
 var client = Resilient({ service: { basePath: '/api/1.0' }})
 client.setServers(servers)
 ```
 
-Perform the request (the best available server will be use)
+Perform the request (the best available server will be use automatically)
 ```js
 client.get('/users', function (err, res) {
   if (res.status === 200) {
@@ -120,7 +120,7 @@ var client = Resilient({ service: { basePath: '/api/1.0' }})
 client.discoveryServers(servers)
 ```
 
-Perform a request (and that's all)
+Perform the request (and that's all, forget about anything else)
 ```js
 client.get('/users', function (err, res) {
   if (res.status === 200) {
@@ -133,11 +133,19 @@ client.get('/users', function (err, res) {
 
 ### resilient([ options ])
 
-Creates a new `resilient` client with a custom config
+Creates a new `resilient` client with custom config
 
 ### Options
 
-The options `object` has three different blocks and levels of configuration
+The options `object` has three different first-level properties of configuration
+
+```js
+Resilient({
+  service: /* { ... } */
+  discovery: /* { ... } */
+  balancer: /* { ... } */
+})
+```
 
 ##### Service
 
