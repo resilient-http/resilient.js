@@ -391,7 +391,8 @@ Return: `Client`
 
 Returns an HTTP client-only interface.
 Useful to provide encapsulation from public usage and
-avoid resilient-specific configuration methods to be called from the public API, useful to provide a limited API version to developers
+avoid resilient-specific configuration methods to be called from the public API.
+This is a restricted API useful to provide for high-level developers
 
 ### resilient#areServersUpdated()
 Return: `boolean`
