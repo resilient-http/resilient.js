@@ -237,7 +237,7 @@ It will be an `Error` instance with the following members
 - **stack** `string` - Optional stack error trace
 - **request** `object` - Original response object (node.js only). Optional
 - **error** `Error` - Original throwed error object (node.js only). Optional
-- **xhr** ``
+- **xhr** `XMLHttpRequest` - XHR native instance (browser only)
 
 ##### Built-in error codes
 
