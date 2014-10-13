@@ -211,7 +211,7 @@ Specific shared configuration options for the HTTP client for discovering proces
 ### Request callback arguments
 
 - **error** [Error|ResilientError](#error) - Response error, if happends. Otherwise `null`
-- **response** [Object](#browser)|[http.IncomingMessage][httpMessage] - Response object
+- **response** [Object](#response)|[http.IncomingMessage][httpMessage] - Response object
 
 #### Response
 
