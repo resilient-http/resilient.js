@@ -198,7 +198,7 @@ Specific configuration for discovery servers requests, behavior and logic
 - **retryWait** `number` - Number of milisenconds to wait before retry. Default to `1000`
 - **parallel** `boolean` - Discover servers in parallel. Improve service availability and decrement delay times. Recommended. Default `true`
 
-Specific shared configuration options for the HTTP client in discovering processes
+Specific shared configuration options for the HTTP client for discovering processes
 
 - **path** `string` - Server request path as part of the final URL
 - **basePath** `string` - Server resource base path to share between all requests
