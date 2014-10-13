@@ -203,7 +203,7 @@ Specific shared configuration options for the HTTP client for discovering proces
 - **path** `string` - Server request path as part of the final URL
 - **basePath** `string` - Server resource base path to share between all requests
 - **timeout** `number` - Server discovery network timeout in miliseconds. Default `2` seconds
-- **auth** `object` - Authentication credentials required for the discovery server. Object must have the `user` and `password` properties
+- **auth** `object` - Authentication credentials required for the discovery server. Object must have both `user` and `password` properties
 - **headers** `object` - Map of strings representing HTTP headers to send to the discovery server
 - **method** `string` - Request HTTP method. Default to `GET`
 - **data** `mixed` - Optional data to send as payload to discovery servers. Default `null`
