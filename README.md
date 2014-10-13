@@ -141,9 +141,9 @@ The options `object` has three different first-level properties of configuration
 
 ```js
 Resilient({
-  service: /* { ... } */
-  discovery: /* { ... } */
-  balancer: /* { ... } */
+  service: { ... }
+  discovery: { ... }
+  balancer: { ... }
 })
 ```
 
