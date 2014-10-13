@@ -94,7 +94,7 @@ var client = Resilient({ service: { basePath: '/api/1.0' }})
 client.setServers(servers)
 ```
 
-Perform the request (the best available server will be use automatically)
+Perform the request (the best available server will be used automatically)
 ```js
 client.get('/users', function (err, res) {
   if (res.status === 200) {
@@ -103,7 +103,7 @@ client.get('/users', function (err, res) {
 })
 ```
 
-#### Dynamic servers discovering
+#### Dynamic servers discovery
 
 Define the discovery servers pool
 ```js
@@ -165,7 +165,7 @@ Specific shared configuration options for the HTTP client for final service requ
 - **data** `mixed` - Payload data to send as body request
 - **headers** `object` - Map of strings representing HTTP headers to send to the server
 - **timeout** `number` - Request maximum timeout in miliseconds before to abort it. Default to 10 seconds
-- **auth** `object` - Authentication credentials to the server. Object must have the `user` and `password` properties
+- **auth** `object` - Authentication credentials to the server. Object must have both `user` and `password` properties
 
 Browser specific options
 
