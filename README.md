@@ -473,11 +473,6 @@ Run tests (in a headless browser)
 $ make test
 ```
 
-Run tests (in real browsers)
-```bash
-$ make karma
-```
-
 ## License
 
 [MIT](http://opensource.org/licenses/MIT) © Tomas Aparicio and contributors
