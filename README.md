@@ -371,7 +371,7 @@ Restore the native `resilient` HTTP client
 
 ### resilient#mock(fakeError, fakeResponse)
 
-Define a mock/fake HTTP client with an optional fake response `object` for all requests
+Define a mock/fake HTTP client error/response `object` for all outgoing requests
 
 ```js
 resilient.mock(null, {
