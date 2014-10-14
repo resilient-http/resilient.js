@@ -369,6 +369,24 @@ Note: `error` and `response` objects must be compatible with the [current interf
 
 Restore the native `resilient` HTTP client
 
+### resilient#mock(proxyFn, mockResponse)
+
+Define a mock/fake HTTP client with an optional fake response `object` for all requests
+
+```js
+resilient.mock({
+  status: 200,
+  data: ['http://server.net'],
+  options: options
+})
+```
+
+See also the `setHttpClient()` method for custom request proxy forward, also useful for testing with stubs/fakes
+
+### resilient#unmock()
+
+Disable the mock/fake mode
+
 ### resilient#on(event, handler)
 
 Subscribe to an event. See [supported events](#events)
