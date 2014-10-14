@@ -13,6 +13,7 @@ For more information about **Resilient**, see the [project site](http://resilien
 - Fault tolerant, transparent server fallback
 - Client-side based balancer using a simple best availability algorithm
 - Smart balancer logic based on server stats (latency, errors and succesfull requests)
+- Separate servers availability stats per read and write operations when balancing
 - Configurable balancer policy by weight
 - Built-in support for in/out traffic interceptors
 - Built-in support for servers caching to improve reliability in fallback
