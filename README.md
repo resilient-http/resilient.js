@@ -164,6 +164,7 @@ Specific shared configuration options for the HTTP client for final service requ
 - **method** `string` - Request HTTP method. Default to `GET`
 - **data** `mixed` - Payload data to send as body request
 - **headers** `object` - Map of strings representing HTTP headers to send to the server
+- **params** `object` - Map of strings representing the query params
 - **timeout** `number` - Request maximum timeout in miliseconds before to abort it. Default to 10 seconds
 - **auth** `object` - Authentication credentials to the server. Object must have both `user` and `password` properties
 
@@ -204,6 +205,7 @@ Specific shared configuration options for the HTTP client for discovering proces
 - **basePath** `string` - Server resource base path to share between all requests
 - **timeout** `number` - Server discovery network timeout in miliseconds. Default `2` seconds
 - **auth** `object` - Authentication credentials required for the discovery server. Object must have both `user` and `password` properties
+- **params** `object` - Map of strings representing the query params
 - **headers** `object` - Map of strings representing HTTP headers to send to the discovery server
 - **method** `string` - Request HTTP method. Default to `GET`
 - **data** `mixed` - Optional data to send as payload to discovery servers. Default `null`
