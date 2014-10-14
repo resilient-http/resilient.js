@@ -336,7 +336,7 @@ Return: `object`
 
 Get a map of HTTP specific options
 
-### resilient#servers([ type = 'servicee' ])
+### resilient#servers([ type = 'service' ])
 Return: `Servers`
 
 Return a the current servers list. Allowed types are: `service` and `discovery`
