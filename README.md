@@ -369,12 +369,12 @@ Note: `error` and `response` objects must be compatible with the [current interf
 
 Restore the native `resilient` HTTP client
 
-### resilient#mock(proxyFn, mockResponse)
+### resilient#mock(fakeError, fakeResponse)
 
 Define a mock/fake HTTP client with an optional fake response `object` for all requests
 
 ```js
-resilient.mock({
+resilient.mock(null, {
   status: 200,
   data: ['http://server.net'],
   options: options
