@@ -138,7 +138,7 @@
   function getURL(config) {
     var url = config.url
     if (isObj(config.params)) {
-      url += '?' + encodeParams(config.params)
+      url += (url.indexOf('?') === -1 ? '?' : '&') + encodeParams(config.params)
     }
     return url
   }
