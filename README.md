@@ -25,7 +25,7 @@ For more information about **Resilient**, see the [project site](http://resilien
 - Full HTTP features support (it uses internally [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http) for the browser)
 - Server-side dynamic client configuration support (experimental)
 - Support round robin scheduling algorithm for traffic distribution (experimental)
-- Lightweight library (just 7KB gzipped)
+- Lightweight library (7KB gzipped)
 
 ## Installation
 
