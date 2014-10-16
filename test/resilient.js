@@ -93,12 +93,59 @@ describe('Resilient', function () {
       nock.cleanAll()
     })
 
-    it('should not have discovery servers configured', function (done) {
+    it('should fetch valid discovery servers', function (done) {
       resilient.discoverServers(function (err, servers) {
         expect(err).to.be.null
         expect(servers).to.be.deep.equal(['http://api'])
         done()
       })
+    })
+
+    it('should have discovery servers', function () {
+      expect(resilient.hasDiscoveryServers()).to.be.true
+    })
+  })
+
+  describe('get updated servers', function () {
+    var resilient = Resilient({
+      discovery: {
+        servers: ['http://server']
+      }
+    })
+
+    before(function () {
+      nock('http://server')
+        .filteringPath(/\?(.*)/g, '')
+        .get('/')
+        .reply(200, ['http://api'])
+    })
+
+    after(function () {
+      nock.cleanAll()
+    })
+
+    it('should fetch updated discovery servers', function (done) {
+      resilient.getUpdatedServers(function (err, servers) {
+        expect(err).to.be.null
+        expect(servers).to.be.deep.equal(['http://api'])
+        done()
+      })
+    })
+
+    it('should get servers from static config', function (done) {
+      Resilient({
+        service: {
+          servers: ['http://api']
+        }
+      }).getUpdatedServers(function (err, servers) {
+        expect(err).to.be.null
+        expect(servers).to.be.deep.equal(['http://api'])
+        done()
+      })
+    })
+
+    it('should have discovery servers', function () {
+      expect(resilient.hasDiscoveryServers()).to.be.true
     })
   })
 
@@ -278,6 +325,47 @@ describe('Resilient', function () {
 
     it('should restore to the native HTTP client', function () {
       resilient.restoreHttpClient()
+      expect(resilient._httpClient).to.be.null
+    })
+  })
+
+  describe('mock mode', function () {
+    var _err_, _res_
+
+    function mock(options, cb) {
+      if (~options.url.indexOf('http://server')) {
+        cb(null, { status: 200, data: ['http://api'] })
+      } else if (options.url === 'http://api/hello') {
+        cb(null, { status: 200, data: { hello: 'world' }})
+      }
+    }
+
+    var resilient = Resilient({
+      discovery: { servers: ['http://server'] }
+    })
+
+    resilient.mock(mock)
+
+    after(function () {
+      nock.cleanAll()
+    })
+
+    it('should perform a request a valid request', function (done) {
+      resilient.get('/hello', function (err, res) {
+        expect(err).to.be.null
+        expect(res.status).to.be.equal(200)
+        _err_ = err
+        _res_ = res
+        done()
+      })
+    })
+
+    it('should return a valid mock data', function () {
+      expect(_res_.data).to.be.deep.equal({ hello: 'world' })
+    })
+
+    it('should restore to non-mock version', function () {
+      resilient.unmock()
       expect(resilient._httpClient).to.be.null
     })
   })

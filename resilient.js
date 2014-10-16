@@ -997,6 +997,11 @@ Resilient.prototype.discoveryServers = function (list) {
   }
 }
 
+Resilient.prototype.hasDiscoveryServers = function () {
+  var servers = this.discoveryServers()
+  return _.isObj(servers) && servers.exists() || false
+}
+
 Resilient.prototype.setServers = function (list) {
   this.options.get('service').servers(list)
   return this
@@ -1004,6 +1009,17 @@ Resilient.prototype.setServers = function (list) {
 
 Resilient.prototype.discoverServers = function (cb) {
   DiscoveryResolver.fetch(this, cb)
+  return this
+}
+
+Resilient.prototype.getUpdatedServers = function (cb) {
+  if (this.discoveryServers()) {
+    this.discoverServers(cb)
+  } else if (this.servers('service')) {
+    cb(null, this.servers('service').urls())
+  } else {
+    cb(new Error('Missing servers'))
+  }
   return this
 }
 
@@ -1047,10 +1063,10 @@ Resilient.prototype.send = Resilient.prototype.request = function (path, options
   return this._client.send(path, options, cb)
 }
 
-Resilient.prototype.mock = function (err, res) {
+Resilient.prototype.mock = function (mockFn) {
   this.setHttpClient(function (options, cb) {
     _.delay(function () {
-      cb(err || null, res || { status: 200, options: options })
+      mockFn(options, cb)
     })
   })
   return this
@@ -1317,6 +1333,12 @@ Servers.prototype.forceUpdate = function () {
   var force = this.force
   if (force) this.force = false
   return force
+}
+
+Servers.prototype.urls = function () {
+  return this.servers.map(function (server) {
+    return server.url
+  })
 }
 
 function isValidURI(uri) {

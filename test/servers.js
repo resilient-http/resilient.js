@@ -25,6 +25,10 @@ describe('Servers', function () {
     })
   })
 
+  it('should get the servers URLs', function () {
+    expect(servers.urls()).to.deep.equal(list)
+  })
+
   it('should find an existent server', function () {
     expect(servers.find('http://1.server.com')).to.be.an('object')
   })

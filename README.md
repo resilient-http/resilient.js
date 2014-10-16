@@ -347,6 +347,16 @@ Return: `Servers`
 
 Setter/Getter for discovery servers list
 
+### resilient#discoverServers(cb)
+Return: `Resilient`
+
+Pass to the callback an up-to-date list of servers asking to discovery servers
+
+### resilient#getUpdatedServers(cb)
+Return: `Resilient`
+
+Pass to the callback an up-to-date list of servers, with or without discovery servers configured
+
 ### resilient#updateServers([ callback ])
 
 Force to update the servers list from discovery servers, if they are defined,
@@ -370,15 +380,19 @@ Note: `error` and `response` objects must be compatible with the [current interf
 
 Restore the native `resilient` HTTP client
 
-### resilient#mock(fakeError, fakeResponse)
+### resilient#mock(mockFn)
 
 Define a mock/fake HTTP client error/response `object` for all outgoing requests
 
 ```js
-resilient.mock(null, {
-  status: 200,
-  data: ['http://server.net'],
-  options: options
+resilient.mock(function (options, cb) {
+  if (options.url === 'http://discovery.server.me') {
+    // fake response
+    cb(null, { status: 200, data: ['http://server.net'] })
+  } else {
+    // fake unavailable status
+    cb(null, { status: 503 })
+  }
 })
 ```
 
