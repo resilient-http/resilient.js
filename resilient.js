@@ -1217,10 +1217,7 @@ Server.prototype.getBalance = function (operation, options) {
   var stats = this.getStats(operation)
   var weight = this.applyOptions(options).weight
   var total = stats.request + stats.error
-  var balance = total === 0 ? 0 : round(
-    (calculateStatsBalance(stats, weight, total) +
-    (stats.latency * weight.latency)) / 100)
-  return balance
+  return total === 0 ? 0 : calculateStatsBalance(stats, weight, total)
 }
 
 Server.prototype.getStats = function (operation, field) {
@@ -1261,8 +1258,10 @@ function getWeightAvg() {
 }
 
 function calculateStatsBalance(stats, weight, total) {
-  return ((stats.request * 100 / total) * weight.success) +
-         ((stats.error * 100 / total) * weight.error)
+  return round(
+   ((((stats.request * 100 / total) * weight.success) +
+   ((stats.error * 100 / total) * weight.error)) +
+   (stats.latency * weight.latency)) / 100)
 }
 
 function calculateAvgLatency(latency, stats) {
