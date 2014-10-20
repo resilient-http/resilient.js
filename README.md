@@ -170,13 +170,13 @@ Specific shared configuration options for the HTTP client for final service requ
 - **timeout** `number` - Request maximum timeout in miliseconds before to abort it. Default to 10 seconds
 - **auth** `object` - Authentication credentials to the server. Object must have both `user` and `password` properties
 
-Browser specific options
+**Browser specific options**
 
 - **async** `boolean` - Set to `false` if the request must be performed as synchronous operation (not recommended, browser only)
 - **withCredentials** `boolean` - Whether to set the withCredentials flag on the XHR object. See [MDN][withcredentials] for more information
 - **responseType** `string` - Define how to handle the response data. Allowed values are: `text`, `arraybuffer`, `blob` or `document`
 
-Node.js specific options
+**Node.js specific options**
 
 See all HTTP options supported for `node.js` [here](https://github.com/mikeal/request#requestoptions-callback)
 
@@ -211,6 +211,8 @@ Specific shared configuration options for the HTTP client for discovering proces
 - **headers** `object` - Map of strings representing HTTP headers to send to the discovery server
 - **method** `string` - Request HTTP method. Default to `GET`
 - **data** `mixed` - Optional data to send as payload to discovery servers. Default `null`
+
+For `node.js`, see all HTTP options supported [here](https://github.com/mikeal/request#requestoptions-callback)
 
 ### Request callback arguments
 
