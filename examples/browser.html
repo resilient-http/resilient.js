@@ -1,0 +1,21 @@
+<html>
+<head>
+  <script src="../resilient.js"></script>
+  <script>
+    <!-- setup the stubby server -->
+    var client = Resilient({
+      discovery: {
+        servers: [
+          'http://localhost:8882/discovery/timeout',
+          'http://localhost:8882/discovery/fail',
+          'http://localhost:8882/discovery/valid/1'
+        ]
+      }
+    })
+
+    client.get('/', function (err, res) {
+      console.log(res)
+    })
+  </script>
+</head>
+</html>

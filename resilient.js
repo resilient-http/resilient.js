@@ -506,7 +506,7 @@ function DiscoveryResolver(resilient) {
 Requester.DiscoveryResolver = DiscoveryResolver
 
 DiscoveryResolver.update = function (resilient, cb) {
-  resilient._updating = false
+  //resilient._updating = false
   DiscoveryResolver(resilient)
     (DiscoveryServers(resilient)
       (cb))
@@ -851,6 +851,7 @@ function Requester(resilient) {
     if (options.retry) {
       retry = delayRetry(servers, options, cb)
       if (options.discoverBeforeRetry && resilient.hasDiscoveryServers()) {
+        resilient._updating = false
         Requester.DiscoveryResolver.update(resilient, retry)
       } else {
         retry()

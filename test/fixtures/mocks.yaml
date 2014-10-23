@@ -12,12 +12,13 @@
         [
           "http://localhost:8882/server/unavailable",
           "http://localhost:8882/server/timeout",
+          "http://localhost:8882/server/fail",
           "http://localhost:8882/server/delay",
           "http://localhost:8882/server/1"
         ]
 
 - request:
-    url: ^/discovery/fail/([0-9])
+    url: ^/discovery/fail
     method:
       - GET
       - POST
@@ -26,12 +27,12 @@
       latency: 100
 
 - request:
-    url: ^/discovery/timeout/([0-9])
+    url: ^/discovery/timeout
     method:
       - GET
       - POST
   response:
-    - status: 500
+    - status: 200
       latency: 5000
 
 - request:
@@ -82,16 +83,4 @@
       body: >
         {"hello": "world"}
 
-- request:
-    url: ^/app/([0-9]+)$
-    method:
-      - GET
-      - POST
-      - DELETE
-      - PUT
-  response:
-    - status: 200
-      latency: 100
-      headers:
-        content-type: application/json
 
