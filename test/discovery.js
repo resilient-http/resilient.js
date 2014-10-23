@@ -129,6 +129,53 @@ describe('Discovery', function () {
     })
   })
 
+  describe('infinity number of retry attempts', function() {
+    var resilient = Resilient({
+      discovery: {
+        timeout: 50,
+        retry: Infinity,
+        retryWait: 50,
+        parallel: false,
+        servers: [
+          'http://unavailable/1',
+          'http://unavailable/2',
+          'http://unavailable/3'
+        ]
+      }
+    })
+
+    before(function () {
+      nock('http://unavailable')
+        .persist()
+        .filteringPath(function () { return '/' })
+        .get('/')
+        .delayConnection(10)
+        .reply(503)
+    })
+
+    after(function () {
+      nock.cleanAll()
+    })
+
+    it('should resolve with a unavailable status after max attemps', function (done) {
+      var start = Date.now()
+      var end = 450
+      resilient.get('/hello', function (err, res) {
+        expect(err.status).to.be.equal(1004)
+        expect(Date.now() - start > end).to.be.true
+        done()
+      })
+
+      setTimeout(function () {
+        nock.cleanAll()
+        nock('http://unavailable')
+          .filteringPath(function () { return '/' })
+          .get('/')
+          .reply(204)
+      }, 500)
+    })
+  })
+
   describe('timeout discovery servers parallel', function () {
     var resilient = Resilient({
       discovery: {
@@ -170,7 +217,8 @@ describe('Discovery', function () {
         expect(err).to.be.null
         expect(res.status).to.be.equal(200)
         expect(res.data).to.be.deep.equal({ hello: 'world' })
-        expect((Date.now() - start) < 100).to.be.true
+        console.log((Date.now() - start))
+        expect((Date.now() - start) > 59).to.be.true
         done()
       })
     })

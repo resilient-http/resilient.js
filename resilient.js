@@ -344,7 +344,7 @@ function wrapCallback(resilient, cb) {
 }
 
 function mergeHttpOptions(options) {
-  var defaults = this._resilient.getHttpOptions()
+  var defaults = this._resilient.getOptions('service').get()
   return _.merge(defaults, options)
 }
 
@@ -366,7 +366,8 @@ defaults.service = {
   servers: null,
   retry: 0,
   retryWait: 1000,
-  discoverBeforeRetry: true
+  discoverBeforeRetry: true,
+  promiscuousErrors: false
 }
 
 defaults.balancer = {
@@ -384,12 +385,13 @@ defaults.discovery = {
   servers: null,
   method: 'GET',
   cache: true,
-  retry: 0,
+  retry: 3,
   retryWait: 1000,
   timeout: 2 * 1000,
   refresh: 60 * 1000,
   parallel: true,
-  cacheExpiration: 60 * 10 * 1000
+  cacheExpiration: 60 * 10 * 1000,
+  promiscuousErrors: true
 }
 
 defaults.resilientOptions = [
@@ -504,6 +506,7 @@ function DiscoveryResolver(resilient) {
 Requester.DiscoveryResolver = DiscoveryResolver
 
 DiscoveryResolver.update = function (resilient, cb) {
+  resilient._updating = false
   DiscoveryResolver(resilient)
     (DiscoveryServers(resilient)
       (cb))
@@ -629,13 +632,13 @@ var MESSAGES = {
   1002: 'Missing discovery servers. Cannot resolve the server',
   1003: 'Cannot resolve servers. Missing data',
   1004: 'Discovery server response is invalid or empty',
-  1005: 'Missing discovery servers during retry process',
+  1005: 'Missing servers during retry process',
   1006: 'Internal state error'
 }
 
 function ResilientError(status, error) {
   if (error instanceof Error) {
-    Error.call(this, error)
+    Error.call(this)
     this.error = error
     if (error.code) this.code = error.code
     if (error.stack) this.stack = error.stack
@@ -834,7 +837,7 @@ function Requester(resilient) {
       var server = serversList.shift()
       if (server) {
         options.url = _.join(server.url, options.basePath, options.path)
-        sendRequest(resilient, options, requestHandler(server, operation, cb, next), buf)
+        sendRequest(resilient, options, requestHandler(server, operation, options, cb, next), buf)
       } else {
         handleMissingServers(servers, options, previousError, cb)
       }
@@ -847,8 +850,7 @@ function Requester(resilient) {
     var retry = null
     if (options.retry) {
       retry = delayRetry(servers, options, cb)
-      if (options.discoverBeforeRetry) {
-        resilient._updating = false
+      if (options.discoverBeforeRetry && resilient.hasDiscoveryServers()) {
         Requester.DiscoveryResolver.update(resilient, retry)
       } else {
         retry()
@@ -866,8 +868,7 @@ function Requester(resilient) {
 
   function retry(servers, options, cb) {
     return function () {
-      var discovery = resilient.discoveryServers()
-      if (discovery && discovery.exists()) {
+      if (servers.exists()) {
         options.retry -= 1
         request(servers, options, cb)
       } else {
@@ -876,11 +877,11 @@ function Requester(resilient) {
     }
   }
 
-  function requestHandler(server, operation, cb, next) {
+  function requestHandler(server, operation, options, cb, next) {
     var start = _.now()
     return function (err, res) {
       var latency = _.now() - start
-      if (isUnavailableStatus(err, res)) {
+      if (isErrorResponse(options, err, res)) {
         server.reportError(operation, latency)
         next(err)
       } else {
@@ -888,6 +889,10 @@ function Requester(resilient) {
         resolve(res, cb)
       }
     }
+  }
+
+  function isErrorResponse(options, err, res) {
+    return (options.promiscuousErrors && isErrorStatus(err || res)) || isUnavailableStatus(err, res)
   }
 
   function resolve(res, cb) {
@@ -909,7 +914,6 @@ function sendRequest(resilient, options, handler, buf) {
   } catch (err) {
     handler(err)
   }
-  options = buf = null
 }
 
 function getHttpClient(resilient) {
@@ -921,7 +925,15 @@ function isUnavailableStatus(err, res) {
 }
 
 function isInvalidStatus(res) {
-  return res && res.status >= 429 || res.status === 0 || false
+  return checkResponseStatus(429, res)
+}
+
+function isErrorStatus(res) {
+  return checkResponseStatus(400, res)
+}
+
+function checkResponseStatus(code, res) {
+  return res && (res.code || res.status >= code || res.status === 0) || false
 }
 
 function getOperation(method) {

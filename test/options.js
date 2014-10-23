@@ -18,7 +18,7 @@ describe('Options', function () {
   })
 
   it('should have a default retry property', function () {
-    expect(options.get('retry')).to.be.equal(0)
+    expect(options.get('retry')).to.be.equal(3)
   })
 
   it('should have a default cache', function () {

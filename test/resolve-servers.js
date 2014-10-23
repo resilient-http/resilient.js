@@ -20,6 +20,8 @@ describe('Resolve servers', function () {
         servers: [
           'http://unavailable:8888',
           'http://timeout',
+          'http://unavailable:8888',
+          'http://timeout',
           'http://valid'
         ]
       }
@@ -29,7 +31,7 @@ describe('Resolve servers', function () {
       nock('http://timeout')
         .get('/hello')
         .delayConnection(200)
-        .reply(200)
+        .reply(204)
       nock('http://valid')
         .get('/hello')
         .reply(200)
@@ -51,7 +53,7 @@ describe('Resolve servers', function () {
   describe('timeout exceeded failure', function () {
     var resilient = Resilient({
       service: {
-        timeout: 50,
+        timeout: 10,
         servers: [
           'http://timeout',
           'http://timeout',
@@ -66,7 +68,7 @@ describe('Resolve servers', function () {
         .filteringPath(function () { return '/' })
         .get('/')
         .times(4)
-        .delayConnection(100)
+        .delayConnection(50)
         .reply(503)
     })
 
@@ -144,6 +146,49 @@ describe('Resolve servers', function () {
     })
   })
 
+  describe('promiscuous error mode', function () {
+    var resilient = Resilient({
+      service: {
+        promiscuousErrors: true,
+        servers: [
+          'http://not-found',
+          'http://bad-request',
+          'http://forbidden',
+          'http://valid'
+        ]
+      }
+    })
+
+    before(function () {
+      nock('http://not-found')
+        .get('/hello')
+        .times(2)
+        .reply(404)
+      nock('http://bad-request')
+        .get('/hello')
+        .times(2)
+        .reply(400)
+      nock('http://forbidden')
+        .get('/hello')
+        .reply(403)
+      nock('http://valid')
+        .get('/hello')
+        .reply(200)
+    })
+
+    after(function () {
+      nock.cleanAll()
+    })
+
+    it('should resolve with valid status', function (done) {
+      resilient.get('/hello', function (err, res) {
+        expect(err).to.be.null
+        expect(res.status).to.be.equal(200)
+        done()
+      })
+    })
+  })
+
   describe('unavailable servers by timeout and status code', function () {
     var resilient = Resilient({
       service: {
@@ -173,12 +218,56 @@ describe('Resolve servers', function () {
       nock.cleanAll()
     })
 
-    it('should resolve with a error timeout status', function (done) {
+    it('should resolve with an error timeout status', function (done) {
       resilient.get('/hello', function (err, res) {
         expect(err.status).to.be.equal(1000)
         expect(res).to.be.undefined
         done()
       })
+    })
+  })
+
+  describe('infinity number of servers retry attemps', function () {
+    var resilient = Resilient({
+      service: {
+        timeout: 50,
+        retry: Infinity,
+        retryWait: 10,
+        servers: [
+          'http://unavailable',
+          'http://unavailable',
+          'http://unavailable'
+        ]
+      }
+    })
+
+    before(function () {
+      nock('http://unavailable')
+        .persist()
+        .get('/hello')
+        .delayConnection(10)
+        .reply(503)
+    })
+
+    after(function () {
+      nock.cleanAll()
+    })
+
+    it('should retry until max timeout exceeds', function (done) {
+      var start = Date.now()
+      var end = 450
+      resilient.get('/hello', function (err, res) {
+        expect(res.status).to.be.equal(204)
+        expect(Date.now() - start > end).to.be.true
+        done()
+      })
+
+      setTimeout(function () {
+        nock.cleanAll()
+        nock('http://unavailable')
+          .get('/hello')
+          .reply(204)
+      }, 500)
     })
   })
 
