@@ -1024,7 +1024,7 @@ Resilient.prototype.discoverServers = function (cb) {
   return this
 }
 
-Resilient.prototype.getUpdatedServers = function (cb) {
+Resilient.prototype.getUpdatedServers = Resilient.prototype.getLatestServers = function (cb) {
   if (this.discoveryServers()) {
     this.discoverServers(cb)
   } else if (this.servers('service')) {
