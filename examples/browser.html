@@ -3,17 +3,28 @@
   <script src="../resilient.js"></script>
   <script>
     <!-- setup the stubby server -->
-    var client = Resilient({
+    var client = resilient({
+      service: {
+        timeout: 200
+      },
       discovery: {
+        timeout: 200,
+        retry: 3,
+        //parallel: false,
         servers: [
+          'http://localhost:8882/discovery/fail',
+          'http://localhost:8882/discovery/timeout',
           'http://localhost:8882/discovery/timeout',
           'http://localhost:8882/discovery/fail',
-          'http://localhost:8882/discovery/valid/1'
+          'http://localhost:8882/discovery/timeout',
+          'http://localhost:8882/discovery/valid/1',
+          'http://localhost:8882/discovery/valid/2'
         ]
       }
     })
 
     client.get('/', function (err, res) {
+      console.log(err)
       console.log(res)
     })
   </script>

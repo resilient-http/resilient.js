@@ -318,7 +318,7 @@ Client.prototype.head = function (path, options, cb) {
 
 function requester(options, cb) {
   if (isFullUrl(options)) {
-    return plainHttp(options, cb)
+    return plainHttpRequest(options, cb)
   } else {
     return resolver(this._resilient, options, cb)
   }
@@ -352,7 +352,7 @@ function isFullUrl(options) {
   return options && (_.isURI(options.path) || _.isURI(options.url)) || false
 }
 
-function plainHttp(options, cb) {
+function plainHttpRequest(options, cb) {
   options.url = options.path
   return http.call(null, options, cb)
 }
@@ -415,6 +415,7 @@ var DiscoveryServers = require('./discovery-servers')
 module.exports = DiscoveryResolver
 
 function DiscoveryResolver(resilient) {
+
   function getOptions() {
     return resilient.getOptions('discovery')
   }
@@ -469,14 +470,14 @@ function DiscoveryResolver(resilient) {
       if (index === 2 && servers.length > 3) {
         server = server.concat(servers.slice(3))
       }
-      Requester(resilient)(new Servers(server), options, _.once(onUpdateInParallel(index, buf, cb)), buf)
+      Requester(resilient)(new Servers(server), options, onUpdateInParallel(index, buf, cb), buf)
     })
   }
 
   function onUpdateInParallel(index, buf, cb) {
     return function (err, res) {
       if (err) buf[index] = null
-      if (res || isEmptyBuffer(buf)) {
+      if (res || index === 2) {
         onUpdateServers(cb, buf)(err, res)
       }
     }
@@ -484,20 +485,27 @@ function DiscoveryResolver(resilient) {
 
   function onUpdateServers(cb, buf) {
     return function (err, res) {
-      resilient._updating = false
-      resilient._queue.forEach(function (cb) { cb(err, res) })
-      resilient._queue.splice(0)
-      if (buf) closePendingRequests(buf)
-      if (err) cb(err)
-      else cb(null, res)
+      dispatchQueue(err, res)
+      closePendingRequests(buf)
+      cb(err || null, res)
     }
   }
 
+  function dispatchQueue(err, res) {
+    resilient._updating = false
+    resilient._queue.forEach(function (cb) { cb(err, res) })
+    resilient._queue.splice(0)
+  }
+
   function closePendingRequests(buf) {
-    buf.forEach(function (client) {
-      try { close(client) } catch (e) {}
-    })
-    buf.splice(0)
+    if (buf) {
+      if (!isEmptyBuffer(buf)) {
+        buf.forEach(function (client) {
+          try { close(client) } catch (e) {}
+        })
+      }
+      buf.splice(0)
+    }
   }
 
   return resolver
@@ -506,7 +514,6 @@ function DiscoveryResolver(resilient) {
 Requester.DiscoveryResolver = DiscoveryResolver
 
 DiscoveryResolver.update = function (resilient, cb) {
-  //resilient._updating = false
   DiscoveryResolver(resilient)
     (DiscoveryServers(resilient)
       (cb))
@@ -1338,7 +1345,11 @@ Servers.prototype.empty = function () {
 }
 
 Servers.prototype.exists = function () {
-  return this.servers.length > 0
+  return this.size() > 0
+}
+
+Servers.prototype.size = function () {
+  return this.servers.length
 }
 
 Servers.prototype.forceUpdate = function () {

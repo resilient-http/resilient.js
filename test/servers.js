@@ -17,6 +17,10 @@ describe('Servers', function () {
     expect(servers.servers[0]).to.be.an('object')
   })
 
+  it('should have a valid number of servers', function () {
+    expect(servers.size()).to.be.equal(3)
+  })
+
   it('should define servers with custom stats', function () {
     servers.servers.forEach(function (server, index) {
       server.stats.read.request = stats[index][0]
