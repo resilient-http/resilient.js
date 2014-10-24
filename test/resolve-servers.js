@@ -68,7 +68,7 @@ describe('Resolve servers', function () {
         .filteringPath(function () { return '/' })
         .get('/')
         .times(4)
-        .delayConnection(50)
+        .delayConnection(200)
         .reply(503)
     })
 

@@ -12,13 +12,16 @@
         retry: 3,
         //parallel: false,
         servers: [
-          'http://localhost:8882/discovery/fail',
+          'http://localhost:8882/discovery/not-found',
+          'http://localhost:8882/discovery/bad-request',
+          'http://localhost:8882/discovery/forbidden',
+          /*'http://localhost:8882/discovery/fail',
           'http://localhost:8882/discovery/timeout',
           'http://localhost:8882/discovery/timeout',
           'http://localhost:8882/discovery/fail',
           'http://localhost:8882/discovery/timeout',
           'http://localhost:8882/discovery/valid/1',
-          'http://localhost:8882/discovery/valid/2'
+          'http://localhost:8882/discovery/valid/2'*/
         ]
       }
     })

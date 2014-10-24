@@ -36,6 +36,33 @@
       latency: 10000
 
 - request:
+    url: ^/discovery/not-found
+    method:
+      - GET
+      - POST
+  response:
+    - status: 404
+      latency: 50
+
+- request:
+    url: ^/discovery/bad-request
+    method:
+      - GET
+      - POST
+  response:
+    - status: 400
+      latency: 50
+
+- request:
+    url: ^/discovery/forbidden
+    method:
+      - GET
+      - POST
+  response:
+    - status: 403
+      latency: 50
+
+- request:
     url: ^/server/unavailable
     method:
       - GET

@@ -217,8 +217,45 @@ describe('Discovery', function () {
         expect(err).to.be.null
         expect(res.status).to.be.equal(200)
         expect(res.data).to.be.deep.equal({ hello: 'world' })
-        console.log((Date.now() - start))
         expect((Date.now() - start) > 59).to.be.true
+        done()
+      })
+    })
+  })
+
+  describe('promiscuous error mode', function () {
+    var resilient = Resilient({
+      discovery: {
+        retry: 3,
+        retryWait: 50,
+        servers: [
+          'http://not-found',
+          'http://bad-request',
+          'http://forbidden'
+        ]
+      }
+    })
+
+    before(function () {
+      nock('http://not-found')
+        .get('/hello')
+        .reply(404)
+      nock('http://bad-request')
+        .get('/hello')
+        .reply(400)
+      nock('http://forbidden')
+        .get('/hello')
+        .reply(403)
+    })
+
+    after(function () {
+      nock.cleanAll()
+    })
+
+    it('should not resolve with valid status', function (done) {
+      resilient.get('/hello', function (err, res) {
+        expect(err.status).to.be.equal(1000)
+        expect(res).to.be.undefined
         done()
       })
     })
