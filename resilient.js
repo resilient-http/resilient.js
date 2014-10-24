@@ -417,7 +417,7 @@ module.exports = DiscoveryResolver
 function DiscoveryResolver(resilient) {
 
   function getOptions() {
-    return resilient.getOptions('discovery')
+    return resilient.getOptions('discovery').get()
   }
 
   function getServers() {
@@ -434,28 +434,28 @@ function DiscoveryResolver(resilient) {
   }
 
   function resolver(cb) {
-    var options = getOptions().get()
     if (!hasDiscoveryServers()) {
       cb(new ResilientError(1002))
     } else if (isUpdating()) {
       resilient._queue.push(cb)
     } else {
-      updateServers(options, cb)
+      updateServers(cb)
     }
   }
 
-  function updateServers(options, cb) {
+  function updateServers(cb) {
     try {
-      fetchServers(options, cb)
+      fetchServers(cb)
     } catch (err) {
       resilient._updating = false
       cb(new ResilientError(1006, err))
     }
   }
 
-  function fetchServers(options, cb) {
-    resilient._updating = true
+  function fetchServers(cb) {
+    var options = getOptions()
     options.path = addTimeStamp(options.path)
+    resilient._updating = true
     if (options.parallel) {
       updateServersInParallel(options, cb)
     } else {
@@ -520,11 +520,12 @@ DiscoveryResolver.update = function (resilient, cb) {
 }
 
 DiscoveryResolver.fetch = function (resilient, cb) {
-  DiscoveryResolver(resilient)(function (err, res) {
-    if (err) cb(err)
-    else if (res && _.isArr(res.data)) cb(null, res.data)
-    else cb(new ResilientError(1001, res))
-  })
+  DiscoveryResolver(resilient)
+    (function (err, res) {
+      if (err) cb(err)
+      else if (res && _.isArr(res.data)) cb(null, res.data)
+      else cb(new ResilientError(1001, res))
+    })
 }
 
 function addTimeStamp(path) {
@@ -1027,8 +1028,9 @@ Resilient.prototype.setServers = function (list) {
   return this
 }
 
-Resilient.prototype.discoverServers = function (cb) {
-  DiscoveryResolver.fetch(this, cb)
+Resilient.prototype.discoverServers = function (options, cb) {
+  cb = typeof options === 'function' ? options : cb
+  DiscoveryResolver.fetch(this, options, cb)
   return this
 }
 
