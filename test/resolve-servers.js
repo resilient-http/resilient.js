@@ -50,7 +50,7 @@ describe('Resolve servers', function () {
     })
   })
 
-  describe('timeout exceeded failure', function () {
+  describe('timeout exceeded total failure', function () {
     var resilient = Resilient({
       service: {
         timeout: 10,
