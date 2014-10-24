@@ -254,7 +254,7 @@ It will be an `Error` instance with the following members
 - **1002** - Missing discovery servers. Cannot resolve the server
 - **1003** - Cannot resolve servers. Missing data
 - **1004** - Discovery server response is invalid or empty
-- **1005** - Missing discovery servers during retry process
+- **1005** - Missing servers during retry process
 - **1006** - Internal state error (usually caused by an unexpected exception)
 
 #### Events
