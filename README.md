@@ -158,7 +158,7 @@ Resilient is a resource-oriented HTTP client, which could be ideal for RESTful W
 - **retry** `number` - Number of times to retry if all requests failed. Use `Infinity` for infinitive attemps. Default `0`
 - **retryWait** `number` - Number of milisenconds to wait before retry attempt. Default to `1000`
 - **discoverBeforeRetry** `boolean` - Force to refresh service servers list from asking for discovery servers on each retry attempt. You must define the discovery servers in order to use this feature. Default `true`
-- **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be handled as failed requests and Resilient will treat it as unavailable error response, retrying the request until it has valid status (if `retry` option is configured). Default `false`
+- **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be handled as failed requests and Resilient will treat it as unavailable error response, retrying the request until it has valid status (if `retry` option was configured). Default `false`
 
 Specific shared configuration options for the HTTP client for final service requests
 
@@ -201,7 +201,7 @@ Specific configuration for discovery servers requests, behavior and logic
 - **retry** `number` - Number of times to retry if all requests failed. Use `Infinity` for infinitive attemps. Default `3`
 - **retryWait** `number` - Number of milisenconds to wait before retry attempt. Default to `1000`
 - **parallel** `boolean` - Discover servers in parallel. Improve service availability and decrement delay times. Recommended. Default `true`
-- **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be handled as failed requests and Resilient will treat it as unavailable error response, retrying the request until it has valid status (if `retry` option is configured). Default `false`
+- **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be handled as failed requests and Resilient will treat it as unavailable error response, retrying the request until it has valid status (if `retry` option was configured). Default `false`
 
 Specific shared configuration options for the HTTP client for discovering processes
 
