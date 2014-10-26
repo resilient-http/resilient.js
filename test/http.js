@@ -14,6 +14,7 @@ describe('HTTP', function () {
       http('http://server/hello', function (err, res) {
         expect(err).to.be.null
         expect(res.status).to.be.equal(200)
+        expect(res.headers['content-type']).to.be.equal('application/json')
         expect(res.data).to.be.deep.equal({ hello: 'world' })
         done()
       })
@@ -31,6 +32,7 @@ describe('HTTP', function () {
       http({ url: 'http://server/hello', method: 'POST' }, function (err, res) {
         expect(err).to.be.null
         expect(res.status).to.be.equal(200)
+        expect(res.headers['content-type']).to.be.equal('application/json')
         expect(res.data).to.be.deep.equal({ hello: 'world' })
         done()
       })
@@ -48,6 +50,7 @@ describe('HTTP', function () {
       http({ url: 'http://server/hello', method: 'PUT' }, function (err, res) {
         expect(err).to.be.null
         expect(res.status).to.be.equal(200)
+        expect(res.headers['content-type']).to.be.equal('application/json')
         expect(res.data).to.be.deep.equal({ hello: 'world' })
         done()
       })
@@ -65,6 +68,7 @@ describe('HTTP', function () {
       http({ url: 'http://server/hello', method: 'DELETE' }, function (err, res) {
         expect(err).to.be.null
         expect(res.status).to.be.equal(200)
+        expect(res.headers['content-type']).to.be.equal('application/json')
         expect(res.data).to.be.deep.equal({ hello: 'world' })
         done()
       })
@@ -82,6 +86,7 @@ describe('HTTP', function () {
       http({ url: 'http://server/hello', method: 'PATCH' }, function (err, res) {
         expect(err).to.be.null
         expect(res.status).to.be.equal(200)
+        expect(res.headers['content-type']).to.be.equal('application/json')
         expect(res.data).to.be.deep.equal({ hello: 'world' })
         done()
       })
@@ -99,6 +104,7 @@ describe('HTTP', function () {
       http({ url: 'http://server/hello', method: 'HEAD' }, function (err, res) {
         expect(err).to.be.null
         expect(res.status).to.be.equal(200)
+        expect(res.headers['content-type']).to.be.equal('application/json')
         expect(res.data).to.be.deep.equal({ hello: 'world' })
         done()
       })
