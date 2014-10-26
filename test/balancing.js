@@ -3,7 +3,7 @@ var nock = require('nock')
 var Resilient = require('../')
 
 describe('Servers sorting', function () {
-  describe('balancer by best available server', function () {
+  describe('balance by best available server', function () {
     var resilient = Resilient({
       service: {
         timeout: 100,
