@@ -203,9 +203,12 @@ Specific configuration for discovery servers requests, behavior and logic
 - **retryWait** `number` - Number of milisenconds to wait before retry attempt. Default to `1000`
 - **parallel** `boolean` - Discover servers in parallel. Improve service availability and decrement delay times. Recommended. Default `true`
 - **refresh** `number` - Servers list refresh interval in miliseconds. Default to `60000`
+- **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be treated as failed requests and Resilient will treat it as unavailable error response, retrying the request until it has valid status (if `retry` option was configured). Default `false`
+
+<!--
 - **refreshServers** `boolean` - Enable automatically update discovery servers list asking for them selves. Default to `true`
 - **refreshServersInterval** `boolean` - Discovery servers list refresh interval in miliseconds. Default to `180000`
-- **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be treated as failed requests and Resilient will treat it as unavailable error response, retrying the request until it has valid status (if `retry` option was configured). Default `false`
+-->
 
 Specific shared configuration options for the HTTP client for discovering processes
 
