@@ -628,9 +628,18 @@ function resolveWithError(err, cb) {
 }
 
 function isValidResponse(res) {
-  return (res
-    && _.isArr(res.data)
-    && res.data.length > 0) || false
+  var valid = false
+  if (res) {
+    if (_.isArr(res.data) && res.data.length) {
+      valid = true
+    } else if (typeof res.data === 'string') {
+      try {
+        res.data = JSON.parse(res.data)
+        valid = true
+      } catch (e) {}
+    }
+  }
+  return valid
 }
 
 },{"./error":7,"./utils":17}],7:[function(require,module,exports){
@@ -1151,8 +1160,7 @@ function Resolver(resilient, options, cb) {
     var updated = true
     var servers = resilient.servers('discovery')
     if (servers && servers.exists()) {
-      // change 'refresh' interval to service
-      updated = servers.forceUpdate() || servers.lastUpdate() < (resilient.getOptions('discovery').get('refresh') || 0)
+      updated = servers.forceUpdate() || servers.lastUpdate() < resilient.getOptions('discovery').get('refresh')
     }
     return updated
   }

@@ -53,7 +53,7 @@ describe('Resolve servers', function () {
   describe('timeout exceeded total failure', function () {
     var resilient = Resilient({
       service: {
-        timeout: 10,
+        timeout: 20,
         servers: [
           'http://timeout',
           'http://timeout',
@@ -68,7 +68,7 @@ describe('Resolve servers', function () {
         .filteringPath(function () { return '/' })
         .get('/')
         .times(4)
-        .delayConnection(200)
+        .delayConnection(500)
         .reply(503)
     })
 
