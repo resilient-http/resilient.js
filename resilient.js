@@ -389,6 +389,8 @@ defaults.discovery = {
   retryWait: 1000,
   timeout: 2 * 1000,
   refresh: 60 * 1000,
+  refreshServers: false,
+  refreshServersInterval: 180 * 1000,
   parallel: true,
   cacheExpiration: 60 * 10 * 1000,
   promiscuousErrors: true
@@ -402,6 +404,8 @@ defaults.resilientOptions = [
   'cacheExpiration',
   'cache',
   'refresh',
+  'refreshServers',
+  'refreshServersInterval',
   'discoverBeforeRetry'
 ]
 
@@ -454,7 +458,7 @@ function DiscoveryResolver(resilient) {
 
   function fetchServers(cb) {
     var options = getOptions()
-    options.path = addTimeStamp(options.path)
+    options.params = addTimeStamp(options)
     resilient._updating = true
     if (options.parallel) {
       updateServersInParallel(options, cb)
@@ -528,11 +532,9 @@ DiscoveryResolver.fetch = function (resilient, cb) {
     })
 }
 
-function addTimeStamp(path) {
-  path = path || ''
-  path += path.indexOf('?') === -1 ? '?' : '&'
-  path += _.now() + Math.floor(Math.random() * 10000)
-  return path
+function addTimeStamp(options) {
+  var time = _.now() + Math.floor(Math.random() * 10000)
+  return _.extend(options.params || options.qs || {}, { _time: time })
 }
 
 function close(client) {
@@ -685,6 +687,7 @@ function requestWrapper(request) {
   return function (options, cb) {
     if (typeof options === 'string') options = { url: options }
     options = setUserAgent(options)
+    if (options.params) options.qs = options.params
     if (options.data) options.body = options.data
     return request.call(null, options, mapResponse(cb))
   }
@@ -1139,15 +1142,16 @@ function Resolver(resilient, options, cb) {
     type = type || 'service'
     servers = resilient.servers(type)
     if (servers && servers.exists()) {
-      valid = type !== 'discovery' ? isUpToDate(servers) : true
+      valid = type !== 'discovery' ? areUpToDate(servers, type) : true
     }
     return valid
   }
 
-  function isUpToDate(servers, type) {
+  function areUpToDate(servers, type) {
     var updated = true
     var servers = resilient.servers('discovery')
     if (servers && servers.exists()) {
+      // change 'refresh' interval to service
       updated = servers.forceUpdate() || servers.lastUpdate() < (resilient.getOptions('discovery').get('refresh') || 0)
     }
     return updated
