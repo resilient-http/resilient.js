@@ -2,9 +2,9 @@
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-A browser and [node.js](http://nodejs.org) fault tolerant, dynamic server discovery, balanced, configurable and full featured HTTP client for distributed and reactive systems
+A browser and [node.js](http://nodejs.org) fault tolerant, dynamic servers auto discovery, balanced, configurable and full featured HTTP client for distributed and reactive system architectures
 
-For more information about **Resilient**, see the [project site](http://resilient-http.github.io)
+For more information about **Resilient**, see the [project site](http://resilient-http.github.io) and the [request flow algorithm](#how-it-works)
 
 **Note**: resilient.js is still beta
 
@@ -12,8 +12,8 @@ For more information about **Resilient**, see the [project site](http://resilien
 
 - Fault tolerant, transparent server fallback
 - Client-side based balancer using a simple best availability algorithm
-- Smart balancer logic based on server stats (latency, errors and succesfull requests)
-- Isolate servers availability stats per read and write operations when balancing
+- Smart balancer logic based on server score (network latency, errors and succesfull requests)
+- Discern servers availability score calculus per read and write operations when balancing
 - Configurable balancer policy by weight
 - Built-in support for in/out traffic interceptors
 - Built-in support for servers caching to improve reliability in fallback
