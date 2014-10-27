@@ -356,7 +356,7 @@ Return: `Servers`
 
 Setter/Getter for discovery servers list
 
-### resilient#discoverServers(cb)
+### resilient#discoverServers([ options, ] cb)
 Return: `Resilient`
 
 Pass to the callback an up-to-date list of servers asking to discovery servers
@@ -366,7 +366,7 @@ Return: `Resilient` Alias: `getLatestServers`
 
 Pass to the callback an up-to-date list of servers, with or without discovery servers configured
 
-### resilient#updateServers([ callback ])
+### resilient#updateServers([ options, callback ])
 
 Force to update the servers list from discovery servers, if they are defined,
 optionally passing a callback to handle the result

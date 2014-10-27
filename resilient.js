@@ -418,10 +418,10 @@ var DiscoveryServers = require('./discovery-servers')
 
 module.exports = DiscoveryResolver
 
-function DiscoveryResolver(resilient) {
+function DiscoveryResolver(resilient, options) {
 
   function getOptions() {
-    return resilient.getOptions('discovery').get()
+    return _.merge(resilient.getOptions('discovery').get(), options)
   }
 
   function getServers() {
@@ -517,14 +517,14 @@ function DiscoveryResolver(resilient) {
 
 Requester.DiscoveryResolver = DiscoveryResolver
 
-DiscoveryResolver.update = function (resilient, cb) {
-  DiscoveryResolver(resilient)
+DiscoveryResolver.update = function (resilient, options, cb) {
+  DiscoveryResolver(resilient, options)
     (DiscoveryServers(resilient)
       (cb))
 }
 
-DiscoveryResolver.fetch = function (resilient, cb) {
-  DiscoveryResolver(resilient)
+DiscoveryResolver.fetch = function (resilient, options, cb) {
+  DiscoveryResolver(resilient, options)
     (function (err, res) {
       if (err) cb(err)
       else if (res && _.isArr(res.data)) cb(null, res.data)
@@ -872,7 +872,7 @@ function Requester(resilient) {
       retry = delayRetry(servers, options, cb)
       if (options.discoverBeforeRetry && resilient.hasDiscoveryServers()) {
         resilient._updating = false
-        Requester.DiscoveryResolver.update(resilient, retry)
+        Requester.DiscoveryResolver.update(resilient, null, retry)
       } else {
         retry()
       }
@@ -1041,9 +1041,7 @@ Resilient.prototype.setServers = function (list) {
 }
 
 Resilient.prototype.discoverServers = function (options, cb) {
-  cb = typeof options === 'function' ? options : cb
-  DiscoveryResolver.fetch(this, options, cb)
-  return this
+  return updateServers.call(this, 'fetch', options, cb)
 }
 
 Resilient.prototype.getUpdatedServers = Resilient.prototype.getLatestServers = function (cb) {
@@ -1057,9 +1055,8 @@ Resilient.prototype.getUpdatedServers = Resilient.prototype.getLatestServers = f
   return this
 }
 
-Resilient.prototype.updateServers = function (cb) {
-  DiscoveryResolver.update(this, cb || _.noop)
-  return this
+Resilient.prototype.updateServers = function (options, cb) {
+  return updateServers.call(this, 'update', options, cb)
 }
 
 Resilient.prototype.flushCache = function () {
@@ -1118,6 +1115,15 @@ function defineMethodProxy(verb) {
   }
 }
 
+function updateServers(method, options, cb) {
+  if (typeof options === 'function') {
+    cb = options
+    options = arguments[2]
+  }
+  DiscoveryResolver[method](this, options, cb || _.noop)
+  return this
+}
+
 },{"./cache":2,"./client":3,"./discovery-resolver":5,"./options":10,"./utils":17,"lil-event":19}],13:[function(require,module,exports){
 var _ = require('./utils')
 var ResilientError = require('./error')
@@ -1139,7 +1145,7 @@ function Resolver(resilient, options, cb) {
       next()
     } else {
       if (hasServers('discovery')) {
-        DiscoveryResolver.update(resilient, next)
+        DiscoveryResolver.update(resilient, null, next)
       } else {
         next(new ResilientError(1002))
       }

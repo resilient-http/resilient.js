@@ -66,8 +66,8 @@ describe('Resolve servers', function () {
     before(function () {
       nock('http://timeout')
         .filteringPath(function () { return '/' })
+        .persist(4)
         .get('/')
-        .times(4)
         .delayConnection(500)
         .reply(503)
     })
