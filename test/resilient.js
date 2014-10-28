@@ -238,14 +238,14 @@ describe('Resilient', function () {
     })
 
     it('should subscribe to request start event and change request path', function () {
-      resilient.on('request.start', function (opts) {
+      resilient.on('request:start', function (opts) {
         opts.path = '/chuck'
         options = opts
       })
     })
 
     it('should subscribe to request finish event', function () {
-      resilient.on('request.finish', function (err, res) {
+      resilient.on('request:finish', function (err, res) {
         eventResponse = res
       })
     })

@@ -288,7 +288,7 @@ function Client(resilient) {
 
 Client.prototype.send = function (path, options, cb, method) {
   var args = normalizeArgs.call(this, path, options, cb, method)
-  this._resilient.emit('request.start', args[0], this._resilient)
+  this._resilient.emit('request:start', args[0], this._resilient)
   requester.apply(this, args)
 }
 
@@ -338,7 +338,7 @@ function normalizeArgs(path, options, cb, method) {
 
 function wrapCallback(resilient, cb) {
   return function (err, res) {
-    resilient.emit('request.finish', err, res, resilient)
+    resilient.emit('request:finish', err, res, resilient)
     cb(err, res)
   }
 }
@@ -614,7 +614,7 @@ function DiscoveryServers(resilient) {
   }
 
   function emit(name, data) {
-    resilient.emit('discovery.' + name, data, resilient)
+    resilient.emit('discovery:' + name, data, resilient)
   }
 
   return defineServers
