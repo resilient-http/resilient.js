@@ -276,17 +276,17 @@ This could be useful really useful while using an interceptor pattern in order t
 You can intercept and change any request configuration and response subscribing to the pre/post hooks.
 Note that mutation is required, you should modify it by reference and do not lose it
 
-##### discovery.refresh
+##### discovery:refresh
 Arguments: `servers<Array>`, `resilient<Resilient>`
 
 Fired every time that servers are updated from discovery servers
 
-##### discovery.cache
+##### discovery:cache
 Arguments: `servers<Array>`, `resilient<Resilient>`
 
 Fired every time that servers cache is updated
 
-##### request.start
+##### request:start
 Arguments: `options<Object>`, `resilient<Resilient>`
 
 Fired as before a request is created
@@ -294,7 +294,7 @@ Fired as before a request is created
 You can intercept and modify the request options on the fly,
 but you must mutate the options `object` and do not lose its reference
 
-##### request.finish
+##### request:finish
 Arguments: `error<Error>`, `response<Object|http.IncomingMessage>`, `resilient<Resilient>`
 
 Fired as after a request was completed
