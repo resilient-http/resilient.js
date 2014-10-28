@@ -106,6 +106,37 @@ describe('Resilient', function () {
     })
   })
 
+  describe('force discover servers with custom options', function () {
+    var resilient = Resilient({
+      discovery: {
+        servers: ['http://server']
+      }
+    })
+
+    before(function () {
+      nock('http://server')
+        .filteringPath(/\?(.*)/g, '')
+        .post('/discovery')
+        .reply(200, ['http://api'])
+    })
+
+    after(function () {
+      nock.cleanAll()
+    })
+
+    it('should fetch valid discovery servers', function (done) {
+      resilient.discoverServers({ basePath: '/discovery', method: 'POST' }, function (err, servers) {
+        expect(err).to.be.null
+        expect(servers).to.be.deep.equal(['http://api'])
+        done()
+      })
+    })
+
+    it('should have discovery servers', function () {
+      expect(resilient.hasDiscoveryServers()).to.be.true
+    })
+  })
+
   describe('get updated servers', function () {
     var resilient = Resilient({
       discovery: {

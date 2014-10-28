@@ -238,6 +238,9 @@ describe('Discovery', function () {
         .get('/')
         .delayConnection(10)
         .reply(200, ['http://server'], { 'Content-Type': 'text/plain'})
+      nock('http://server')
+        .get('/hello')
+        .reply(200, { hello: 'world' })
     })
 
     after(function () {
@@ -245,9 +248,16 @@ describe('Discovery', function () {
     })
 
     it('should not resolve with valid status', function (done) {
-      resilient.discoverServers(function (err, res) {
-        expect(res.data).to.be.deep.equal(['http://server'])
+      resilient.discoverServers(function (err, servers) {
+        expect(JSON.parse(servers)).to.be.deep.equal(['http://server'])
         done()
+      })
+    })
+
+    it('should perform find the server', function () {
+      resilient.get('/hello', function (err, res) {
+        expect(res.status).to.be.equal(200)
+        expect(res.data).to.be.deep.equal({ hello: 'world' })
       })
     })
   })
@@ -267,13 +277,19 @@ describe('Discovery', function () {
 
     before(function () {
       nock('http://not-found')
-        .get('/hello')
+        .persist()
+        .filteringPath(function () { return '/' })
+        .get('/')
         .reply(404)
       nock('http://bad-request')
-        .get('/hello')
+        .persist()
+        .filteringPath(function () { return '/' })
+        .get('/')
         .reply(400)
       nock('http://forbidden')
-        .get('/hello')
+        .persist()
+        .filteringPath(function () { return '/' })
+        .get('/')
         .reply(403)
     })
 

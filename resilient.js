@@ -419,7 +419,6 @@ var DiscoveryServers = require('./discovery-servers')
 module.exports = DiscoveryResolver
 
 function DiscoveryResolver(resilient, options) {
-
   function getOptions() {
     return _.merge(resilient.getOptions('discovery').get(), options)
   }
@@ -438,7 +437,7 @@ function DiscoveryResolver(resilient, options) {
   }
 
   function resolver(cb) {
-    if (!hasDiscoveryServers()) {
+    if (hasDiscoveryServers() === false) {
       cb(new ResilientError(1002))
     } else if (isUpdating()) {
       resilient._queue.push(cb)
@@ -524,12 +523,11 @@ DiscoveryResolver.update = function (resilient, options, cb) {
 }
 
 DiscoveryResolver.fetch = function (resilient, options, cb) {
-  DiscoveryResolver(resilient, options)
-    (function (err, res) {
-      if (err) cb(err)
-      else if (res && _.isArr(res.data)) cb(null, res.data)
-      else cb(new ResilientError(1001, res))
-    })
+  DiscoveryResolver(resilient, options)(function (err, res) {
+    if (err) cb(err)
+    else if (res && res.data) cb(null, res.data)
+    else cb(new ResilientError(1001, res))
+  })
 }
 
 function addTimeStamp(options) {
@@ -717,7 +715,7 @@ function mapResponse(cb) {
 }
 
 function isJSONContent(res) {
-  return res.headers['content-type'] === 'application/json'
+  return typeof res.body === 'string' && /application\/json/.test(res.headers['content-type'])
 }
 
 function setUserAgent(options) {
@@ -974,8 +972,6 @@ var Cache = require('./cache')
 var DiscoveryResolver = require('./discovery-resolver')
 var EventBus = require('lil-event')
 
-var VERBS = ['get', 'post', 'put', 'del', 'head', 'patch']
-
 module.exports = Resilient
 
 function Resilient(options) {
@@ -1107,6 +1103,7 @@ Resilient.prototype.unmock = function () {
   this.restoreHttpClient()
 }
 
+var VERBS = ['get', 'post', 'put', 'del', 'head', 'patch']
 VERBS.forEach(defineMethodProxy)
 
 function defineMethodProxy(verb) {
@@ -1118,7 +1115,7 @@ function defineMethodProxy(verb) {
 function updateServers(method, options, cb) {
   if (typeof options === 'function') {
     cb = options
-    options = arguments[2]
+    options = null
   }
   DiscoveryResolver[method](this, options, cb || _.noop)
   return this
@@ -1157,12 +1154,12 @@ function Resolver(resilient, options, cb) {
     type = type || 'service'
     servers = resilient.servers(type)
     if (servers && servers.exists()) {
-      valid = type !== 'discovery' ? areUpToDate(servers, type) : true
+      valid = type !== 'discovery' ? areUpToDate(servers) : true
     }
     return valid
   }
 
-  function areUpToDate(servers, type) {
+  function areUpToDate(servers) {
     var updated = true
     var servers = resilient.servers('discovery')
     if (servers && servers.exists()) {
