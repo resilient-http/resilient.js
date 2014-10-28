@@ -697,7 +697,7 @@ function requestWrapper(request) {
     options = setUserAgent(options)
     if (options.params) options.qs = options.params
     if (options.data) {
-      options.body = serializeBody(options.data)
+      mapRequestBody(options)
     }
     return request.call(null, options, mapResponse(cb))
   }
@@ -732,8 +732,13 @@ function getUserAgent() {
   return 'resilient-http ' + client.LIBRARY_VERSION + ' (node)'
 }
 
-function serializeBody(body) {
-  return body && _.isObj(body) || _.isArr(body) ? JSON.stringify(body) : body
+function mapRequestBody(options) {
+  var body = options.data
+  if (body && _.isObj(body) || _.isArr(body)) {
+    options.json = true
+    options.data = null
+  }
+  options.body = body
 }
 
 },{"../bower_components/lil-http/http":1,"./utils":17,"request":18}],9:[function(require,module,exports){
@@ -750,7 +755,7 @@ function ResilientFactory(options) {
   return new Resilient(options)
 }
 
-ResilientFactory.VERSION = '0.1.10'
+ResilientFactory.VERSION = '0.1.11'
 ResilientFactory.CLIENT_VERSION = http.VERSION
 ResilientFactory.defaults = defaults
 ResilientFactory.Options = Options
