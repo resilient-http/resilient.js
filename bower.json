@@ -1,7 +1,7 @@
 {
   "name": "resilient",
   "description": "Fault tolerant, server discovering, balanced and full featured HTTP client for distributed systems",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "license": "MIT",
   "repository": "resilient-http/resilient",
   "author": "Tomas Aparicio",
