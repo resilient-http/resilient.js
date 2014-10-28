@@ -4,9 +4,7 @@
 
 A browser and [node.js](http://nodejs.org) fault tolerant, dynamic servers auto discovery, balanced, configurable and full featured HTTP client for distributed and reactive system architectures
 
-For more information about **Resilient**, see the [project site](http://resilient-http.github.io) and the [request flow algorithm](#how-it-works)
-
-**Note**: resilient.js is still beta
+For more information about **Resilient**, see the [project site](http://resilient-http.github.io) and the [request flow algorithm](#how-it-works) and useful resources
 
 ## Features
 
@@ -63,6 +61,12 @@ It runs properly in any [ES5 compliant](http://kangax.github.io/compat-table/es5
 - Safari >= 5
 - Opera >= 10
 - IE >= 9
+
+## Useful resources
+
+- [angular-resilient](https://github.com/h2non/angular-resilient) - Turn $http resilient and fault tolerant
+- [resilient-server](https://github.com/h2non/resilient-server) - node.js powered dummy HTTP discovery server for testing/development
+- [hydra](http://innotech.github.io/hydra) - Multicloud balancer and application discovery server
 
 ## How it works?
 
