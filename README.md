@@ -364,7 +364,7 @@ Return: `Resilient`
 
 Pass to the callback an up-to-date list of servers asking to discovery servers
 
-### resilient#getUpdatedServers(cb)
+### resilient#getUpdatedServers([ options, ] cb)
 Return: `Resilient` Alias: `getLatestServers`
 
 Pass to the callback an up-to-date list of servers, with or without discovery servers configured

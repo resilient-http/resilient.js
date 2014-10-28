@@ -22,3 +22,12 @@ client.discoverServers(function (err, servers) {
 client.getLatestServers(function (err, servers) {
   console.log('Fresh service servers:', servers)
 })
+
+// custom app name
+client.discoverServers({ basePath: '/app/my-app' }, function (err, servers) {
+  console.log('Fresh service servers:', servers)
+})
+
+client.getLatestServers({ basePath: '/app/my-app' }, function (err, servers) {
+  console.log('Fresh service servers:', servers)
+})
