@@ -223,6 +223,35 @@ describe('Discovery', function () {
     })
   })
 
+  describe('invalid response content type header', function () {
+    var resilient = Resilient({
+      discovery: {
+        timeout: 50,
+        parallel: true,
+        servers: [ 'http://valid' ]
+      }
+    })
+
+    before(function () {
+      nock('http://valid')
+        .filteringPath(function () { return '/' })
+        .get('/')
+        .delayConnection(10)
+        .reply(200, ['http://server'], { 'Content-Type': 'text/plain'})
+    })
+
+    after(function () {
+      nock.cleanAll()
+    })
+
+    it('should not resolve with valid status', function (done) {
+      resilient.discoverServers(function (err, res) {
+        expect(res.data).to.be.deep.equal(['http://server'])
+        done()
+      })
+    })
+  })
+
   describe('promiscuous error mode', function () {
     var resilient = Resilient({
       discovery: {
