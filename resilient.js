@@ -743,7 +743,7 @@ function ResilientFactory(options) {
   return new Resilient(options)
 }
 
-ResilientFactory.VERSION = '0.1.9'
+ResilientFactory.VERSION = '0.2.0'
 ResilientFactory.CLIENT_VERSION = http.VERSION
 ResilientFactory.defaults = defaults
 ResilientFactory.Options = Options
@@ -936,7 +936,7 @@ function sendRequest(resilient, options, handler, buf) {
 }
 
 function getHttpClient(resilient) {
-  return resilient._httpClient ? resilient._httpClient : http
+  return typeof resilient._httpClient === 'function' ? resilient._httpClient : http
 }
 
 function isUnavailableStatus(err, res) {
@@ -979,6 +979,7 @@ function Resilient(options) {
   this._updating = false
   this._client = new Client(this)
   this._cache = new Cache()
+  this._httpClient = null
   this.setOptions(options)
 }
 
