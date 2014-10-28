@@ -671,6 +671,7 @@ ResilientError.prototype = Object.create(Error.prototype)
 ResilientError.MESSAGES = MESSAGES
 
 },{}],8:[function(require,module,exports){
+var _ = require('./utils')
 var http = resolveModule()
 
 module.exports = client
@@ -691,11 +692,13 @@ function resolveModule() {
 }
 
 function requestWrapper(request) {
-  return function (options, cb) {
+  return function requester(options, cb) {
     if (typeof options === 'string') options = { url: options }
     options = setUserAgent(options)
     if (options.params) options.qs = options.params
-    if (options.data) options.body = options.data
+    if (options.data) {
+      options.body = serializeBody(options.data)
+    }
     return request.call(null, options, mapResponse(cb))
   }
 }
@@ -729,7 +732,11 @@ function getUserAgent() {
   return 'resilient-http ' + client.LIBRARY_VERSION + ' (node)'
 }
 
-},{"../bower_components/lil-http/http":1,"request":18}],9:[function(require,module,exports){
+function serializeBody(body) {
+  return body && _.isObj(body) || _.isArr(body) ? JSON.stringify(body) : body
+}
+
+},{"../bower_components/lil-http/http":1,"./utils":17,"request":18}],9:[function(require,module,exports){
 var Resilient = require('./resilient')
 var Options = require('./options')
 var defaults = require('./defaults')
