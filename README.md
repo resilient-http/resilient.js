@@ -302,6 +302,14 @@ Fired as after a request was completed
 You can intercept and modify the error/response on the fly,
 but you must mutate the options `object` and do not lose its reference
 
+##### request:retry
+Arguments: `options<Object>`, `servers<Servers>`
+
+Fired as when a request performs a retry attempt cycle, that means all the previous requests has failed
+
+You can intercept and modify the `options` object on the fly,
+but you must mutate it and do not lose its reference
+
 ### resilient#send(path, options, callback)
 
 Performs a custom request with the given options.
