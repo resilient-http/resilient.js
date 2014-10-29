@@ -63,9 +63,10 @@
       latency: 50
 
 - request:
-    url: ^/server/unavailable
+    url: ^/server/(unavailable|fail)
     method:
       - GET
+      - POST
   response:
     - status: 503
       latency: 50
@@ -78,6 +79,7 @@
     url: ^/server/timeout
     method:
       - GET
+      - POST
   response:
     - status: 502
       latency: 10000
@@ -90,6 +92,7 @@
     url: ^/server/delay
     method:
       - GET
+      - POST
   response:
     - status: 202
       latency: 500
@@ -110,4 +113,18 @@
       body: >
         {"hello": "world"}
 
-
+- request:
+    url: ^/server/([0-9])
+    method:
+      - POST
+    headers:
+       content-type: application/json
+    post: >
+       {"hello":"world"}
+  response:
+    - status: 200
+      latency: 50
+      headers:
+        content-type: application/json
+      body: >
+        {"hello": "world"}

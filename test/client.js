@@ -76,12 +76,15 @@ describe('Client', function () {
   describe('POST', function () {
     before(function () {
       nock('http://server')
-        .post('/hello')
-        .reply(200, { hello: 'world' })
+        .filteringRequestBody(/.*/, '*')
+        .post('/hello', '*')
+        .reply(200, function (uri, body) {
+          return body
+        })
     })
 
     it('should perform a valid request', function (done) {
-      client.post('/hello', function (err, res) {
+      client.post({ path: '/hello', data: { hello: 'world' }}, function (err, res) {
         expect(err).to.be.null
         expect(res.status).to.be.equal(200)
         expect(res.data).to.be.deep.equal({ hello: 'world' })
@@ -93,12 +96,15 @@ describe('Client', function () {
   describe('PUT', function () {
     before(function () {
       nock('http://server')
-        .put('/hello')
-        .reply(200, { hello: 'world' })
+        .filteringRequestBody(/.*/, '*')
+        .put('/hello', '*')
+        .reply(200, function (uri, body) {
+          return body
+        })
     })
 
     it('should perform a valid request', function (done) {
-      client.put('/hello', function (err, res) {
+      client.put({ path: '/hello', data: { hello: 'world' }}, function (err, res) {
         expect(err).to.be.null
         expect(res.status).to.be.equal(200)
         expect(res.data).to.be.deep.equal({ hello: 'world' })
@@ -110,12 +116,15 @@ describe('Client', function () {
   describe('DELETE', function () {
     before(function () {
       nock('http://server')
-        .delete('/hello')
-        .reply(200, { hello: 'world' })
+        .filteringRequestBody(/.*/, '*')
+        .delete('/hello', '*')
+        .reply(200, function (uri, body) {
+          return body
+        })
     })
 
     it('should perform a valid request', function (done) {
-      client.del('/hello', function (err, res) {
+      client.del({ path: '/hello', data: { hello: 'world' }}, function (err, res) {
         expect(err).to.be.null
         expect(res.status).to.be.equal(200)
         expect(res.data).to.be.deep.equal({ hello: 'world' })
