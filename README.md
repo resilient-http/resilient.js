@@ -8,7 +8,7 @@ For more information about **Resilient**, see the [project site](http://resilien
 
 ## Features
 
-- Fault tolerant, transparent server fallback
+- Failover, transparent server fallbacking until success
 - Client-side based balancer using a simple best availability algorithm
 - Smart balancer logic based on server score (network latency, errors and succesfull requests)
 - Discern servers availability score calculus per read and write operations when balancing
@@ -20,6 +20,7 @@ For more information about **Resilient**, see the [project site](http://resilien
 - Cross engine (node.js and browsers. ES5 compliant)
 - Configurable alternative HTTP client to use as forward proxy (instead of using the embeded one)
 - Dynamic servers discovery (based on the resilient [specification](https://github.com/resilient-http/spec) protocol)
+- Support promiscuous errors (400-499 response status code)
 - Support mock/stub working mode
 - Full HTTP features support (it uses internally [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http) for the browser)
 - Server-side dynamic client configuration support (experimental)

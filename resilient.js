@@ -388,9 +388,10 @@ defaults.discovery = {
   retry: 3,
   retryWait: 1000,
   timeout: 2 * 1000,
-  refresh: 60 * 1000,
-  refreshServers: false,
-  refreshServersInterval: 180 * 1000,
+  refreshInterval: 60 * 1000,
+  enableRefreshServers: true,
+  refreshServersInterval: 60 * 3 * 1000,
+  refreshServers: null,
   parallel: true,
   cacheExpiration: 60 * 10 * 1000,
   promiscuousErrors: true
@@ -405,6 +406,7 @@ defaults.resilientOptions = [
   'cache',
   'refresh',
   'refreshServers',
+  'enableRefreshServers',
   'refreshServersInterval',
   'discoverBeforeRetry'
 ]
@@ -796,7 +798,7 @@ Options.prototype.set = function (key, value) {
   if (_.isObj(key)) {
     _.each(key, _.bind(this, this.set))
   } else if (value !== undefined) {
-    if (key === 'servers') {
+    if (key === 'servers' || key === 'refreshServers') {
       this.setServers(value)
     } else {
       this.store[key] = value
@@ -1087,7 +1089,7 @@ Resilient.prototype.restoreHttpClient = function () {
 }
 
 Resilient.prototype.areServersUpdated = function () {
-  return this.servers('service').lastUpdate() < (this.getOptions('discovery').get('refresh') || 0)
+  return this.servers('service').lastUpdate() < (this.getOptions('discovery').get('refreshInterval') || 0)
 }
 
 Resilient.prototype.balancer = function (options) {
@@ -1170,16 +1172,16 @@ function Resolver(resilient, options, cb) {
     type = type || 'service'
     servers = resilient.servers(type)
     if (servers && servers.exists()) {
-      valid = type !== 'discovery' ? areUpToDate(servers) : true
+      valid = type !== 'discovery' ? serversAreUpToDate(servers) : true
     }
     return valid
   }
 
-  function areUpToDate(servers) {
+  function serversAreUpToDate(servers) {
     var updated = true
     var servers = resilient.servers('discovery')
     if (servers && servers.exists()) {
-      updated = servers.forceUpdate() || servers.lastUpdate() < resilient.getOptions('discovery').get('refresh')
+      updated = servers.forceUpdate() || servers.lastUpdate() < resilient.getOptions('discovery').get('refreshInterval')
     }
     return updated
   }
