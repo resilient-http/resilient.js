@@ -337,10 +337,10 @@ function normalizeArgs(path, options, cb, method) {
 }
 
 function wrapCallback(resilient, cb) {
-  return function (err, res) {
+  return _.once(function (err, res) {
     resilient.emit('request:finish', err, res, resilient)
     cb(err, res)
-  }
+  })
 }
 
 function mergeHttpOptions(options) {
@@ -404,7 +404,7 @@ defaults.resilientOptions = [
   'parallel',
   'cacheExpiration',
   'cache',
-  'refresh',
+  'refreshInterval',
   'refreshServers',
   'enableRefreshServers',
   'refreshServersInterval',
@@ -1156,20 +1156,21 @@ function Resolver(resilient, options, cb) {
   }
 
   function resolve(next) {
-    if (hasServers()) {
+    if (hasValidServers('service')) {
       next()
+    } else if (hasValidServers('discovery')) {
+      updateDiscoveryServers(next)
     } else {
-      if (hasServers('discovery')) {
-        DiscoveryResolver.update(resilient, null, next)
-      } else {
-        next(new ResilientError(1002))
-      }
+      next(new ResilientError(1002))
     }
   }
 
-  function hasServers(type) {
+  function updateDiscoveryServers(next) {
+    DiscoveryResolver.update(resilient, null, next)
+  }
+
+  function hasValidServers(type) {
     var servers, valid = false
-    type = type || 'service'
     servers = resilient.servers(type)
     if (servers && servers.exists()) {
       valid = type !== 'discovery' ? serversAreUpToDate(servers) : true
@@ -1198,7 +1199,7 @@ function Resolver(resilient, options, cb) {
     var servers = resilient.servers()
     if (res && res._cache) {
       servers = new Servers(res.data)
-    } else if (!hasServers()) {
+    } else if (!hasValidServers('service')) {
       return cb(new ResilientError(1003))
     }
     Requester(resilient)(servers, options, cb)
