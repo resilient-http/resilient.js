@@ -1,5 +1,6 @@
 var expect = require('chai').expect
 var nock = require('nock')
+var fw = require('fw')
 var Resilient = require('../')
 
 describe('Concurrency', function () {
@@ -32,9 +33,9 @@ describe('Concurrency', function () {
           .get('/')
           .reply(200, ['http://server'])
         nock('http://server')
-          .persist()
           .filteringPath(function () { return '/' })
           .get('/')
+          .times(22)
           .reply(200, { hello: 'world' })
       })
 
@@ -42,31 +43,28 @@ describe('Concurrency', function () {
         nock.cleanAll()
       })
 
-      it('should resolve with a valid status', function (done) {
-        resilient.get('/hello', function (err, res) {
+      function expecter(done) {
+        return function (err, res) {
           expect(err).to.be.null
           expect(res.status).to.be.equal(200)
           expect(res.data).to.be.deep.equal({ hello: 'world' })
           done()
-        })
+        }
+      }
+
+      it('should resolve with a valid status', function (done) {
+        resilient.get('/hello', expecter(done))
       })
 
       it('should resolve with a valid status', function (done) {
-        resilient.get('/world', function (err, res) {
-          expect(err).to.be.null
-          expect(res.status).to.be.equal(200)
-          expect(res.data).to.be.deep.equal({ hello: 'world' })
-          done()
-        })
+        resilient.get('/world', expecter(done))
       })
 
-      it('should resolve with a valid status', function (done) {
-        resilient.get('/chuck', function (err, res) {
-          expect(err).to.be.null
-          expect(res.status).to.be.equal(200)
-          expect(res.data).to.be.deep.equal({ hello: 'world' })
-          done()
-        })
+      it('should resolve all the concurrent request with valid state', function (done) {
+        var i = 0, pool = []
+        function request(done) { resilient.get('/chuck', expecter(done)) }
+        while ((i += 1) < 20) pool.push(request)
+        fw.parallel(pool, done)
       })
     })
   })
