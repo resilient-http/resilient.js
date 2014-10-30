@@ -1,5 +1,5 @@
 - request:
-    url: ^/discovery/valid/([0-9])
+    url: ^/discovery/valid(/[0-9])?
     method:
       - GET
       - POST

@@ -3,7 +3,7 @@
 
 var Resilient = require('../')
 var yargs = require('yargs')
-var params = ['method', 'header']
+var params = ['method', 'header', 'timeout']
 
 var argv = yargs
   .usage('Resilient HTTP client.\nUsage: $0')
@@ -16,6 +16,10 @@ var argv = yargs
   .alias('method', 'X')
   .describe('header', 'Define request header')
   .alias('header', 'H')
+  .describe('timeout', 'Request timeout in miliseconds')
+  .alias('timeout', 't')
+  .describe('discover', 'Get an update list of discovery servers')
+  .alias('discovery', 'ds')
   .describe('debug', 'Debug mode')
   .describe('help', 'Show help')
   .argv
@@ -32,12 +36,16 @@ try {
 }
 
 function newResilientClient(options) {
-  Resilient(options.config).send(options.options, handler)
+  var client = Resilient(options.config)
+  if (argv.discover)
+    client.discoverServers(handler)
+  else
+    client.send(options.options, handler)
 }
 
 function handler(err, res) {
   if (err) console.error(err.message) && process.exit(1)
-  else console.log(res.data)
+  else console.log(res.data || res)
 }
 
 function buildOptions(argv) {

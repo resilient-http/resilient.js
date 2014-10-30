@@ -4,9 +4,9 @@ var client = Resilient({
   discovery: {
     retry: 1,
     servers: [
-      'http://localhost:8882/unavailable',
-      'http://localhost:8882/timeout',
-      'http://localhost:8882/unavailable'
+      'http://localhost:8882/discovery/unavailable',
+      'http://localhost:8882/discovery/timeout',
+      'http://localhost:8882/discovery/unavailable'
     ]
   }
 })

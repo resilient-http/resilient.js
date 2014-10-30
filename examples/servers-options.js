@@ -3,9 +3,9 @@ var Resilient = require('../')
 var client = Resilient({
   service: {
     servers: [
-      'http://localhost:8882/unavailable',
-      'http://localhost:8882/timeout',
-      'http://localhost:8882/server'
+      'http://localhost:8882/discovery/unavailable',
+      'http://localhost:8882/discovery/timeout',
+      'http://localhost:8882/discovery/server'
     ],
     timeout: 1000,
     basePath: '/api',
