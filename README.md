@@ -4,7 +4,7 @@
 
 A browser and [node.js](http://nodejs.org) fault tolerant, dynamic servers auto discovery, balanced, configurable and full featured HTTP client for distributed and reactive system architectures
 
-For more information about **Resilient**, see the [project site](http://resilient-http.github.io) and the [request flow algorithm](#how-it-works) and useful resources
+For more information about **Resilient**, see the [project site](http://resilient-http.github.io), and the [request flow algorithm](#how-it-works)
 
 ## Features
 
@@ -20,7 +20,7 @@ For more information about **Resilient**, see the [project site](http://resilien
 - Cross engine (node.js and browsers. ES5 compliant)
 - Configurable alternative HTTP client to use as forward proxy (instead of using the embeded one)
 - Dynamic servers discovery (based on the resilient [specification](https://github.com/resilient-http/spec) protocol)
-- Support mock/stub operation mode
+- Support mock/stub working mode
 - Full HTTP features support (it uses internally [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http) for the browser)
 - Server-side dynamic client configuration support (experimental)
 - Support round robin scheduling algorithm for traffic distribution (experimental)
@@ -48,7 +48,7 @@ component install resilient-http/resilient.js
 
 Or loading the script remotely
 ```html
-<script src="//cdn.rawgit.com/resilient-http/resilient.js/0.1.9/resilient.js"></script>
+<script src="//cdn.rawgit.com/resilient-http/resilient.js/0.2.0/resilient.js"></script>
 ```
 
 ## Environments
@@ -446,7 +446,7 @@ See [supported events](#events)
 Force to flush servers cache
 
 ### resilient#client()
-Return: `Client`
+Return: `Client` Alias: `http`
 
 Returns an HTTP client-only interface.
 Useful to provide encapsulation from public usage and

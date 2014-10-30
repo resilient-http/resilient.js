@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "lil-event": "^0.1.3",
-    "request": "^2.47.0"
+    "request": "^2.47.0",
+    "yargs": "^1.3.2"
   }
 }

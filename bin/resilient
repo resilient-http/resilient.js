@@ -1,0 +1,67 @@
+#!/usr/bin/env node
+'use strict'
+
+var Resilient = require('../')
+var yargs = require('yargs')
+var params = ['method', 'header']
+
+var argv = yargs
+  .usage('Resilient HTTP client.\nUsage: $0')
+  .example('$0 -h localhost -p 8080', '')
+  .describe('version', 'Show the server version')
+  .alias('version', 'v')
+  .describe('server', 'Define a discovery server')
+  .alias('server', 's')
+  .describe('method', 'HTTP method name')
+  .alias('method', 'X')
+  .describe('header', 'Define request header')
+  .alias('header', 'H')
+  .describe('debug', 'Debug mode')
+  .describe('help', 'Show help')
+  .argv
+
+if (argv.help) return echo(yargs.help())
+if (argv.version) return echo(templating.VERSION)
+
+try {
+  newResilientClient(buildOptions(argv))
+} catch (e) {
+  console.error(e)
+  if (argv.debug) console.error(e.stack)
+  process.exit(1)
+}
+
+function newResilientClient(options) {
+  Resilient(options.config).send(options.options, handler)
+}
+
+function handler(err, res) {
+  if (err) console.error(err.message) && process.exit(1)
+  else console.log(res.data)
+}
+
+function buildOptions(argv) {
+  var config = { discovery: {} }
+  var options = { headers: {} }
+
+  config.discovery.servers = Array.isArray(argv.server) ? argv.server : [ argv.server ]
+
+  params.forEach(function (key) {
+    if (argv[key]) {
+      if (key === 'header') {
+        setHeader(argv[key], options.headers)
+      } else {
+        options[key] = argv[key]
+      }
+    }
+  })
+
+  options.path = argv._[0]
+
+  return { config: config, options: options }
+}
+
+function setHeader(header, headers) {
+  header = header.split(':').map(function (str) { return str.trim() })
+  headers[header[0]] = header[1]
+}

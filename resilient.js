@@ -932,7 +932,7 @@ function Requester(resilient) {
   }
 
   function getOptions(type) {
-    return resilient.options.get(type || 'service')
+    return resilient.getOptions(type || 'service')
   }
 
   return request
@@ -988,6 +988,7 @@ var EventBus = require('lil-event')
 module.exports = Resilient
 
 function Resilient(options) {
+  this._options = null
   this._queue = []
   this._updating = false
   this._client = new Client(this)
@@ -1001,10 +1002,10 @@ Resilient.prototype = Object.create(EventBus.prototype)
 Resilient.prototype.setOptions = function (type, options) {
   var store = null
   if (type && _.isObj(options)) {
-    store = this.options.get(type)
+    store = this._options.get(type)
     if (store instanceof Options) store.set(options)
   } else {
-    this.options = Options.define(type)
+    this._options = Options.define(type)
   }
 }
 
@@ -1019,22 +1020,22 @@ Resilient.prototype.setServiceOptions = function (options) {
 }
 
 Resilient.prototype.getOptions = function (type) {
-  return type ? this.options.get(type) : this.options
+  return type ? this._options.get(type) : this._options
 }
 
 Resilient.prototype.getHttpOptions = function (type) {
-  var options = this.options.get(type || 'service')
+  var options = this._options.get(type || 'service')
   if (options) return options.http()
 }
 
 Resilient.prototype.servers = function (type) {
-  var options = this.options.get(type || 'service')
+  var options = this._options.get(type || 'service')
   if (options) return options.servers()
 }
 
 Resilient.prototype.discoveryServers = function (list) {
   if (_.isArr(list)) {
-    this.options.get('discovery').servers(list)
+    this._options.get('discovery').servers(list)
   } else {
     return this.servers('discovery')
   }
@@ -1046,7 +1047,7 @@ Resilient.prototype.hasDiscoveryServers = function () {
 }
 
 Resilient.prototype.setServers = function (list) {
-  this.options.get('service').servers(list)
+  this._options.get('service').servers(list)
   return this
 }
 
@@ -1091,13 +1092,13 @@ Resilient.prototype.areServersUpdated = function () {
 
 Resilient.prototype.balancer = function (options) {
   if (options) {
-    this.options.get('balancer').set(options)
+    this._options.get('balancer').set(options)
   } else {
     return this.getOptions('balancer')
   }
 }
 
-Resilient.prototype.client = function () {
+Resilient.prototype.client = Resilient.prototype.http = function () {
   return this._client
 }
 
