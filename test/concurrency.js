@@ -35,7 +35,8 @@ describe('Concurrency', function () {
         nock('http://server')
           .filteringPath(function () { return '/' })
           .get('/')
-          .times(22)
+          .times(52)
+          .delayConnection(5)
           .reply(200, { hello: 'world' })
       })
 
@@ -63,7 +64,7 @@ describe('Concurrency', function () {
       it('should resolve all the concurrent request with valid state', function (done) {
         var i = 0, pool = []
         function request(done) { resilient.get('/chuck', expecter(done)) }
-        while ((i += 1) < 20) pool.push(request)
+        while ((i += 1) < 50) { pool.push(request) }
         fw.parallel(pool, done)
       })
     })
