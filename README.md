@@ -62,7 +62,7 @@ It runs properly in any [ES5 compliant](http://kangax.github.io/compat-table/es5
 - Opera >= 10
 - IE >= 9
 
-## Useful resources
+## Related projects
 
 - [angular-resilient](https://github.com/h2non/angular-resilient) - Turn $http resilient and fault tolerant
 - [resilient-server](https://github.com/h2non/resilient-server) - node.js powered dummy HTTP discovery server for testing/development
