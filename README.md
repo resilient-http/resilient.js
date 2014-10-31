@@ -8,7 +8,7 @@ For more information about **Resilient**, see the [project site](http://resilien
 
 ## Features
 
-- Failover, transparent server fallbacking until success
+- Smart failover and error handling with transparent server fallback
 - Client-side based balancer using a simple best availability algorithm
 - Smart balancer logic based on server score (network latency, errors and succesfull requests)
 - Discern servers availability score calculus per read and write operations when balancing
