@@ -1170,21 +1170,18 @@ function Resolver(resilient, options, cb) {
   }
 
   function hasValidServers(type) {
-    var servers, valid = false
-    servers = resilient.servers(type)
-    if (servers && servers.exists()) {
-      valid = type !== 'discovery' ? serversAreUpToDate(servers) : true
+    var servers = resilient.servers(type)
+    var valid = servers && servers.exists() || false
+    if (valid && type === 'service') {
+      valid = serversAreUpToDate(servers)
     }
     return valid
   }
 
   function serversAreUpToDate(servers) {
-    var updated = true
-    var servers = resilient.servers('discovery')
-    if (servers && servers.exists()) {
-      updated = servers.forceUpdate() || servers.lastUpdate() < resilient.getOptions('discovery').get('refreshInterval')
-    }
-    return updated
+    return resilient.hasDiscoveryServers()
+      ? servers.lastUpdate() < resilient.getOptions('discovery').get('refreshInterval')
+      : true
   }
 
   function resolver(err, res) {
