@@ -1135,7 +1135,6 @@ function updateServers(method, options, cb) {
 }
 
 },{"./cache":2,"./client":3,"./discovery-resolver":5,"./options":10,"./utils":17,"lil-event":19}],13:[function(require,module,exports){
-var _ = require('./utils')
 var ResilientError = require('./error')
 var Requester = require('./requester')
 var DiscoveryResolver = require('./discovery-resolver')
@@ -1151,34 +1150,32 @@ function Resolver(resilient, options, cb) {
   }
 
   function resolve(next) {
-    if (hasServers()) {
+    if (hasValidServers('service')) {
       next()
+    } else if (hasValidServers('discovery')) {
+      updateDiscoveryServers(next)
     } else {
-      if (hasServers('discovery')) {
-        DiscoveryResolver.update(resilient, null, next)
-      } else {
-        next(new ResilientError(1002))
-      }
+      next(new ResilientError(1002))
     }
   }
 
-  function hasServers(type) {
-    var servers, valid = false
-    type = type || 'service'
-    servers = resilient.servers(type)
-    if (servers && servers.exists()) {
-      valid = type !== 'discovery' ? areUpToDate(servers) : true
+  function updateDiscoveryServers(next) {
+    DiscoveryResolver.update(resilient, null, next)
+  }
+
+  function hasValidServers(type) {
+    var servers = resilient.servers(type)
+    var valid = servers && servers.exists() || false
+    if (valid && type === 'service') {
+      valid = serversAreUpToDate(servers)
     }
     return valid
   }
 
-  function areUpToDate(servers) {
-    var updated = true
-    var servers = resilient.servers('discovery')
-    if (servers && servers.exists()) {
-      updated = servers.forceUpdate() || servers.lastUpdate() < resilient.getOptions('discovery').get('refresh')
-    }
-    return updated
+  function serversAreUpToDate(servers) {
+    return resilient.hasDiscoveryServers()
+      ? servers.lastUpdate() < resilient.getOptions('discovery').get('refresh')
+      : true
   }
 
   function resolver(err, res) {
@@ -1193,14 +1190,14 @@ function Resolver(resilient, options, cb) {
     var servers = resilient.servers()
     if (res && res._cache) {
       servers = new Servers(res.data)
-    } else if (!hasServers()) {
+    } else if (!hasValidServers('service')) {
       return cb(new ResilientError(1003))
     }
     Requester(resilient)(servers, options, cb)
   }
 }
 
-},{"./discovery-resolver":5,"./error":7,"./requester":11,"./servers":16,"./utils":17}],14:[function(require,module,exports){
+},{"./discovery-resolver":5,"./error":7,"./requester":11,"./servers":16}],14:[function(require,module,exports){
 module.exports = resolver
 
 function resolver(arr, size) {
