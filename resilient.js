@@ -1075,7 +1075,7 @@ Resilient.prototype.flushCache = function () {
   return this
 }
 
-Resilient.prototype.setHttpClient = function (client) {
+Resilient.prototype.useHttpClient = function (client) {
   if (typeof client === 'function') {
     this._httpClient = client
   }
@@ -1106,7 +1106,7 @@ Resilient.prototype.send = Resilient.prototype.request = function (path, options
 }
 
 Resilient.prototype.mock = function (mockFn) {
-  this.setHttpClient(function (options, cb) {
+  this.useHttpClient(function (options, cb) {
     _.delay(function () { mockFn(options, cb) })
   })
   return this

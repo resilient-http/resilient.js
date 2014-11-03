@@ -386,7 +386,7 @@ Pass to the callback an up-to-date list of servers, with or without discovery se
 Force to update the servers list from discovery servers, if they are defined,
 optionally passing a callback to handle the result
 
-### resilient#setHttpClient(fn)
+### resilient#useHttpClient(fn)
 
 Use a custom HTTP client as proxy instead of the embedded `resilient` native HTTP client.
 
@@ -420,7 +420,7 @@ resilient.mock(function (options, cb) {
 })
 ```
 
-See also the `setHttpClient()` method for custom request proxy forward, also useful for testing with stubs/fakes
+See also the `useHttpClient()` method for custom request proxy forward, also useful for testing with stubs/fakes
 
 ### resilient#unmock()
 

@@ -348,7 +348,7 @@ describe('Resilient', function () {
       discovery: { servers: ['http://server'] }
     })
 
-    resilient.setHttpClient(httpClient)
+    resilient.useHttpClient(httpClient)
 
     before(function () {
       nock('http://server')
