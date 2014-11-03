@@ -317,11 +317,9 @@ Client.prototype.head = function (path, options, cb) {
 }
 
 function requester(options, cb) {
-  if (isFullUrl(options)) {
-    return plainHttpRequest(options, cb)
-  } else {
-    return resolver(this._resilient, options, cb)
-  }
+  return isFullUrlSchema(options)
+    ? plainHttpRequest(options, cb)
+    : resolver(this._resilient, options, cb)
 }
 
 function normalizeArgs(path, options, cb, method) {
@@ -329,7 +327,7 @@ function normalizeArgs(path, options, cb, method) {
     cb = options
     options = arguments[0]
   }
-  options = mergeHttpOptions.call(this, options)
+  options = mergeHttpOptions(this._resilient, options)
   if (typeof path === 'string') options.path = path
   if (typeof method === 'string') options.method = method
   if (typeof cb !== 'function') cb = _.noop
@@ -337,23 +335,23 @@ function normalizeArgs(path, options, cb, method) {
 }
 
 function wrapCallback(resilient, cb) {
-  return _.once(function (err, res) {
+  return _.once(function finalHandler(err, res) {
     resilient.emit('request:finish', err, res, resilient)
     cb(err, res)
   })
 }
 
-function mergeHttpOptions(options) {
-  var defaults = this._resilient.getOptions('service').get()
+function mergeHttpOptions(resilient, options) {
+  var defaults = resilient.getOptions('service').get()
   return _.merge(defaults, options)
 }
 
-function isFullUrl(options) {
+function isFullUrlSchema(options) {
   return options && (_.isURI(options.path) || _.isURI(options.url)) || false
 }
 
 function plainHttpRequest(options, cb) {
-  options.url = options.path
+  if (options.path) options.url = options.path
   return http.call(null, options, cb)
 }
 
@@ -525,7 +523,7 @@ DiscoveryResolver.update = function (resilient, options, cb) {
 }
 
 DiscoveryResolver.fetch = function (resilient, options, cb) {
-  DiscoveryResolver(resilient, options)(function (err, res) {
+  DiscoveryResolver(resilient, options)(function handler(err, res) {
     if (err) cb(err)
     else if (res && res.data) cb(null, res.data)
     else cb(new ResilientError(1001, res))
@@ -912,7 +910,7 @@ function Requester(resilient) {
 
   function requestHandler(server, operation, options, cb, nextServer) {
     var start = _.now()
-    return function (err, res) {
+    return function requestReport(err, res) {
       var latency = _.now() - start
       if (isErrorResponse(options, err, res)) {
         server.reportError(operation, latency)
