@@ -304,7 +304,7 @@ Client.prototype.put = function (path, options, cb) {
   return this.send(path, options, cb, 'PUT')
 }
 
-Client.prototype.del = function (path, options, cb) {
+Client.prototype.del = Client.prototype.delete = function (path, options, cb) {
   return this.send(path, options, cb, 'DELETE')
 }
 
@@ -559,7 +559,7 @@ module.exports = DiscoveryServers
 
 function DiscoveryServers(resilient) {
   function defineServers(cb) {
-    return function (err, res) {
+    return function handler(err, res) {
       if (err) {
         handlerError(err, cb)
       } else if (isValidResponse(res)) {
@@ -675,6 +675,7 @@ ResilientError.MESSAGES = MESSAGES
 },{}],8:[function(require,module,exports){
 var _ = require('./utils')
 var http = resolveModule()
+var JSON_MIME = /application\/json/
 
 module.exports = client
 
@@ -720,7 +721,7 @@ function mapResponse(cb) {
 }
 
 function isJSONContent(res) {
-  return typeof res.body === 'string' && /application\/json/.test(res.headers['content-type'])
+  return typeof res.body === 'string' && JSON_MIME.test(res.headers['content-type'])
 }
 
 function setUserAgent(options) {
@@ -782,18 +783,6 @@ Options.prototype.get = function (key) {
   return key ? this.store[key] : _.clone(this.store)
 }
 
-Options.prototype.getRaw = function () {
-  var buf = {}, options = this.get()
-  if (options) {
-    _.each(options, function (key, value) {
-      if (value instanceof Options) {
-        buf[key] = value.get()
-      }
-    })
-  }
-  return buf
-}
-
 Options.prototype.set = function (key, value) {
   if (_.isObj(key)) {
     _.each(key, _.bind(this, this.set))
@@ -823,7 +812,7 @@ Options.prototype.setServers = function (servers) {
 }
 
 Options.prototype.clone = function () {
-  return Options.define(this.getRaw())
+  return Options.define(getRaw(this.store))
 }
 
 Options.define = function (options, defaultOptions) {
@@ -840,6 +829,16 @@ function defineDefaults(options, store) {
       store.set(type, new Options(options[type], type))
     }
   }
+}
+
+function getRaw(options) {
+  var buf = {}
+  _.each(options, function (key, value) {
+    if (value instanceof Options) {
+      buf[key] = value.get()
+    }
+  })
+  return buf
 }
 
 },{"./defaults":4,"./servers":16,"./utils":17}],11:[function(require,module,exports){
@@ -865,17 +864,17 @@ function Requester(resilient) {
     var serversList = getServersList(servers, operation)
     options = _.clone(options)
 
-    function next(previousError) {
+    function nextServer(previousError) {
       var server = serversList.shift()
       if (server) {
         options.url = _.join(server.url, options.basePath, options.path)
-        sendRequest(resilient, options, requestHandler(server, operation, options, cb, next), buf)
+        sendRequest(resilient, options, requestHandler(server, operation, options, cb, nextServer), buf)
       } else {
         handleMissingServers(servers, options, previousError, cb)
       }
     }
 
-    next()
+    nextServer()
   }
 
   function handleMissingServers(servers, options, previousError, cb) {
@@ -911,13 +910,13 @@ function Requester(resilient) {
     }
   }
 
-  function requestHandler(server, operation, options, cb, next) {
+  function requestHandler(server, operation, options, cb, nextServer) {
     var start = _.now()
     return function (err, res) {
       var latency = _.now() - start
       if (isErrorResponse(options, err, res)) {
         server.reportError(operation, latency)
-        next(err)
+        nextServer(err)
       } else {
         server.report(operation, latency)
         resolve(res, cb)
@@ -1121,7 +1120,7 @@ Resilient.prototype.unmock = function () {
   this.restoreHttpClient()
 }
 
-var VERBS = ['get', 'post', 'put', 'del', 'head', 'patch']
+var VERBS = ['get', 'post', 'put', 'del', 'delete', 'head', 'patch']
 VERBS.forEach(defineMethodProxy)
 
 function defineMethodProxy(verb) {
@@ -1140,7 +1139,6 @@ function updateServers(method, options, cb) {
 }
 
 },{"./cache":2,"./client":3,"./discovery-resolver":5,"./options":10,"./utils":17,"lil-event":19}],13:[function(require,module,exports){
-var _ = require('./utils')
 var ResilientError = require('./error')
 var Requester = require('./requester')
 var DiscoveryResolver = require('./discovery-resolver')
@@ -1203,7 +1201,7 @@ function Resolver(resilient, options, cb) {
   }
 }
 
-},{"./discovery-resolver":5,"./error":7,"./requester":11,"./servers":16,"./utils":17}],14:[function(require,module,exports){
+},{"./discovery-resolver":5,"./error":7,"./requester":11,"./servers":16}],14:[function(require,module,exports){
 module.exports = resolver
 
 function resolver(arr, size) {
