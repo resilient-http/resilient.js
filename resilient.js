@@ -650,7 +650,7 @@ var MESSAGES = {
   1003: 'Cannot resolve servers. Missing data',
   1004: 'Discovery server response is invalid or empty',
   1005: 'Missing servers during retry process',
-  1006: 'Internal state error'
+  1006: 'Internal unexpected error'
 }
 
 function ResilientError(status, error) {
