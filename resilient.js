@@ -1051,7 +1051,7 @@ Resilient.prototype.setServers = function (list) {
 }
 
 Resilient.prototype.discoverServers = function (options, cb) {
-  return updateServers.call(this, 'fetch', options, cb)
+  return updateServers(this, 'fetch', options, cb)
 }
 
 Resilient.prototype.getUpdatedServers = Resilient.prototype.getLatestServers = function (options, cb) {
@@ -1067,7 +1067,7 @@ Resilient.prototype.getUpdatedServers = Resilient.prototype.getLatestServers = f
 }
 
 Resilient.prototype.updateServers = function (options, cb) {
-  return updateServers.call(this, 'update', options, cb)
+  return updateServers(this, 'update', options, cb)
 }
 
 Resilient.prototype.flushCache = function () {
@@ -1107,9 +1107,7 @@ Resilient.prototype.send = Resilient.prototype.request = function (path, options
 
 Resilient.prototype.mock = function (mockFn) {
   this.setHttpClient(function (options, cb) {
-    _.delay(function () {
-      mockFn(options, cb)
-    })
+    _.delay(function () { mockFn(options, cb) })
   })
   return this
 }
@@ -1127,13 +1125,13 @@ function defineMethodProxy(verb) {
   }
 }
 
-function updateServers(method, options, cb) {
+function updateServers(resilient, method, options, cb) {
   if (typeof options === 'function') {
     cb = options
     options = null
   }
-  DiscoveryResolver[method](this, options, cb || _.noop)
-  return this
+  DiscoveryResolver[method](resilient, options, cb || _.noop)
+  return resilient
 }
 
 },{"./cache":2,"./client":3,"./discovery-resolver":5,"./options":10,"./utils":17,"lil-event":19}],13:[function(require,module,exports){
@@ -1433,7 +1431,7 @@ var bind = Function.prototype.bind
 var isArrayNative = Array.isArray
 var uriRegex = /^http[s]?\:\/\/(.+)/i
 
-_.noop = function () {}
+_.noop = function noop() {}
 
 _.now = function () {
   return new Date().getTime()
@@ -1471,10 +1469,6 @@ _.once = function (fn) {
   }
 }
 
-_.extend = objIterator(extender)
-
-_.merge = objIterator(merger)
-
 _.clone = function (obj) {
   return _.extend({}, obj)
 }
@@ -1502,6 +1496,11 @@ _.join = function (base) {
     .filter(function (part) { return typeof part === 'string' && part.length > 0 })
     .join(''))
 }
+
+_.extend = objIterator(extender)
+
+_.merge = objIterator(merger)
+
 
 function extender(target, key, value) {
   target[key] = value
