@@ -205,7 +205,7 @@ Specific configuration for discovery servers requests, behavior and logic
 - **cacheExpiration** `number` - Maximum cache time to live. Default to `10` minutes
 - **retry** `number` - Number of times to retry if all requests failed. Use `Infinity` for infinitive attemps. Default `3`
 - **retryWait** `number` - Number of milisenconds to wait before retry attempt cycle. Default to `1000`
-- **parallel** `boolean` - Discover servers in parallel. Improve service availability and decrement delay times. Recommended. Default `true`
+- **parallel** `boolean` - Discover servers in parallel. This will improve service availability and decrement server lookup delays. Default `true`
 - **refreshInterval** `number` - Servers list time to live in miliseconds. Default to `60000`
 - **enableRefreshServers** `boolean` - Enable/disable discovery servers auto discovery and refresh. Default `true`
 - **refreshServersInterval** `number` - Discovery servers list time to live in miliseconds. Default to `180000`
