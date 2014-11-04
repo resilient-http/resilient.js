@@ -13,8 +13,8 @@ For more information about **Resilient**, see the [project site](http://resilien
 - Smart balancer logic based on server score (network latency, errors and succesfull requests)
 - Discern servers availability score calculus per read and write operations when balancing
 - Configurable balancer policy by weight
-- Built-in support for in/out traffic interceptors
-- Built-in support for servers caching to improve reliability in fallback
+- Built-in support for request/response interceptors
+- Built-in support for servers caching to improve reliability when fallback
 - Highly configurable (timeout, retry loop, cache, wait delay fallback...)
 - Parallel servers discovering for a faster availability
 - Cross engine (node.js and browsers. ES5 compliant)
