@@ -503,9 +503,7 @@ function DiscoveryResolver(resilient, options) {
   function closePendingRequests(buf) {
     if (buf) {
       if (!isEmptyBuffer(buf)) {
-        buf.forEach(function (client) {
-          try { close(client) } catch (e) {}
-        })
+        buf.forEach(closeAliveRequest)
       }
       buf.splice(0)
     }
@@ -535,18 +533,24 @@ function addTimeStamp(options) {
   return _.extend(options.params || options.qs || {}, { _time: time })
 }
 
-function close(client) {
+function closeAliveRequest(client) {
   if (client) {
     if (client.xhr) {
-      if (client.xhr.readyState !== 4) client.xhr.abort()
+      if (client.xhr.readyState !== 4) {
+        closeClient(client.xhr)
+      }
     } else if (typeof client.abort === 'function') {
-      client.abort()
+      closeClient(client)
     }
   }
 }
 
+function closeClient(client) {
+  try { client.abort() } catch (e) {}
+}
+
 function isEmptyBuffer(buf) {
-  return !buf || buf.filter(function (request) { return _.isObj(request) }).length === 0
+  return buf.filter(function (request) { return _.isObj(request) }).length === 0
 }
 
 },{"./discovery-servers":6,"./error":7,"./requester":11,"./servers":16,"./utils":17}],6:[function(require,module,exports){
@@ -922,18 +926,6 @@ function Requester(resilient) {
     }
   }
 
-  function isErrorResponse(options, err, res) {
-    return (options.promiscuousErrors && isErrorStatus(err || res)) || isUnavailableStatus(err, res)
-  }
-
-  function resolve(res, cb) {
-    http.mapResponse(cb)(null, res, res.body)
-  }
-
-  function getOptions(type) {
-    return resilient.getOptions(type || 'service')
-  }
-
   return request
 }
 
@@ -947,8 +939,16 @@ function sendRequest(resilient, options, handler, buf) {
   }
 }
 
+function resolve(res, cb) {
+  http.mapResponse(cb)(null, res, res.body)
+}
+
 function getHttpClient(resilient) {
   return typeof resilient._httpClient === 'function' ? resilient._httpClient : http
+}
+
+function isErrorResponse(options, err, res) {
+  return (options.promiscuousErrors && isErrorStatus(err || res)) || isUnavailableStatus(err, res)
 }
 
 function isUnavailableStatus(err, res) {
@@ -969,11 +969,6 @@ function checkResponseStatus(code, res) {
 
 function getOperation(method) {
   return !method || method.toUpperCase() === 'GET' ? 'read' : 'write'
-}
-
-function mapResponse(res) {
-  if (res && res.body && !res.data) res.data = res.body
-  return res
 }
 
 },{"./defaults":4,"./discovery-servers":6,"./error":7,"./http":8,"./utils":17}],12:[function(require,module,exports){
