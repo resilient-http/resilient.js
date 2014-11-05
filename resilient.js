@@ -392,7 +392,8 @@ defaults.discovery = {
   refreshServers: null,
   parallel: true,
   cacheExpiration: 60 * 10 * 1000,
-  promiscuousErrors: true
+  promiscuousErrors: true,
+  discoverBeforeRetry: false // review
 }
 
 defaults.resilientOptions = [
@@ -865,10 +866,11 @@ function Requester(resilient) {
     options = _.clone(options)
 
     function nextServer(previousError) {
-      var server = serversList.shift()
+      var handler, server = serversList.shift()
       if (server) {
         options.url = _.join(server.url, options.basePath, options.path)
-        sendRequest(resilient, options, requestHandler(server, operation, options, cb, nextServer), buf)
+        handler = requestHandler(server, operation, options, cb, nextServer)
+        sendRequest(resilient, options, handler, buf)
       } else {
         handleMissingServers(servers, options, previousError, cb)
       }
@@ -882,8 +884,7 @@ function Requester(resilient) {
     if (options.retry) {
       retry = delayRetry(servers, options, cb)
       if (options.discoverBeforeRetry && resilient.hasDiscoveryServers()) {
-        resilient._updating = false
-        Requester.DiscoveryResolver.update(resilient, null, retry)
+        updateAndRetry(resilient, retry)
       } else {
         retry()
       }
@@ -935,6 +936,11 @@ function sendRequest(resilient, options, handler, buf) {
   } catch (err) {
     handler(err)
   }
+}
+
+function updateAndRetry(resilient, onRetry) {
+  resilient._updating = false
+  Requester.DiscoveryResolver.update(resilient, null, onRetry)
 }
 
 function resolve(res, cb) {
