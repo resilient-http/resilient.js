@@ -911,21 +911,21 @@ function Requester(resilient) {
     }
   }
 
-  function requestHandler(server, operation, options, cb, nextServer) {
-    var start = _.now()
-    return function requestReport(err, res) {
-      var latency = _.now() - start
-      if (isErrorResponse(options, err, res)) {
-        server.reportError(operation, latency)
-        nextServer(err)
-      } else {
-        server.report(operation, latency)
-        resolve(res, cb)
-      }
+  return request
+}
+
+function requestHandler(server, operation, options, cb, nextServer) {
+  var start = _.now()
+  return function requestReport(err, res) {
+    var latency = _.now() - start
+    if (isErrorResponse(options, err, res)) {
+      server.reportError(operation, latency)
+      nextServer(err)
+    } else {
+      server.report(operation, latency)
+      resolve(res, cb)
     }
   }
-
-  return request
 }
 
 function sendRequest(resilient, options, handler, buf) {
