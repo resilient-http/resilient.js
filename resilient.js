@@ -437,16 +437,6 @@ function DiscoveryResolver(resilient, options) {
     return (servers && servers.exists()) || false
   }
 
-  function resolver(cb) {
-    if (hasDiscoveryServers() === false) {
-      cb(new ResilientError(1002))
-    } else if (isUpdating()) {
-      resilient._queue.push(cb)
-    } else {
-      updateServers(cb)
-    }
-  }
-
   function updateServers(cb) {
     try {
       fetchServers(cb)
@@ -510,7 +500,15 @@ function DiscoveryResolver(resilient, options) {
     }
   }
 
-  return resolver
+  return function resolver(cb) {
+    if (hasDiscoveryServers() === false) {
+      cb(new ResilientError(1002))
+    } else if (isUpdating()) {
+      resilient._queue.push(cb)
+    } else {
+      updateServers(cb)
+    }
+  }
 }
 
 Requester.DiscoveryResolver = DiscoveryResolver
@@ -561,18 +559,6 @@ var ResilientError = require('./error')
 module.exports = DiscoveryServers
 
 function DiscoveryServers(resilient) {
-  function defineServers(cb) {
-    return function handler(err, res) {
-      if (err) {
-        handlerError(err, cb)
-      } else if (isValidResponse(res)) {
-        saveServers(res, cb)
-      } else {
-        cb(new ResilientError(1004, res))
-      }
-    }
-  }
-
   function saveServers(res, cb) {
     var data = res.data
     emit('refresh', data)
@@ -622,7 +608,17 @@ function DiscoveryServers(resilient) {
     resilient.emit('discovery:' + name, data, resilient)
   }
 
-  return defineServers
+  return function defineServers(cb) {
+    return function handler(err, res) {
+      if (err) {
+        handlerError(err, cb)
+      } else if (isValidResponse(res)) {
+        saveServers(res, cb)
+      } else {
+        cb(new ResilientError(1004, res))
+      }
+    }
+  }
 }
 
 function resolveWithError(err, cb) {
