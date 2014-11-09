@@ -4,6 +4,8 @@ var client = Resilient({
   discovery: {
     // define the hydra server base path and app name
     basePath: '/app/my-service',
+    // refresh path for dynamic servers
+    refreshBasePath: '/app/hydra',
     // hydra servers pool (aka discovery servers)
     servers: [
       'http://hydra1.server.net',

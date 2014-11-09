@@ -390,6 +390,7 @@ defaults.discovery = {
   enableRefreshServers: true,
   refreshServersInterval: 60 * 3 * 1000,
   refreshServers: null,
+  refreshOptions: null,
   parallel: true,
   cacheExpiration: 60 * 10 * 1000,
   promiscuousErrors: true,
@@ -405,6 +406,7 @@ defaults.resilientOptions = [
   'cache',
   'refreshInterval',
   'refreshServers',
+  'refreshOptions',
   'enableRefreshServers',
   'refreshServersInterval',
   'discoverBeforeRetry'
@@ -491,15 +493,6 @@ function DiscoveryResolver(resilient, options) {
     resilient._queue.splice(0)
   }
 
-  function closePendingRequests(buf) {
-    if (buf) {
-      if (!isEmptyBuffer(buf)) {
-        buf.forEach(closeAliveRequest)
-      }
-      buf.splice(0)
-    }
-  }
-
   return function resolver(cb) {
     if (hasDiscoveryServers() === false) {
       cb(new ResilientError(1002))
@@ -532,7 +525,14 @@ function addTimeStamp(options) {
   return _.extend(options.params || options.qs || {}, { _time: time })
 }
 
-function closeAliveRequest(client) {
+function closePendingRequests(buf) {
+  if (buf) {
+    if (!isEmptyBuffer(buf)) buf.forEach(closePendingRequest)
+    buf.splice(0)
+  }
+}
+
+function closePendingRequest(client) {
   if (client) {
     if (client.xhr) {
       if (client.xhr.readyState !== 4) {
@@ -1496,19 +1496,18 @@ _.extend = objIterator(extender)
 
 _.merge = objIterator(merger)
 
-
 function extender(target, key, value) {
   target[key] = value
 }
 
 function objIterator(iterator) {
   return function (target) {
-    _.each(slice.call(arguments, 1), eachArgument(target, iterator))
+    _.each(slice.call(arguments, 1), iterateEachArgument(target, iterator))
     return target
   }
 }
 
-function eachArgument(target, iterator) {
+function iterateEachArgument(target, iterator) {
   return function (obj) {
     if (_.isObj(obj)) {
       _.each(obj, function (key, value) {

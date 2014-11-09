@@ -327,7 +327,8 @@ Creates a POST request with optional custom options
 
 Creates a PUT request with optional custom options
 
-### resilient#del(path, options, callback)
+### resilient#delete(path, options, callback)
+Alias: `del`
 
 Creates a DELETE request with optional custom options
 
