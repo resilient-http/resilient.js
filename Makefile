@@ -1,10 +1,9 @@
 BROWSERIFY = node ./node_modules/browserify/bin/cmd.js
 MOCHA = ./node_modules/.bin/mocha
 UGLIFYJS = ./node_modules/.bin/uglifyjs
-BANNER = "/*! resilient - v0.1 - MIT License - https://github.com/resilient-http/resilient.js */"
-MOCHA_PHANTOM = ./node_modules/.bin/mocha-phantomjs
 CUCUMBER = ./node_modules/.bin/cucumber-js
-KARMA = ./node_modules/karma/bin/karma
+STUBBY = ./node_modules/.bin/stubby
+BANNER = "/*! resilient - v0.1 - MIT License - https://github.com/resilient-http/resilient.js */"
 
 define release
 	VERSION=`node -pe "require('./bower.json').version"` && \
@@ -48,8 +47,8 @@ mocha:
 loc:
 	wc -l resilient.js
 
-karma:
-	$(KARMA) start
+mock-server:
+	$(STUBBY) --data test/fixtures/mocks.yaml
 
 gzip:
 	gzip -c resilient.min.js | wc -c

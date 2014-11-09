@@ -1173,7 +1173,6 @@ function getRefreshOptions(options) {
   var refreshOptions = _.merge(defaultOptions, options.get('refreshOptions'), { discoverBeforeRetry: false })
   var basePath = getRefreshBasePath(options.get())
   if (basePath) refreshOptions.basePath = basePath
-  console.log(refreshOptions)
   return refreshOptions
 }
 
