@@ -342,7 +342,7 @@ function wrapCallback(resilient, cb) {
 }
 
 function mergeHttpOptions(resilient, options) {
-  var defaults = resilient.getOptions('service').get()
+  var defaults = resilient.options('service').get()
   return _.merge(defaults, options)
 }
 
@@ -509,7 +509,7 @@ function DiscoveryServers(resilient) {
   }
 
   function hasValidCache(cache) {
-    var valid = false, expires = resilient.getOptions('discovery').get('cacheExpiration')
+    var valid = false, expires = resilient.options('discovery').get('cacheExpiration')
     return cache && _.isArr(cache.data) && (_.now() - cache.time) > expires || false
   }
 
@@ -521,7 +521,7 @@ function DiscoveryServers(resilient) {
   }
 
   function isCacheEnabled() {
-    return resilient.getOptions('discovery').get('cache')
+    return resilient.options('discovery').get('cache')
   }
 
   function getCache() {
@@ -907,54 +907,59 @@ var EventBus = require('lil-event')
 module.exports = Resilient
 
 function Resilient(options) {
-  this._options = null
   this._queue = []
   this._updating = false
   this._client = new Client(this)
   this._cache = new Cache()
   this._httpClient = null
-  this.setOptions(options)
+  this._options = Options.define(options)
 }
 
 Resilient.prototype = Object.create(EventBus.prototype)
 
-Resilient.prototype.setOptions = function (type, options) {
+Resilient.prototype.options = function (type, options) {
   var store = null
   if (type && _.isObj(options)) {
     store = this._options.get(type)
     if (store instanceof Options) store.set(options)
-  } else {
+  } else if (_.isObj(type)) {
     this._options = Options.define(type)
+  } else if (typeof type === 'string') {
+    return this._options.get(type)
+  } else {
+    return this._options.get()
   }
 }
 
-Resilient.prototype.setDiscoveryOptions = function (options) {
-  this.setOptions('discovery', options)
-  return this
+Resilient.prototype.discoveryOptions = function (options) {
+  if (options) {
+    this.options('discovery', options)
+  } else {
+    return this.options('discovery').get()
+  }
 }
 
-Resilient.prototype.setServiceOptions = function (options) {
-  this.setOptions('service', options)
-  return this
-}
-
-Resilient.prototype.getOptions = function (type) {
-  return type ? this._options.get(type) : this._options
+Resilient.prototype.serviceOptions = function (options) {
+  if (options) {
+    this.options('service', options)
+  } else {
+    return this.options('service').get()
+  }
 }
 
 Resilient.prototype.getHttpOptions = function (type) {
-  var options = this._options.get(type || 'service')
+  var options = this.options(type || 'service')
   if (options) return options.http()
 }
 
 Resilient.prototype.servers = function (type) {
-  var options = this._options.get(type || 'service')
+  var options = this.options(type || 'service')
   if (options) return options.servers()
 }
 
 Resilient.prototype.discoveryServers = function (list) {
   if (_.isArr(list)) {
-    this._options.get('discovery').servers(list)
+    this.options('discovery').servers(list)
   } else {
     return this.servers('discovery')
   }
@@ -966,11 +971,11 @@ Resilient.prototype.hasDiscoveryServers = function () {
 }
 
 Resilient.prototype.setServers = function (list) {
-  this._options.get('service').servers(list)
+  this.options('service').servers(list)
   return this
 }
 
-Resilient.prototype.getUpdatedServers = Resilient.prototype.getLatestServers = function (options, cb) {
+Resilient.prototype.getUpdatedServers = Resilient.prototype.latestServers = function (options, cb) {
   cb = typeof options === 'function' ? options : cb
   if (this.discoveryServers()) {
     this.discoverServers(options, cb)
@@ -1006,14 +1011,14 @@ Resilient.prototype.restoreHttpClient = function () {
 }
 
 Resilient.prototype.areServersUpdated = function () {
-  return this.servers('service').lastUpdate() < (this.getOptions('discovery').get('refreshInterval') || 0)
+  return this.servers('service').lastUpdate() < (this.options('discovery').get('refreshInterval') || 0)
 }
 
 Resilient.prototype.balancer = function (options) {
   if (options) {
-    this._options.get('balancer').set(options)
+    this.options('balancer', options)
   } else {
-    return this.getOptions('balancer')
+    return this.options('balancer')
   }
 }
 
@@ -1088,7 +1093,7 @@ function Resolver(resilient, options, cb) {
   }
 
   function updateDiscoveryServers(next) {
-    var options = resilient.getOptions('discovery')
+    var options = resilient.options('discovery')
     var servers = getRefreshServers(options)
     var refreshOptions = getRefreshOptions(options)
     ServersDiscovery(resilient, refreshOptions, servers)(onRefreshServers(options, next))
@@ -1113,7 +1118,7 @@ function Resolver(resilient, options, cb) {
 
   function hasDiscoveryServersOutdated() {
     var outdate = false
-    var options = resilient.getOptions('discovery')
+    var options = resilient.options('discovery')
     var servers = options.get('servers')
     var refreshServers = options.get('refreshServers')
     if (options.get('enableRefreshServers')) {
@@ -1136,7 +1141,7 @@ function Resolver(resilient, options, cb) {
   function serversAreUpdated(servers) {
     var updated = true
     if (hasDiscoveryServers()) {
-      updated = servers.lastUpdate() < resilient.getOptions('discovery').get('refreshInterval')
+      updated = servers.lastUpdate() < resilient.options('discovery').get('refreshInterval')
     }
     return updated
   }
@@ -1314,7 +1319,7 @@ module.exports = ServersDiscovery
 
 function ServersDiscovery(resilient, options, servers) {
   function getOptions() {
-    return _.merge(resilient.getOptions('discovery').get(), options)
+    return _.merge(resilient.options('discovery').get(), options)
   }
 
   function getServers() {

@@ -4,23 +4,23 @@
 
 A browser and [node.js](http://nodejs.org) fault tolerant, dynamic servers auto discovery, balanced, highly configurable and full featured HTTP client for distributed and reactive systems architectures, stateless-oriented services, redundant high available HTTP APIs and more...
 
-It provides an elegant [programmatic API](#api) and featured [command-line interface](#cli)
+It provides an elegant [programmatic API](#api) and a featured [command-line interface](#command-line-interface)
 
 For more information about **Resilient**, see the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-it-works) and [compatible servers](http://resilient-http.github.io/#servers)
 
 ## Features
 
-- Smart failover and error handling with transparent server fallback
+- Reliable failover and error handling with transparent server fallback
 - Client-side based balancer using a simple best availability algorithm
 - Smart balancer logic based on server score (network latency, errors and succesfull requests)
-- Discern servers availability score calculus per read and write operations when balancing
+- Discern best servers based on scoring per read and write operations when balancing
 - Configurable balancer policy by weight
 - Built-in support for request/response interceptors
 - Built-in support for servers caching to improve reliability when fallback
 - Highly configurable (timeout, retry loop, cache, wait delay fallback...)
 - Parallel servers discovering for a faster availability
 - Cross engine (node.js and browsers. ES5 compliant)
-- Configurable alternative HTTP client to use as forward proxy (instead of using the embeded one)
+- Configurable external HTTP client to use as forward request proxy (instead of using the embedded one)
 - Dynamic servers discovery (based on the resilient [specification](https://github.com/resilient-http/spec) protocol)
 - Support promiscuous errors (400-499 response status code)
 - Support mock/stub working mode
@@ -68,9 +68,9 @@ It runs properly in any [ES5 compliant](http://kangax.github.io/compat-table/es5
 
 ## Related projects
 
-- [angular-resilient](https://github.com/h2non/angular-resilient) - Turn $http resilient and fault tolerant
-- [resilient-server](https://github.com/h2non/resilient-server) - node.js powered dummy HTTP discovery server for testing/development
 - [hydra](http://innotech.github.io/hydra) - Multicloud balancer and application discovery server
+- [resilient-server](https://github.com/h2non/resilient-server) - node.js powered dummy HTTP discovery server for testing/development
+- [angular-resilient](https://github.com/h2non/angular-resilient) - Turn $http resilient and fault tolerant
 
 ## How it works?
 
@@ -146,7 +146,31 @@ For more usage examples, see [examples](https://github.com/resilient-http/resili
 For a better approach, it's recommended you install `Resilient` as global package: `npm install -g resilient`
 
 ```bash
+Resilient HTTP client.
+Usage: node ./bin/resilient
 
+Examples:
+  resilient http://httpbin.org/user-agent
+  resilient http://httpbin.org/post -x POST \
+            -d '{"hello":"world"}' -h "Content-Type: application/json"
+  resilient /api/users -s http://server1.me,http://server2.me
+  resilient /api/users -d http://discover1.me,http://discover1.me
+  resilient --discover -d http://discover1.me,http://discover1.me
+
+Options:
+  --version, -v             Show the server version
+  --url, -u                 Complete request URL
+  --path, -p                Request path
+  --servers, -s             Define the service servers (comma separated)
+  --method, -x              HTTP method. Default GET
+  --header, -h              Define custom request header
+  --body, -b                HTTP request body data to send
+  --timeout, -t             Request timeout in miliseconds
+  --discover, -k            Get an updated list of servers asking for discovery servers
+  --discovery-servers, -d   Define the discovery service servers (comma separated)
+  --discovery-basepath, -l  Discovery servers base path
+  --debug                   Enable debug mode
+  --help                    Show help
 ```
 
 ## API
@@ -354,22 +378,17 @@ Creates a PATCH request with optional custom options
 
 Creates a HEAD request with optional custom options
 
-### resilient#setOptions(options)
+### resilient#options([ type|options, options ])
 
-Define custom options. See [supported options](#options)
+Getter/setter accessor for resilient options, optionally per type. See [supported options](#options)
 
-### resilient#getOptions()
-Return: `Options`
+### resilient#serviceOptions(options)
 
-Retrieve the current options
+Getter/setter accessor for [service-level options](#service)
 
-### resilient#setServiceOptions(options)
+### resilient#discoveryOptions(options)
 
-Define custom [service-level options](#service)
-
-### resilient#setDiscoveryOptions(options)
-
-Define custom [service-level options](#discovery)
+Getter/setter accessor for [discovery-level options](#discovery)
 
 ### resilient#getHttpOptions(type)
 Return: `object`
@@ -391,8 +410,8 @@ Return: `Resilient`
 
 Pass to the callback an up-to-date list of servers asking to discovery servers
 
-### resilient#getUpdatedServers([ options, ] cb)
-Return: `Resilient` Alias: `getLatestServers`
+### resilient#latestServers([ options, ] cb)
+Return: `Resilient` Alias: `getUpdatedServers`
 
 Pass to the callback an up-to-date list of servers, with or without discovery servers configured
 

@@ -53,7 +53,7 @@ describe('Refresh discovery servers', function () {
     })
 
     it('should define refresh servers', function () {
-      var servers = resilient.getOptions('discovery').get('refreshServers')
+      var servers = resilient.options('discovery').get('refreshServers')
       expect(servers.urls()).to.be.deep.equal([
         'http://refresh-unavailable',
         'http://refresh-timeout',
@@ -151,7 +151,7 @@ describe('Refresh discovery servers', function () {
     })
 
     it('should define refresh servers', function () {
-      var servers = resilient.getOptions('discovery').get('refreshServers')
+      var servers = resilient.options('discovery').get('refreshServers')
       expect(servers.urls()).to.be.deep.equal([
         'http://refresh-unavailable',
         'http://refresh-timeout',
