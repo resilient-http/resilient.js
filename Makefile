@@ -39,7 +39,7 @@ browserify:
 		--entry ./lib/index.js >> ./resilient.js
 
 uglify:
-	$(UGLIFYJS) resilient.js --mangle --preamble $(BANNER) --source-map resilient.min.js.map --source-map-url http://cdn.rawgit.com/h2non/resilient/$(VERSION)/resilient.min.js.map > resilient.min.js
+	$(UGLIFYJS) resilient.js --mangle --preamble $(BANNER) --source-map resilient.min.js.map --source-map-url http://cdn.rawgit.com/resilient/resilient.js/$(VERSION)/resilient.min.js.map > resilient.min.js
 
 mocha:
 	$(MOCHA) --reporter spec --ui tdd --timeout 2000
