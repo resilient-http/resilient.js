@@ -6,7 +6,7 @@ A browser and [node.js](http://nodejs.org) fault tolerant, dynamic servers auto 
 
 It provides an elegant [programmatic API](#api) and a featured [command-line interface](#command-line-interface)
 
-For more information about **Resilient**, see the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-it-works) and [compatible servers](http://resilient-http.github.io/#servers)
+For more information, see the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-it-works) and [compatible servers](http://resilient-http.github.io/#servers)
 
 ## Features
 
