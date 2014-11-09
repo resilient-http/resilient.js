@@ -14,8 +14,6 @@ var argv = yargs
   .example('resilient --discover -d http://discover1.me,http://discover1.me', '')
   .describe('version', 'Show the server version')
   .alias('version', 'v')
-  .describe('url', 'Complete request URL')
-  .alias('url', 'u')
   .describe('path', 'Request path')
   .alias('path', 'p')
   .describe('servers', 'Define the service servers (comma separated)')
