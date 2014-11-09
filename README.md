@@ -143,7 +143,7 @@ For more usage examples, see [examples](https://github.com/resilient-http/resili
 
 ## Command-line interface
 
-For a better approach, it's recommended you install `Resilient` as global package: `npm install -g resilient`
+For better approach, you could install `Resilient` as global package: `npm install -g resilient`
 
 ```bash
 Resilient HTTP client.
