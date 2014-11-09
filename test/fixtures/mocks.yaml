@@ -114,7 +114,7 @@
         {"hello": "world"}
 
 - request:
-    url: ^/server/([0-9])
+    url: ^/server/(.*)
     method:
       - POST
     headers:

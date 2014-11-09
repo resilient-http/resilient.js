@@ -873,7 +873,7 @@ function getHttpClient(resilient) {
 }
 
 function isErrorResponse(options, err, res) {
-  return (options.promiscuousErrors && isErrorStatus(err || res)) || isUnavailableStatus(err, res)
+  return (options.promiscuousErrors && (isErrorStatus(err || res)) || isUnavailableStatus(err, res))
 }
 
 function isUnavailableStatus(err, res) {
@@ -889,7 +889,7 @@ function isErrorStatus(res) {
 }
 
 function checkResponseStatus(code, res) {
-  return res && (res.code || res.status >= code || res.status === 0) || false
+  return (res && !res.code && (res.status >= code || res.status === 0)) || false
 }
 
 function getOperation(method) {
@@ -970,10 +970,6 @@ Resilient.prototype.setServers = function (list) {
   return this
 }
 
-Resilient.prototype.discoverServers = function (options, cb) {
-  return updateServers(this, 'fetch', options, cb)
-}
-
 Resilient.prototype.getUpdatedServers = Resilient.prototype.getLatestServers = function (options, cb) {
   cb = typeof options === 'function' ? options : cb
   if (this.discoveryServers()) {
@@ -984,6 +980,10 @@ Resilient.prototype.getUpdatedServers = Resilient.prototype.getLatestServers = f
     cb(new Error('Missing servers'))
   }
   return this
+}
+
+Resilient.prototype.discoverServers = function (options, cb) {
+  return updateServers(this, 'fetch', options, cb)
 }
 
 Resilient.prototype.updateServers = function (options, cb) {
@@ -1343,14 +1343,14 @@ function ServersDiscovery(resilient, options, servers) {
       if (index === 2 && servers.length > 3) {
         server = server.concat(servers.slice(3))
       }
-      Requester(resilient)(new Servers(server), options, onUpdateInParallel(index, buf, cb), buf)
+      Requester(resilient)(new Servers(server), options, onUpdateInParallel(servers, index, buf, cb), buf)
     })
   }
 
-  function onUpdateInParallel(index, buf, cb) {
+  function onUpdateInParallel(servers, index, buf, cb) {
     return function (err, res) {
       if (err) buf[index] = null
-      if (res || index === 2) {
+      if (res || index === (servers.length > 3 ? 2 : servers.length - 1)) {
         onUpdateServers(cb, buf)(err, res)
       }
     }

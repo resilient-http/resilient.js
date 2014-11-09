@@ -4,7 +4,9 @@
 
 A browser and [node.js](http://nodejs.org) fault tolerant, dynamic servers auto discovery, balanced, highly configurable and full featured HTTP client for distributed and reactive systems architectures, stateless-oriented services, redundant high available HTTP APIs and more...
 
-For more information about **Resilient**, see the [project site](http://resilient-http.github.io), and the [request flow algorithm](#how-it-works)
+It provides an elegant [programmatic API](#api) and featured [command-line interface](#cli)
+
+For more information about **Resilient**, see the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-it-works) and [compatible servers](http://resilient-http.github.io/#servers)
 
 ## Features
 
@@ -26,6 +28,7 @@ For more information about **Resilient**, see the [project site](http://resilien
 - Server-side dynamic client configuration support (experimental)
 - Support round robin scheduling algorithm for traffic distribution (experimental)
 - Lightweight library (7KB gzipped)
+- Provides command-line support
 
 ## Installation
 
@@ -134,6 +137,16 @@ client.get('/users', function (err, res) {
     console.log('Success:', res.data)
   }
 })
+```
+
+For more usage examples, see [examples](https://github.com/resilient-http/resilient.js/tree/master/examples) folder
+
+## Command-line interface
+
+For a better approach, it's recommended you install `Resilient` as global package: `npm install -g resilient`
+
+```bash
+
 ```
 
 ## API

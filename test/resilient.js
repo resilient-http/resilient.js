@@ -137,6 +137,28 @@ describe('Resilient', function () {
     })
   })
 
+  describe('invalid force discover servers due network error', function () {
+    var resilient = Resilient({
+      discovery: {
+        timeout: 50,
+        retry: 0,
+        servers: [
+          'http://127.0.0.1:9440',
+          'http://127.0.0.1:9440',
+          'http://127.0.0.1:9440'
+        ]
+      }
+    })
+
+    it('should fetch valid discovery servers', function (done) {
+      resilient.discoverServers({ basePath: '/discovery', method: 'POST' }, function (err, servers) {
+        expect(err).to.be.an('object')
+        expect(err.status).to.be.equal(1000)
+        done()
+      })
+    })
+  })
+
   describe('get updated servers', function () {
     var resilient = Resilient({
       discovery: {
@@ -286,7 +308,7 @@ describe('Resilient', function () {
       nock.cleanAll()
     })
 
-    it('should create an example application', function (done) {
+    it('should fire the retry event', function (done) {
       var counter = 0
       resilient.on('request:retry', function (options, servers) {
         expect(options.url).to.be.a('string')
