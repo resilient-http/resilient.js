@@ -137,6 +137,28 @@ describe('Resilient', function () {
     })
   })
 
+  describe('invalid force discover servers due network error', function () {
+    var resilient = Resilient({
+      discovery: {
+        timeout: 50,
+        retry: 0,
+        servers: [
+          'http://127.0.0.1:9440',
+          'http://127.0.0.1:9440',
+          'http://127.0.0.1:9440'
+        ]
+      }
+    })
+
+    it('should fetch valid discovery servers', function (done) {
+      resilient.discoverServers({ basePath: '/discovery', method: 'POST' }, function (err, servers) {
+        expect(err).to.be.an('object')
+        expect(err.status).to.be.equal(1000)
+        done()
+      })
+    })
+  })
+
   describe('get updated servers', function () {
     var resilient = Resilient({
       discovery: {
@@ -238,14 +260,14 @@ describe('Resilient', function () {
     })
 
     it('should subscribe to request start event and change request path', function () {
-      resilient.on('request.start', function (opts) {
+      resilient.on('request:start', function (opts) {
         opts.path = '/chuck'
         options = opts
       })
     })
 
     it('should subscribe to request finish event', function () {
-      resilient.on('request.finish', function (err, res) {
+      resilient.on('request:finish', function (err, res) {
         eventResponse = res
       })
     })
@@ -268,18 +290,43 @@ describe('Resilient', function () {
     })
   })
 
+  describe('request retry cycle event listener', function () {
+    var options, response, eventResponse
+    var resilient = Resilient({
+      retry: 3,
+      discovery: { servers: ['http://server/1', 'http://server/2', 'http://server/3'] }
+    })
+
+    before(function () {
+      nock('http://server')
+        .filteringPath(/\?(.*)/g, '')
+        .get('/')
+        .reply(503)
+    })
+
+    after(function () {
+      nock.cleanAll()
+    })
+
+    it('should fire the retry event', function (done) {
+      var counter = 0
+      resilient.on('request:retry', function (options, servers) {
+        expect(options.url).to.be.a('string')
+        expect(servers).to.be.an('object')
+        if ((counter += 1) === 3) done()
+      })
+      resilient.get('/test')
+    })
+  })
+
   describe('merge default and custom options', function () {
     var resilient = Resilient({
       service: {
-        headers: {
-          accept: 'application/json'
-        }
+        headers: { accept: 'application/json' }
       },
       discovery: {
         servers: ['http://server'],
-        headers: {
-          accept: 'application/json'
-        }
+        headers: { accept: 'application/json' }
       }
     })
 
@@ -323,7 +370,7 @@ describe('Resilient', function () {
       discovery: { servers: ['http://server'] }
     })
 
-    resilient.setHttpClient(httpClient)
+    resilient.useHttpClient(httpClient)
 
     before(function () {
       nock('http://server')

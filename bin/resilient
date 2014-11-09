@@ -1,0 +1,109 @@
+#!/usr/bin/env node
+'use strict'
+
+var Resilient = require('../')
+var util = require('util')
+var yargs = require('yargs')
+
+var argv = yargs
+  .usage('Resilient HTTP client.\nUsage: $0')
+  .example('resilient http://httpbin.org/user-agent', '')
+  .example('resilient http://httpbin.org/post -x POST \\\n            -d \'{"hello":"world"}\' -h "Content-Type: application/json"', '')
+  .example('resilient /api/users -s http://server1.me,http://server2.me', '')
+  .example('resilient /api/users -d http://discover1.me,http://discover1.me', '')
+  .example('resilient --discover -d http://discover1.me,http://discover1.me', '')
+  .describe('version', 'Show the server version')
+  .alias('version', 'v')
+  .describe('url', 'Complete request URL')
+  .alias('url', 'u')
+  .describe('path', 'Request path')
+  .alias('path', 'p')
+  .describe('servers', 'Define the service servers (comma separated)')
+  .alias('servers', 's')
+  .describe('method', 'HTTP method. Default GET')
+  .alias('method', 'x')
+  .describe('header', 'Define custom request header')
+  .alias('header', 'h')
+  .describe('body', 'HTTP request body data to send')
+  .alias('body', 'b')
+  .describe('timeout', 'Request timeout in miliseconds')
+  .alias('timeout', 't')
+  .describe('discover', 'Get an updated list of servers asking for discovery servers')
+  .alias('discover', 'k')
+  .describe('discovery-servers', 'Define the discovery service servers (comma separated)')
+  .alias('discovery-servers', 'd')
+  .describe('discovery-basepath', 'Discovery servers base path')
+  .alias('discovery-basepath', 'l')
+  .describe('debug', 'Enable debug mode')
+  .describe('help', 'Show help')
+  .argv
+
+if (argv.help) return echo(yargs.help())
+if (argv.version) return echo(Resilient.VERSION)
+
+try {
+  newResilientClient(buildOptions(argv))
+} catch (e) {
+  console.error(e)
+  if (argv.debug) console.error(e.stack)
+  process.exit(1)
+}
+
+function newResilientClient(options) {
+  var client = Resilient(options.config)
+  if (argv.discover) {
+    client.discoverServers(handler)
+  } else {
+    client.send(options.options, handler)
+  }
+}
+
+function handler(err, res) {
+  if (err) {
+    console.error('Error:', err.message) && process.exit(1)
+  } else if (res.status >= 400) {
+    console.error('Error status:', res.status)
+  } else {
+    echo(util.inspect(res.data || res, { depth: null }))
+  }
+}
+
+function buildOptions(argv) {
+  var config = { discovery: { retry: 0 } }
+  var options = { headers: {} }
+  options.path = argv._[0]
+
+  Object.keys(argv).forEach(function (key) {
+    var value = argv[key]
+    if (key.length > 3 && key.indexOf('-') === -1) {
+      if (/^discovery/.test(key)) {
+        key = key.replace('discovery', '').toLowerCase()
+        if (key === 'servers') value = parseServers(value)
+        config.discovery[key] = value
+      } else {
+        if (key === 'servers') {
+          config.service[key] = parseServers(value)
+        } else if (key === 'header') {
+          setHeader(value, options.headers)
+        } else {
+          options[key] = value
+        }
+      }
+    }
+  })
+
+  return { config: config, options: options }
+}
+
+function setHeader(header, headers) {
+  header = header.split(':').map(function (str) { return str.trim() })
+  headers[header[0]] = header[1]
+}
+
+function parseServers(value) {
+  return value.split(',').map(function (v) { return v.trim() })
+}
+
+function echo() {
+  console.log.apply(console, arguments)
+}

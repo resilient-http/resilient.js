@@ -5,5 +5,4 @@ bower_components
 bower.json
 component.json
 .travis.yml
-examples
 .gitignore

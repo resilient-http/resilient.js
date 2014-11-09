@@ -3,9 +3,9 @@ var Resilient = require('../')
 var client = Resilient({
   discovery: {
     servers: [
-      'http://localhost:8882/unavailable',
-      'http://localhost:8882/timeout',
-      'http://localhost:8882/valid'
+      'http://localhost:8882/discovery/unavailable',
+      'http://localhost:8882/discovery/timeout',
+      'http://localhost:8882/discovery/valid'
     ]
   }
 })

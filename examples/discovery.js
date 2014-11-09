@@ -6,16 +6,16 @@ var client = Resilient({
   },
   discovery: {
     servers: [
-      'http://localhost:8882/unavailable',
-      'http://localhost:8882/timeout',
-      'http://localhost:8882/valid'
+      'http://localhost:8882/discovery/unavailable',
+      'http://localhost:8882/discovery/timeout',
+      'http://localhost:8882/discovery/valid'
     ],
     timeout: 1000,
     parallel: false
   }
 })
 
-client('/hello', function (err, res) {
+client.get('/hello', function (err, res) {
   console.log('Error:', err)
   console.log('Response:', res)
   console.log('Body:', res.data)

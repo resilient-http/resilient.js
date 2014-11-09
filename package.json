@@ -1,7 +1,7 @@
 {
   "name": "resilient",
-  "description": "Fault tolerant, server discovering, balanced and full featured HTTP client for distributed systems",
-  "version": "0.1.12",
+  "description": "Fault tolerant, dynamic server discovery, balanced and full featured HTTP client for distributed and reactive systems",
+  "version": "0.2.0",
   "license": "MIT",
   "repository": "resilient-http/resilient.js",
   "author": "Tomas Aparicio",
@@ -23,19 +23,21 @@
   "scripts": {
     "test": "make test"
   },
+  "dependencies": {
+    "lil-event": "^0.1.3",
+    "request": "^2.47.0",
+    "yargs": "^1.3.2"
+  },
   "devDependencies": {
     "browserify": "^5.9.1",
     "chai": "^1.9.1",
     "cucumber": "^0.4.4",
+    "fw": "^0.1.2",
     "lodash": "^2.4.1",
     "mocha": "^1.21.3",
     "nock": "^0.48.0",
     "sinon": "^1.10.3",
     "stubby": "^0.2.6",
     "uglify-js": "^2.4.15"
-  },
-  "dependencies": {
-    "lil-event": "^0.1.3",
-    "request": "^2.44.0"
   }
 }

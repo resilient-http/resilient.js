@@ -2,31 +2,33 @@
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-A browser and [node.js](http://nodejs.org) fault tolerant, dynamic servers auto discovery, balanced, configurable and full featured HTTP client for distributed and reactive system architectures
+A browser and [node.js](http://nodejs.org) fault tolerant, dynamic servers auto discovery, balanced, highly configurable and full featured HTTP client for distributed and reactive systems architectures, stateless-oriented services, redundant high available HTTP APIs and more...
 
-For more information about **Resilient**, see the [project site](http://resilient-http.github.io) and the [request flow algorithm](#how-it-works)
+It provides an elegant [programmatic API](#api) and a featured [command-line interface](#command-line-interface)
 
-**Note**: resilient.js is still beta
+For more information about **Resilient**, see the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-it-works) and [compatible servers](http://resilient-http.github.io/#servers)
 
 ## Features
 
-- Fault tolerant, transparent server fallback
+- Reliable failover and error handling with transparent server fallback
 - Client-side based balancer using a simple best availability algorithm
 - Smart balancer logic based on server score (network latency, errors and succesfull requests)
-- Discern servers availability score calculus per read and write operations when balancing
+- Discern best servers based on scoring per read and write operations when balancing
 - Configurable balancer policy by weight
-- Built-in support for in/out traffic interceptors
-- Built-in support for servers caching to improve reliability in fallback
+- Built-in support for request/response interceptors
+- Built-in support for servers caching to improve reliability when fallback
 - Highly configurable (timeout, retry loop, cache, wait delay fallback...)
 - Parallel servers discovering for a faster availability
 - Cross engine (node.js and browsers. ES5 compliant)
-- Configurable alternative HTTP client to use as forward proxy (instead of using the embeded one)
+- Configurable external HTTP client to use as forward request proxy (instead of using the embedded one)
 - Dynamic servers discovery (based on the resilient [specification](https://github.com/resilient-http/spec) protocol)
-- Support mock/stub operation mode
+- Support promiscuous errors (400-499 response status code)
+- Support mock/stub working mode
 - Full HTTP features support (it uses internally [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http) for the browser)
 - Server-side dynamic client configuration support (experimental)
 - Support round robin scheduling algorithm for traffic distribution (experimental)
 - Lightweight library (7KB gzipped)
+- Provides command-line support
 
 ## Installation
 
@@ -50,7 +52,7 @@ component install resilient-http/resilient.js
 
 Or loading the script remotely
 ```html
-<script src="//cdn.rawgit.com/resilient-http/resilient.js/0.1.12/resilient.js"></script>
+<script src="//cdn.rawgit.com/resilient-http/resilient.js/0.2.0/resilient.js"></script>
 ```
 
 ## Environments
@@ -63,6 +65,12 @@ It runs properly in any [ES5 compliant](http://kangax.github.io/compat-table/es5
 - Safari >= 5
 - Opera >= 10
 - IE >= 9
+
+## Related projects
+
+- [hydra](http://innotech.github.io/hydra) - Multicloud balancer and application discovery server
+- [resilient-server](https://github.com/h2non/resilient-server) - node.js powered dummy HTTP discovery server for testing/development
+- [angular-resilient](https://github.com/h2non/angular-resilient) - Turn $http resilient and fault tolerant
 
 ## How it works?
 
@@ -131,6 +139,40 @@ client.get('/users', function (err, res) {
 })
 ```
 
+For more usage examples, see [examples](https://github.com/resilient-http/resilient.js/tree/master/examples) folder
+
+## Command-line interface
+
+For better approach, you could install `Resilient` as global package: `npm install -g resilient`
+
+```bash
+Resilient HTTP client.
+Usage: node ./bin/resilient
+
+Examples:
+  resilient http://httpbin.org/user-agent
+  resilient http://httpbin.org/post -x POST \
+            -d '{"hello":"world"}' -h "Content-Type: application/json"
+  resilient /api/users -s http://server1.me,http://server2.me
+  resilient /api/users -d http://discover1.me,http://discover1.me
+  resilient --discover -d http://discover1.me,http://discover1.me
+
+Options:
+  --version, -v             Show the server version
+  --url, -u                 Complete request URL
+  --path, -p                Request path
+  --servers, -s             Define the service servers (comma separated)
+  --method, -x              HTTP method. Default GET
+  --header, -h              Define custom request header
+  --body, -b                HTTP request body data to send
+  --timeout, -t             Request timeout in miliseconds
+  --discover, -k            Get an updated list of servers asking for discovery servers
+  --discovery-servers, -d   Define the discovery service servers (comma separated)
+  --discovery-basepath, -l  Discovery servers base path
+  --debug                   Enable debug mode
+  --help                    Show help
+```
+
 ## API
 
 ### resilient([ options ])
@@ -159,7 +201,6 @@ Resilient is a resource-oriented HTTP client, which could be ideal for RESTful W
 - **retryWait** `number` - Number of milisenconds to wait before retry attempt cycle. Default to `1000`
 - **discoverBeforeRetry** `boolean` - Force to refresh service servers list from asking for discovery servers on each retry attempt. You must define the discovery servers in order to use this feature. Default `true`
 - **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be treated as failed request, retrying it until it has valid status (when `retry` is enabled). Default `false`
-- **refresh** `number` - Server refresh interval time in miliseconds
 
 Specific shared configuration options for the HTTP client for final service requests
 
@@ -201,8 +242,14 @@ Specific configuration for discovery servers requests, behavior and logic
 - **cacheExpiration** `number` - Maximum cache time to live. Default to `10` minutes
 - **retry** `number` - Number of times to retry if all requests failed. Use `Infinity` for infinitive attemps. Default `3`
 - **retryWait** `number` - Number of milisenconds to wait before retry attempt cycle. Default to `1000`
-- **parallel** `boolean` - Discover servers in parallel. Improve service availability and decrement delay times. Recommended. Default `true`
-- **refresh** `number` - Servers list refresh interval in miliseconds. Default to `60000`
+- **parallel** `boolean` - Discover servers in parallel. This will improve service availability and decrement server lookup delays. Default `true`
+- **refreshInterval** `number` - Servers list time to live in miliseconds. Default to `60000`
+- **enableRefreshServers** `boolean` - Enable/disable discovery servers auto discovery and refresh. Default `true`
+- **refreshServersInterval** `number` - Discovery servers list time to live in miliseconds. Default to `180000`
+- **refreshServers** `array` - Servers list for auto discover and refresh discovery servers. This will enable automatically update discovery servers list asking for them selves to the following list of servers. Default `null`
+- **refreshPath** `string` - Discovery refresh servers lookup path. Example: `/app/hydra` for Hydra. Default `null`
+- **refreshOptions** `object` - Custom HTTP options for discovery servers refresh. By default inherits from discovery options
+- **useDiscoveryServersToRefresh** `boolean` - Enable/disable self-discovery using the discovery servers pools (useful for Hydra). This options requires the `refreshPath` be defined. Default `false`
 - **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be treated as failed request, retrying it until it has valid status (when `retry` is enabled). Default `false`
 
 Specific shared configuration options for the HTTP client for discovering processes
@@ -267,17 +314,17 @@ This could be useful really useful while using an interceptor pattern in order t
 You can intercept and change any request configuration and response subscribing to the pre/post hooks.
 Note that mutation is required, you should modify it by reference and do not lose it
 
-##### discovery.refresh
+##### discovery:refresh
 Arguments: `servers<Array>`, `resilient<Resilient>`
 
 Fired every time that servers are updated from discovery servers
 
-##### discovery.cache
+##### discovery:cache
 Arguments: `servers<Array>`, `resilient<Resilient>`
 
 Fired every time that servers cache is updated
 
-##### request.start
+##### request:start
 Arguments: `options<Object>`, `resilient<Resilient>`
 
 Fired as before a request is created
@@ -285,13 +332,21 @@ Fired as before a request is created
 You can intercept and modify the request options on the fly,
 but you must mutate the options `object` and do not lose its reference
 
-##### request.finish
+##### request:finish
 Arguments: `error<Error>`, `response<Object|http.IncomingMessage>`, `resilient<Resilient>`
 
 Fired as after a request was completed
 
 You can intercept and modify the error/response on the fly,
 but you must mutate the options `object` and do not lose its reference
+
+##### request:retry
+Arguments: `options<Object>`, `servers<Servers>`
+
+Fired as when a request performs a retry attempt cycle, that means all the previous requests has failed
+
+You can intercept and modify the `options` object on the fly,
+but you must mutate it and do not lose its reference
 
 ### resilient#send(path, options, callback)
 
@@ -310,7 +365,8 @@ Creates a POST request with optional custom options
 
 Creates a PUT request with optional custom options
 
-### resilient#del(path, options, callback)
+### resilient#delete(path, options, callback)
+Alias: `del`
 
 Creates a DELETE request with optional custom options
 
@@ -322,22 +378,17 @@ Creates a PATCH request with optional custom options
 
 Creates a HEAD request with optional custom options
 
-### resilient#setOptions(options)
+### resilient#options([ type|options, options ])
 
-Define custom options. See [supported options](#options)
+Getter/setter accessor for resilient options, optionally per type. See [supported options](#options)
 
-### resilient#getOptions()
-Return: `Options`
+### resilient#serviceOptions(options)
 
-Retrieve the current options
+Getter/setter accessor for [service-level options](#service)
 
-### resilient#setServiceOptions(options)
+### resilient#discoveryOptions(options)
 
-Define custom [service-level options](#service)
-
-### resilient#setDiscoveryOptions(options)
-
-Define custom [service-level options](#discovery)
+Getter/setter accessor for [discovery-level options](#discovery)
 
 ### resilient#getHttpOptions(type)
 Return: `object`
@@ -359,8 +410,8 @@ Return: `Resilient`
 
 Pass to the callback an up-to-date list of servers asking to discovery servers
 
-### resilient#getUpdatedServers([ options, ] cb)
-Return: `Resilient` Alias: `getLatestServers`
+### resilient#latestServers([ options, ] cb)
+Return: `Resilient` Alias: `getUpdatedServers`
 
 Pass to the callback an up-to-date list of servers, with or without discovery servers configured
 
@@ -369,7 +420,7 @@ Pass to the callback an up-to-date list of servers, with or without discovery se
 Force to update the servers list from discovery servers, if they are defined,
 optionally passing a callback to handle the result
 
-### resilient#setHttpClient(fn)
+### resilient#useHttpClient(fn)
 
 Use a custom HTTP client as proxy instead of the embedded `resilient` native HTTP client.
 
@@ -403,7 +454,7 @@ resilient.mock(function (options, cb) {
 })
 ```
 
-See also the `setHttpClient()` method for custom request proxy forward, also useful for testing with stubs/fakes
+See also the `useHttpClient()` method for custom request proxy forward, also useful for testing with stubs/fakes
 
 ### resilient#unmock()
 
@@ -429,7 +480,7 @@ See [supported events](#events)
 Force to flush servers cache
 
 ### resilient#client()
-Return: `Client`
+Return: `Client` Alias: `http`
 
 Returns an HTTP client-only interface.
 Useful to provide encapsulation from public usage and

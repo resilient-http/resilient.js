@@ -69,7 +69,7 @@ describe('Discovery', function () {
       nock('http://timeout')
         .filteringPath(function () { return '/' })
         .get('/')
-        .times(9)
+        .times(11)
         .delayConnection(100)
         .reply(503)
     })
@@ -306,4 +306,25 @@ describe('Discovery', function () {
     })
   })
 
+  describe('network error cannot resolve', function () {
+    var resilient = Resilient({
+      discovery: {
+        retry: 3,
+        retryWait: 50,
+        servers: [
+          'http://not-found',
+          'http://bad-request',
+          'http://forbidden'
+        ]
+      }
+    })
+
+    it('should not resolve with valid status', function (done) {
+      resilient.get('/hello', function (err, res) {
+        expect(err).to.be.an('object')
+        expect(err.status).to.be.equal(1000)
+        done()
+      })
+    })
+  })
 })
