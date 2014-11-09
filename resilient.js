@@ -395,8 +395,7 @@ defaults.discovery = {
   refreshServers: null,
   refreshOptions: null,
   refreshPath: null,
-  useDiscoveryServersToRefresh: false,
-  discoverBeforeRetry: false // review
+  useDiscoveryServersToRefresh: false
 }
 
 defaults.resilientOptions = [
