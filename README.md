@@ -210,8 +210,9 @@ Specific configuration for discovery servers requests, behavior and logic
 - **enableRefreshServers** `boolean` - Enable/disable discovery servers auto discovery and refresh. Default `true`
 - **refreshServersInterval** `number` - Discovery servers list time to live in miliseconds. Default to `180000`
 - **refreshServers** `array` - Servers list for auto discover and refresh discovery servers. This will enable automatically update discovery servers list asking for them selves to the following list of servers. Default `null`
-- **refreshPath** `string` - Discovery refresh servers lookup path. Example: `/app/hydra`. Default `null`
+- **refreshPath** `string` - Discovery refresh servers lookup path. Example: `/app/hydra` for Hydra. Default `null`
 - **refreshOptions** `object` - Custom HTTP options for discovery servers refresh. By default inherits from discovery options
+- **useDiscoveryServersToRefresh** `boolean` - Enable/disable self-discovery using the discovery servers pools (useful for Hydra). This options requires the `refreshPath` be defined. Default `false`
 - **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be treated as failed request, retrying it until it has valid status (when `retry` is enabled). Default `false`
 
 Specific shared configuration options for the HTTP client for discovering processes

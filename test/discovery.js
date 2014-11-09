@@ -69,7 +69,7 @@ describe('Discovery', function () {
       nock('http://timeout')
         .filteringPath(function () { return '/' })
         .get('/')
-        .times(9)
+        .times(11)
         .delayConnection(100)
         .reply(503)
     })

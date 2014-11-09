@@ -386,14 +386,16 @@ defaults.discovery = {
   retry: 3,
   retryWait: 1000,
   timeout: 2 * 1000,
-  refreshInterval: 60 * 1000,
-  enableRefreshServers: true,
-  refreshServersInterval: 60 * 3 * 1000,
-  refreshServers: null,
-  refreshOptions: null,
   parallel: true,
   cacheExpiration: 60 * 10 * 1000,
   promiscuousErrors: true,
+  enableRefreshServers: true,
+  refreshInterval: 60 * 1000,
+  refreshServersInterval: 60 * 3 * 1000,
+  refreshServers: null,
+  refreshOptions: null,
+  refreshPath: null,
+  useDiscoveryServersToRefresh: false,
   discoverBeforeRetry: false // review
 }
 
@@ -407,9 +409,11 @@ defaults.resilientOptions = [
   'refreshInterval',
   'refreshServers',
   'refreshOptions',
+  'refreshPath',
   'enableRefreshServers',
   'refreshServersInterval',
-  'discoverBeforeRetry'
+  'discoverBeforeRetry',
+  'useDiscoveryServersToRefresh'
 ]
 
 },{}],5:[function(require,module,exports){
@@ -1070,7 +1074,7 @@ function Resolver(resilient, options, cb) {
   function resolve(next) {
     if (hasDiscoveryServersOutdated()) {
       updateDiscoveryServers(next)
-    } else if (hasValidServers('service')) {
+    } else if (hasValidServers()) {
       next()
     } else if (hasDiscoveryServers()) {
       updateServers(next)
@@ -1085,9 +1089,8 @@ function Resolver(resilient, options, cb) {
 
   function updateDiscoveryServers(next) {
     var options = resilient.getOptions('discovery')
-    var defaultOptions = _.omit(options.get(), ['servers', 'refreshOptions'])
-    var refreshOptions = _.merge(defaultOptions, options.get('refreshOptions'), { discoverBeforeRetry: false })
-    var servers = options.get('refreshServers')
+    var servers = getRefreshServers(options)
+    var refreshOptions = getRefreshOptions(options)
     ServersDiscovery(resilient, refreshOptions, servers)(onRefreshServers(options, next))
   }
 
@@ -1113,11 +1116,13 @@ function Resolver(resilient, options, cb) {
     var options = resilient.getOptions('discovery')
     var servers = options.get('servers')
     var refreshServers = options.get('refreshServers')
-    if (refreshServers && refreshServers.exists()) {
-      if (servers && servers.exists()) {
-        outdate = servers.lastUpdate() > options.get('refreshServersInterval')
-      } else {
-        outdate = true
+    if (options.get('enableRefreshServers')) {
+      if (options.get('useDiscoveryServersToRefresh') || (refreshServers && refreshServers.exists())) {
+        if (servers && servers.exists()) {
+          outdate = servers.lastUpdate() > options.get('refreshServersInterval')
+        } else {
+          outdate = true
+        }
       }
     }
     return outdate
@@ -1157,6 +1162,25 @@ function Resolver(resilient, options, cb) {
     }
     Requester(resilient)(servers, options, cb)
   }
+}
+
+function getRefreshServers(options) {
+  return options.get('useDiscoveryServersToRefresh') ? options.get('servers') : options.get('refreshServers')
+}
+
+function getRefreshOptions(options) {
+  var defaultOptions = _.omit(options.get(), ['servers', 'refreshOptions'])
+  var refreshOptions = _.merge(defaultOptions, options.get('refreshOptions'), { discoverBeforeRetry: false })
+  var basePath = getRefreshBasePath(options.get())
+  if (basePath) refreshOptions.basePath = basePath
+  console.log(refreshOptions)
+  return refreshOptions
+}
+
+function getRefreshBasePath(options) {
+  return options && (options.refreshPath
+    || (options.refreshOptions && (options.refreshOptions.basePath)))
+    || false
 }
 
 },{"./discovery-resolver":5,"./error":7,"./requester":11,"./servers":17,"./servers-discovery":16,"./utils":18}],14:[function(require,module,exports){
