@@ -1,9 +1,9 @@
+VERSION = 0.2.1
 BROWSERIFY = node ./node_modules/browserify/bin/cmd.js
 MOCHA = ./node_modules/.bin/mocha
 UGLIFYJS = ./node_modules/.bin/uglifyjs
 CUCUMBER = ./node_modules/.bin/cucumber-js
 STUBBY = ./node_modules/.bin/stubby
-VERSION = 0.2.1
 BANNER = "/*! resilient - $(VERSION) - MIT License - https://github.com/resilient-http/resilient.js */"
 
 define release
