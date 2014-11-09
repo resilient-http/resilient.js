@@ -20,6 +20,12 @@
     "resilience",
     "reactive"
   ],
+  "directories": {
+    "lib": "./lib"
+  },
+  "bin": {
+    "resilient": "./bin/resilient"
+  },
   "scripts": {
     "test": "make test"
   },
