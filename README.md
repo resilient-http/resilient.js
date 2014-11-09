@@ -146,7 +146,6 @@ For more usage examples, see [examples](https://github.com/resilient-http/resili
 For better approach, you could install `Resilient` as global package: `npm install -g resilient`
 
 ```bash
-Resilient HTTP client.
 Usage: node ./bin/resilient
 
 Examples:
@@ -157,9 +156,9 @@ Examples:
   resilient /api/users -d http://discover1.me,http://discover1.me
   resilient --discover -d http://discover1.me,http://discover1.me
 
+
 Options:
   --version, -v             Show the server version
-  --url, -u                 Complete request URL
   --path, -p                Request path
   --servers, -s             Define the service servers (comma separated)
   --method, -x              HTTP method. Default GET
