@@ -243,10 +243,10 @@ Specific configuration for discovery servers requests, behavior and logic
 - **retryWait** `number` - Number of milisenconds to wait before retry attempt cycle. Default to `1000`
 - **parallel** `boolean` - Discover servers in parallel. This will improve service availability and decrement server lookup delays. Default `true`
 - **refreshInterval** `number` - Servers list time to live in miliseconds. Default to `60000`
-- **enableRefreshServers** `boolean` - Enable/disable discovery servers auto discovery and refresh. Default `true`
+- **enableRefreshServers** `boolean` - Enable/disable discovery servers auto refresh. This option requires `refreshServers` or `useDiscoveryServersToRefresh` be defined. Default `true`
+- **refreshServers** `array` - Servers list of refresh servers. This will enable automatically update discovery servers list asking for them selves to the following list of servers on each interval. Default `null`
 - **refreshServersInterval** `number` - Discovery servers list time to live in miliseconds. Default to `180000`
-- **refreshServers** `array` - Servers list to refresh discovery servers. This will enable automatically update discovery servers list asking for them selves to the following list of servers. Default `null`
-- **useDiscoveryServersToRefresh** `boolean` - Enable/disable self-discovery using the discovery servers pools (useful for Hydra). This options requires the `refreshPath` be defined. Default `false`
+- **useDiscoveryServersToRefresh** `boolean` - Enable/disable self-discovery using the discovery servers pools (useful for Hydra). This options requires the `refreshPath` option be defined. Default `false`
 - **refreshPath** `string` - Discovery refresh servers lookup path. Example: `/app/hydra` for Hydra. This options requires you define `useDiscoveryServersToRefresh` to `true`. Default `null`
 - **refreshOptions** `object` - Custom HTTP options for discovery servers refresh. By default inherits from discovery options
 - **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be treated as failed request, retrying it until it has valid status (when `retry` is enabled). Default `false`
