@@ -33,6 +33,7 @@ var argv = yargs
   .describe('discovery-basepath', 'Discovery servers base path')
   .alias('discovery-basepath', 'l')
   .describe('debug', 'Enable debug mode')
+  .alias('debug', 'D')
   .describe('help', 'Show help')
   .argv
 
@@ -62,7 +63,8 @@ function handler(err, res) {
   } else if (res.status >= 400) {
     console.error('Error status:', res.status)
   } else {
-    echo(util.inspect(res.data || res, { depth: null }))
+    if (argv.debug) printHeaders(res.headers)
+    if (res.data) echo(util.inspect(res.data, { depth: null }))
   }
 }
 
@@ -96,6 +98,13 @@ function buildOptions(argv) {
 function setHeader(header, headers) {
   header = header.split(':').map(function (str) { return str.trim() })
   headers[header[0]] = header[1]
+}
+
+function printHeaders(headers) {
+  Object.keys(headers).forEach(function (key) {
+    echo(key + ':', headers[key])
+  })
+  echo('')
 }
 
 function parseServers(value) {

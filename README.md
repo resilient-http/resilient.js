@@ -146,6 +146,7 @@ For more usage examples, see [examples](https://github.com/resilient-http/resili
 For better approach, you could install `Resilient` as global package: `npm install -g resilient`
 
 ```bash
+Resilient HTTP client (beta).
 Usage: node ./bin/resilient
 
 Examples:
@@ -168,7 +169,7 @@ Options:
   --discover, -k            Get an updated list of servers asking for discovery servers
   --discovery-servers, -d   Define the discovery service servers (comma separated)
   --discovery-basepath, -l  Discovery servers base path
-  --debug                   Enable debug mode
+  --debug, -D               Enable debug mode
   --help                    Show help
 ```
 
