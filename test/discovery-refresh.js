@@ -226,7 +226,6 @@ describe('Refresh discovery servers', function () {
 
     it('should update the discovery servers list', function (done) {
       resilient.get('/hello', function (err, res) {
-        console.log(err)
         expect(err).to.be.an('object')
         expect(err.status).to.be.equal(1001)
         expect(err.error.code).to.be.equal('ETIMEDOUT')
