@@ -6,7 +6,7 @@ var util = require('util')
 var yargs = require('yargs')
 
 var argv = yargs
-  .usage('Resilient HTTP client.\nUsage: $0')
+  .usage('Resilient HTTP client (beta).\nUsage: $0')
   .example('resilient http://httpbin.org/user-agent', '')
   .example('resilient http://httpbin.org/post -x POST \\\n            -d \'{"hello":"world"}\' -h "Content-Type: application/json"', '')
   .example('resilient /api/users -s http://server1.me,http://server2.me', '')

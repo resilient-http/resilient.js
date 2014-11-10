@@ -178,6 +178,63 @@ describe('Refresh discovery servers', function () {
     })
   })
 
+  describe('invalid refresh servers', function() {
+    var resilient = Resilient({
+      discovery: {
+        timeout: 50,
+        retry: 1,
+        retryWait: 10,
+        parallel: false,
+        useDiscoveryServersToRefresh: false,
+        servers: null,
+        refreshServers: [
+          'http://refresh-unavailable',
+          'http://refresh-timeout',
+          'http://refresh-unavailable',
+          'http://refresh-timeout',
+        ]
+      }
+    })
+
+    before(function () {
+      nock('http://unnavailable')
+        .filteringPath(/\?(.*)/g, '')
+        .get('/')
+        .times(8)
+        .reply(503)
+      nock('http://refresh-timeout')
+        .filteringPath(function () { return '/' })
+        .get('/')
+        .times(8)
+        .delayConnection(100)
+        .reply(500)
+    })
+
+    after(function () {
+      nock.cleanAll()
+    })
+
+    it('should define refresh servers', function () {
+      var servers = resilient.options('discovery').get('refreshServers')
+      expect(servers.urls()).to.be.deep.equal([
+        'http://refresh-unavailable',
+        'http://refresh-timeout',
+        'http://refresh-unavailable',
+        'http://refresh-timeout'
+      ])
+    })
+
+    it('should update the discovery servers list', function (done) {
+      resilient.get('/hello', function (err, res) {
+        console.log(err)
+        expect(err).to.be.an('object')
+        expect(err.status).to.be.equal(1001)
+        expect(err.error.code).to.be.equal('ETIMEDOUT')
+        done()
+      })
+    })
+  })
+
   describe('self discovery servers', function() {
     var resilient = Resilient({
       discovery: {
