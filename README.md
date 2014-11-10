@@ -353,27 +353,33 @@ Performs a custom request with the given options.
 It's recommended using as generic interface to make multi verb requests
 
 ### resilient#get(path, options, callback)
+Return `Client`
 
 Creates a GET request with optional custom options
 
 ### resilient#post(path, options, callback)
+Return `Client`
 
 Creates a POST request with optional custom options
+Return `Client`
 
 ### resilient#put(path, options, callback)
+Return `Client`
 
 Creates a PUT request with optional custom options
 
 ### resilient#delete(path, options, callback)
-Alias: `del`
+Alias: `del` | Return `Client`
 
 Creates a DELETE request with optional custom options
 
 ### resilient#patch(path, options, callback)
+Return `Client`
 
 Creates a PATCH request with optional custom options
 
 ### resilient#head(path, options, callback)
+Return `Client`
 
 Creates a HEAD request with optional custom options
 
