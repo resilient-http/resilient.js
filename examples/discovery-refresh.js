@@ -27,5 +27,4 @@ var client = Resilient({
 client.get('/hello', function (err, res) {
   console.log('Error:', err)
   console.log('Response:', res)
-  console.log('Body:', res.data)
 })
