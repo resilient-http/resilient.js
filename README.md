@@ -151,12 +151,13 @@ Usage: node ./bin/resilient
 
 Examples:
   resilient http://httpbin.org/user-agent
+  resilient http://httpbin.org/status/201 --status
+  resilient http://httpbin.org/get --debug
   resilient http://httpbin.org/post -x POST \
             -d '{"hello":"world"}' -h "Content-Type: application/json"
   resilient /api/users -s http://server1.me,http://server2.me
   resilient /api/users -d http://discover1.me,http://discover1.me
   resilient --discover -d http://discover1.me,http://discover1.me
-
 
 Options:
   --version, -v             Show the server version
@@ -170,6 +171,7 @@ Options:
   --discovery-servers, -d   Define the discovery service servers (comma separated)
   --discovery-basepath, -l  Discovery servers base path
   --debug, -D               Enable debug mode
+  --status, -S              Print the response status code
   --help                    Show help
 ```
 
