@@ -1,19 +1,16 @@
 var Resilient = require('../')
 
 var client = Resilient({
-  service: {
-    timeout: 1000
-  },
   discovery: {
-    servers: null,
+    servers: null, // note that discovery server are empty
     parallel: false,
-    timeout: 1000,
+    timeout: 100,
     refreshServers: [
       'http://localhost:8882/discovery/unavailable',
       'http://localhost:8882/discovery/timeout',
       'http://localhost:8882/discovery/valid'
     ],
-    refreshServersInterval: 1 * 1000,
+    refreshServersInterval: 1000,
     refreshOptions: {
       method: 'POST',
       headers: {
