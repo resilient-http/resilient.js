@@ -25,6 +25,7 @@
     ".*",
     "*.md",
     "*.sh",
+    "bin",
     "test",
     "lib",
     "examples",
