@@ -305,7 +305,7 @@ Client.prototype.put = function (path, options, cb) {
   return this.send(path, options, cb, 'PUT')
 }
 
-Client.prototype.del = Client.prototype.delete = function (path, options, cb) {
+Client.prototype.delete = Client.prototype.del = function (path, options, cb) {
   return this.send(path, options, cb, 'DELETE')
 }
 
@@ -924,10 +924,8 @@ Resilient.prototype.options = function (type, options) {
     if (store instanceof Options) store.set(options)
   } else if (_.isObj(type)) {
     this._options = Options.define(type)
-  } else if (typeof type === 'string') {
-    return this._options.get(type)
   } else {
-    return this._options.get()
+    return this._options.get(type)
   }
 }
 
@@ -1051,10 +1049,7 @@ function defineMethodProxy(verb) {
 }
 
 function updateServers(resilient, method, options, cb) {
-  if (typeof options === 'function') {
-    cb = options
-    options = null
-  }
+  if (typeof options === 'function') { cb = options; options = null }
   DiscoveryResolver[method](resilient, options, cb || _.noop)
   return resilient
 }
