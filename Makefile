@@ -4,7 +4,7 @@ MOCHA = ./node_modules/.bin/mocha
 UGLIFYJS = ./node_modules/.bin/uglifyjs
 CUCUMBER = ./node_modules/.bin/cucumber-js
 STUBBY = ./node_modules/.bin/stubby
-BANNER = "/*! resilient - $(VERSION) - MIT License - https://github.com/resilient-http/resilient.js */"
+BANNER = "/*! resilient - v$(VERSION) - MIT License - https://github.com/resilient-http/resilient.js */"
 
 define release
 	VERSION=`node -pe "require('./bower.json').version"` && \
