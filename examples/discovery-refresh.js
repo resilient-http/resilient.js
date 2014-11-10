@@ -13,7 +13,6 @@ var client = Resilient({
       'http://localhost:8882/discovery/timeout',
       'http://localhost:8882/discovery/valid'
     ],
-    refreshPath: '/discovery',
     refreshServersInterval: 1 * 1000,
     refreshOptions: {
       method: 'POST',
