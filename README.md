@@ -381,18 +381,28 @@ Creates a HEAD request with optional custom options
 
 Getter/setter accessor for resilient options, optionally per type. See [supported options](#options)
 
-### resilient#serviceOptions(options)
+### resilient#serviceOptions([ options ])
 
-Getter/setter accessor for [service-level options](#service)
+Getter/setter accessor for [service-level config options](#service)
 
-### resilient#discoveryOptions(options)
+### resilient#discoveryOptions([ options ])
 
-Getter/setter accessor for [discovery-level options](#discovery)
+Getter/setter accessor for [discovery-level config options](#discovery)
+
+### resilient#balancer([ options ])
+Return: `object`
+
+Getter/Setter accessor for [balancer-level config options](#balancer)
 
 ### resilient#getHttpOptions(type)
 Return: `object`
 
 Get a map of HTTP specific options
+
+### resilient#areServersUpdated()
+Return: `boolean`
+
+Returns `true` if servers are up-to-date. Otherwise `false`
 
 ### resilient#servers([ type = 'service' ])
 Return: `Servers`
@@ -484,17 +494,8 @@ Return: `Client` Alias: `http`
 Returns an HTTP client-only interface.
 Useful to provide encapsulation from public usage and
 avoid resilient-specific configuration methods to be called from the public API.
+
 This is a restricted API useful to provide for high-level developers
-
-### resilient#areServersUpdated()
-Return: `boolean`
-
-Returns `true` if servers are up-to-date. Otherwise `false`
-
-### resilient#balancer([ options ])
-Return: `object`
-
-Returns the current balancer config options
 
 ### resilient.VERSION
 Type: `string`
