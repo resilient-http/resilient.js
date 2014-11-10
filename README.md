@@ -45,7 +45,7 @@ Via [Bower](http://bower.io)
 bower install resilient
 ```
 
-Via [Component](http://component.io/)
+Via [Component](https://github.com/componentjs/component)
 ```bash
 component install resilient-http/resilient.js
 ```
