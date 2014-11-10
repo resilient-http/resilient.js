@@ -34,6 +34,8 @@ var argv = yargs
   .alias('discovery-basepath', 'l')
   .describe('debug', 'Enable debug mode')
   .alias('debug', 'D')
+  .describe('status', 'Print the response status code')
+  .alias('status', 'S')
   .describe('help', 'Show help')
   .argv
 
@@ -64,7 +66,8 @@ function handler(err, res) {
     console.error('Error status:', res.status)
   } else {
     if (argv.debug) printHeaders(res.headers)
-    if (res.data) echo(util.inspect(res.data, { depth: null }))
+    if (argv.status) echo(res.status)
+    else if (res.data) echo(util.inspect(res.data, { depth: null }))
   }
 }
 
