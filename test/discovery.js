@@ -312,9 +312,9 @@ describe('Discovery', function () {
         retry: 3,
         retryWait: 50,
         servers: [
-          'http://not-found',
-          'http://bad-request',
-          'http://forbidden'
+          'http://127.0.0.1:8198',
+          'http://127.0.0.1:8199',
+          'http://127.0.0.1:8100'
         ]
       }
     })
