@@ -1082,13 +1082,13 @@ function Resolver(resilient, options, cb) {
     } else if (hasValidServers()) {
       next()
     } else if (hasDiscoveryServers()) {
-      updateServers(next)
+      updateServersFromDiscovery(next)
     } else {
       next(new ResilientError(1002))
     }
   }
 
-  function updateServers(next) {
+  function updateServersFromDiscovery(next) {
     DiscoveryResolver.update(resilient, null, next)
   }
 
@@ -1104,37 +1104,41 @@ function Resolver(resilient, options, cb) {
       if (err) {
         next(new ResilientError(1001, err))
       } else if (res && res.data) {
-        options.servers(res.data)
-        if (!hasValidServers()) {
-          updateServers(next)
-        } else {
-          next()
-        }
+        refreshDiscoveryServers(res.data, options, next)
       } else {
         next(new ResilientError(1004, err))
       }
     }
   }
 
-  function hasDiscoveryServersOutdated() {
-    var outdate = false
+  function refreshDiscoveryServers(data, options, next) {
+    options.servers(data)
+    if (!hasValidServers()) {
+      updateServersFromDiscovery(next)
+    } else {
+      next()
+    }
+  }
+
+  function hasDiscoveryServersOutdated(options) {
+    var outdated = false
     var options = resilient.options('discovery')
     var servers = options.get('servers')
     var refreshServers = options.get('refreshServers')
     if (options.get('enableRefreshServers')) {
       if (options.get('useDiscoveryServersToRefresh') || (refreshServers && refreshServers.exists())) {
         if (servers && servers.exists()) {
-          outdate = servers.lastUpdate() > options.get('refreshServersInterval')
+          outdated = servers.lastUpdate() > options.get('refreshServersInterval')
         } else {
-          outdate = true
+          outdated = true
         }
       }
     }
-    return outdate
+    return outdated
   }
 
   function hasValidServers() {
-    var servers = resilient.servers('service')
+    var servers = resilient.servers()
     return servers && servers.exists() && serversAreUpdated(servers) || false
   }
 
@@ -1162,7 +1166,7 @@ function Resolver(resilient, options, cb) {
     var servers = resilient.servers()
     if (res && res._cache) {
       servers = new Servers(res.data)
-    } else if (!hasValidServers('service')) {
+    } else if (!hasValidServers()) {
       return cb(new ResilientError(1003))
     }
     Requester(resilient)(servers, options, cb)
