@@ -146,7 +146,7 @@ For more usage examples, see [examples](https://github.com/resilient-http/resili
 For better approach, you could install `Resilient` as global package: `npm install -g resilient`
 
 ```bash
-Resilient HTTP client (beta).
+Resilient HTTP client (beta)
 Usage: node ./bin/resilient
 
 Examples:
@@ -156,23 +156,27 @@ Examples:
   resilient http://httpbin.org/post -x POST \
             -d '{"hello":"world"}' -h "Content-Type: application/json"
   resilient /api/users -s http://server1.me,http://server2.me
-  resilient /api/users -d http://discover1.me,http://discover1.me
-  resilient --discover -d http://discover1.me,http://discover1.me
+  resilient /api/users -z http://discover1.me,http://discover1.me
+  resilient --discover -z http://discover1.me,http://discover1.me --discovery-timeout 500
+
 
 Options:
-  --version, -v             Show the server version
-  --path, -p                Request path
-  --servers, -s             Define the service servers (comma separated)
-  --method, -x              HTTP method. Default GET
-  --header, -h              Define custom request header
-  --body, -b                HTTP request body data to send
-  --timeout, -t             Request timeout in miliseconds
-  --discover, -k            Get an updated list of servers asking for discovery servers
-  --discovery-servers, -d   Define the discovery service servers (comma separated)
-  --discovery-basepath, -l  Discovery servers base path
-  --debug, -D               Enable debug mode
-  --status, -S              Print the response status code
-  --help                    Show help
+  --version, -v            Show the server version
+  --path, -p               Request path
+  --servers, -s            Define the service servers (comma separated)
+  --method, -x             HTTP method. Default GET
+  --header, -h             Define custom request header
+  --body, -b               HTTP request body data to send
+  --retry, -r              Request retry attempts. Default 0                            [default: 0]
+  --timeout, -t            Request timeout in miliseconds
+  --discover, -k           Get an updated list of servers asking for discovery servers
+  --discovery-servers, -z  Define the discovery service servers (comma separated)
+  --debug, -d              Enable debug mode
+  --discovery-retry, -R    Discovery servers retry attempts. Default to 0               [default: 0]
+  --discovery-timeout, -T  Discovery servers request maximum timeout in miliseconds
+  --info, -i               Show response headers and info
+  --status, -c             Print the response status code
+  --help                   Show help
 ```
 
 ## API
@@ -313,18 +317,18 @@ It will be an `Error` instance with the following members
 Resilient client has a built-in support for internal states event dispacher and notifier to the public interface
 
 This could be useful really useful while using an interceptor pattern in order to detect states and data changes.
-You can intercept and change any request configuration and response subscribing to the pre/post hooks.
-Note that mutation is required, you should modify it by reference and do not lose it
+You can intercept and change any request configuration and response subscribing to the pre/post process hooks.
+Note that mutation is required, you should modify the `object` by reference and do not lose it
 
-##### discovery:refresh
-Arguments: `servers<Array>`, `resilient<Resilient>`
-
-Fired every time that servers are updated from discovery servers
-
-##### discovery:cache
-Arguments: `servers<Array>`, `resilient<Resilient>`
-
-Fired every time that servers cache is updated
+```js
+// subscribe to every outgoing request before be dropped to the network
+resilientClient.on('request:start', function handler(options, resilient) {
+  // mutate the options, adding aditional headers
+  options.headers['API-Token'] = 'awesome!'
+  // unsubscribe example
+  resilientClient.off('request:start', handler)
+})
+```
 
 ##### request:start
 Arguments: `options<Object>`, `resilient<Resilient>`
@@ -349,6 +353,21 @@ Fired as when a request performs a retry attempt cycle, that means all the previ
 
 You can intercept and modify the `options` object on the fly,
 but you must mutate it and do not lose its reference
+
+##### servers:refresh
+Arguments: `servers<Array>`, `resilient<Resilient>`
+
+Fired every time that service servers list is updated from discovery servers
+
+##### servers:cache
+Arguments: `servers<Array>`, `resilient<Resilient>`
+
+Fired every time that servers cache is updated
+
+##### discovery:refresh
+Arguments: `servers<Array>`, `resilient<Resilient>`
+
+Fired every time that discovery servers are updated form refresh servers
 
 ### resilient#send(path, options, callback)
 

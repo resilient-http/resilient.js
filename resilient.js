@@ -529,7 +529,7 @@ function DiscoveryServers(resilient) {
   }
 
   function emit(name, data) {
-    resilient.emit('discovery:' + name, data, resilient)
+    resilient.emit('servers:' + name, data, resilient)
   }
 
   return function defineServers(cb) {
@@ -1039,8 +1039,7 @@ Resilient.prototype.unmock = function () {
   this.restoreHttpClient()
 }
 
-var VERBS = ['get', 'post', 'put', 'del', 'delete', 'head', 'patch']
-VERBS.forEach(defineMethodProxy)
+;['get', 'post', 'put', 'del', 'delete', 'head', 'patch'].forEach(defineMethodProxy)
 
 function defineMethodProxy(verb) {
   Resilient.prototype[verb] = function (path, options, cb) {
@@ -1107,6 +1106,7 @@ function Resolver(resilient, options, cb) {
   }
 
   function refreshDiscoveryServers(data, options, next) {
+    resilient.emit('discovery:refresh', data, resilient)
     options.servers(data)
     if (!hasValidServers()) {
       updateServersFromDiscovery(next)
@@ -1239,7 +1239,7 @@ Server.prototype.report = function (operation, latency, type) {
   var stats = this.getStats(operation)
   if (stats) {
     stats[type || 'request'] += 1
-    if (latency >= 0) {
+    if (latency > 0) {
       stats.latency = calculateAvgLatency(latency, stats)
     }
   }

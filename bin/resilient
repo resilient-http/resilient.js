@@ -12,8 +12,8 @@ var argv = yargs
   .example('resilient http://httpbin.org/get --debug', '')
   .example('resilient http://httpbin.org/post -x POST \\\n            -d \'{"hello":"world"}\' -h "Content-Type: application/json"', '')
   .example('resilient /api/users -s http://server1.me,http://server2.me', '')
-  .example('resilient /api/users -d http://discover1.me,http://discover1.me', '')
-  .example('resilient --discover -d http://discover1.me,http://discover1.me', '')
+  .example('resilient /api/users -z http://discover1.me,http://discover1.me', '')
+  .example('resilient --discover -z http://discover1.me,http://discover1.me --discovery-timeout 500', '')
   .describe('version', 'Show the server version')
   .alias('version', 'v')
   .describe('path', 'Request path')
@@ -26,18 +26,26 @@ var argv = yargs
   .alias('header', 'h')
   .describe('body', 'HTTP request body data to send')
   .alias('body', 'b')
+  .describe('retry', 'Request retry attempts. Default 0')
+  .alias('retry', 'r')
+  .default('retry', 0)
   .describe('timeout', 'Request timeout in miliseconds')
   .alias('timeout', 't')
   .describe('discover', 'Get an updated list of servers asking for discovery servers')
   .alias('discover', 'k')
   .describe('discovery-servers', 'Define the discovery service servers (comma separated)')
-  .alias('discovery-servers', 'd')
-  .describe('discovery-basepath', 'Discovery servers base path')
-  .alias('discovery-basepath', 'l')
+  .alias('discovery-servers', 'z')
   .describe('debug', 'Enable debug mode')
-  .alias('debug', 'D')
+  .describe('discovery-retry', 'Discovery servers retry attempts. Default to 0')
+  .alias('discovery-retry', 'R')
+  .default('discovery-retry', 0)
+  .describe('discovery-timeout', 'Discovery servers request maximum timeout in miliseconds')
+  .alias('discovery-timeout', 'T')
+  .alias('debug', 'd')
+  .describe('info', 'Show response headers and info')
+  .alias('info', 'i')
   .describe('status', 'Print the response status code')
-  .alias('status', 'S')
+  .alias('status', 'c')
   .describe('help', 'Show help')
   .argv
 
@@ -45,10 +53,10 @@ if (argv.help) return echo(yargs.help())
 if (argv.version) return echo(Resilient.VERSION)
 
 try {
-  newResilientClient(buildOptions(argv))
+  newResilientClient(buildOptions(parseIntegerParams(argv)))
 } catch (e) {
-  console.error(e)
-  if (argv.debug) console.error(e.stack)
+  echoError(e)
+  if (argv.debug) echoError(e.stack)
   process.exit(1)
 }
 
@@ -63,41 +71,56 @@ function newResilientClient(options) {
 
 function handler(err, res) {
   if (err) {
-    console.error('Error:', err.message) && process.exit(1)
-  } else if (res.status >= 400) {
-    console.error('Error status:', res.status)
+    echoError('Error:', err.message, err.status ? '(' + err.status + ')' : '') && process.exit(1)
+  } else if (res.status >= 400 && !argv.status) {
+    printToStderr(res)
   } else {
-    if (argv.debug) printHeaders(res.headers)
-    if (argv.status) echo(res.status)
-    else if (res.data) echo(util.inspect(res.data, { depth: null }))
+    printToStdout(res)
   }
 }
 
+function printToStdout(res) {
+  if (argv.debug || argv.info) printHeaders(res.headers)
+  if (argv.status || argv.info) echo('Status:', res.status)
+  else if (res.data) echo(util.inspect(res.data, { depth: null }))
+}
+
+function printToStderr(res) {
+  if (argv.debug || argv.info) printHeaders(res.headers)
+  echoError('Error status:', res.status)
+  process.exit(1)
+}
+
 function buildOptions(argv) {
-  var config = { discovery: { retry: 0 } }
+  var config = { discovery: {}, service: {} }
   var options = { headers: {} }
   options.path = argv._[0]
 
   Object.keys(argv).forEach(function (key) {
-    var value = argv[key]
     if (key.length > 3 && key.indexOf('-') === -1) {
-      if (/^discovery/.test(key)) {
-        key = key.replace('discovery', '').toLowerCase()
-        if (key === 'servers') value = parseServers(value)
-        config.discovery[key] = value
-      } else {
-        if (key === 'servers') {
-          config.service[key] = parseServers(value)
-        } else if (key === 'header') {
-          setHeader(value, options.headers)
-        } else {
-          options[key] = value
-        }
-      }
+      mapOptionField(config, options, key)
     }
   })
 
   return { config: config, options: options }
+}
+
+function mapOptionField(config, options, key) {
+  var value = argv[key]
+  if (/retry/.test(key)) value = parseInt(value, 10)
+  if (/^discovery/.test(key)) {
+    key = key.replace('discovery', '').toLowerCase()
+    if (key === 'servers') value = parseServers(value)
+    config.discovery[key] = value
+  } else {
+    if (key === 'servers' && typeof argv[key] !== 'boolean') {
+      config.service[key] = parseServers(value)
+    } else if (key === 'header') {
+      setHeader(value, options.headers)
+    } else {
+      options[key] = value
+    }
+  }
 }
 
 function setHeader(header, headers) {
@@ -116,6 +139,19 @@ function parseServers(value) {
   return value.split(',').map(function (v) { return v.trim() })
 }
 
+function parseIntegerParams(params) {
+  ['retry', 'timeout', 'discoveryTimeout', 'retryWait'].forEach(function (key) {
+    if (params.hasOwnProperty(key) && typeof params[key] !== 'boolean') {
+      params[key] = parseInt(params[key], 10)
+    }
+  })
+  return params
+}
+
 function echo() {
   console.log.apply(console, arguments)
+}
+
+function echoError() {
+  console.error.apply(console, arguments)
 }
