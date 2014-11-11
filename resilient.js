@@ -803,7 +803,7 @@ function Requester(resilient) {
   function handleMissingServers(servers, options, previousError, cb) {
     var retry = null
     if (options.retry) {
-      retry = delayRetry(servers, options, cb)
+      retry = delayBeforeRetry(servers, options, cb)
       if (options.discoverBeforeRetry && resilient.hasDiscoveryServers()) {
         updateAndRetry(resilient, retry)
       } else {
@@ -814,7 +814,7 @@ function Requester(resilient) {
     }
   }
 
-  function delayRetry(servers, options, cb) {
+  function delayBeforeRetry(servers, options, cb) {
     return function () {
       _.delay(retry(servers, options, cb), options.retryWait)
     }
