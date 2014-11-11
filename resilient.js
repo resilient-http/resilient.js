@@ -668,10 +668,9 @@ function mapRequestBody(options) {
 },{"../bower_components/lil-http/http":1,"./utils":18,"request":19}],9:[function(require,module,exports){
 var Resilient = require('./resilient')
 var Options = require('./options')
-var defaults = require('./defaults')
-var Servers = require('./servers')
 var Client = require('./client')
 var http = require('./http')
+var defaults = require('./defaults')
 
 module.exports = ResilientFactory
 
@@ -683,12 +682,11 @@ ResilientFactory.VERSION = '0.2.5'
 ResilientFactory.CLIENT_VERSION = http.VERSION
 ResilientFactory.defaults = defaults
 ResilientFactory.Options = Options
-ResilientFactory.Servers = Servers
 ResilientFactory.Client = Client
 ResilientFactory.request = http
 http.LIBRARY_VERSION = ResilientFactory.VERSION
 
-},{"./client":3,"./defaults":4,"./http":8,"./options":10,"./resilient":12,"./servers":17}],10:[function(require,module,exports){
+},{"./client":3,"./defaults":4,"./http":8,"./options":10,"./resilient":12}],10:[function(require,module,exports){
 var _ = require('./utils')
 var defaults = require('./defaults')
 var Servers = require('./servers')
