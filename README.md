@@ -323,7 +323,7 @@ Note that mutation is required, you should modify the `object` by reference and 
 ```js
 // subscribe to every outgoing request before be dropped to the network
 resilientClient.on('request:start', function handler(options, resilient) {
-  // mutate the options, adding aditional headers
+  // mutate the options, adding an aditional header
   options.headers['API-Token'] = 'awesome!'
   // unsubscribe example
   resilientClient.off('request:start', handler)
