@@ -2,7 +2,7 @@
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-A browser and [node.js](http://nodejs.org) fault tolerant, dynamic servers auto discovery, balanced, highly configurable and full featured HTTP client for distributed and reactive systems architectures, stateless-oriented services, redundant high available HTTP APIs and more...
+A browser and [node.js](http://nodejs.org) highly configurable and full featured HTTP client with awesome superpowers such as fault tolerant, dynamic server discovery, built-in balancer, round-robin requests distribution and more... designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless resource-oriented services, redundant high available HTTP APIs, multicloud services...
 
 It provides an elegant [programmatic API](#api) and a featured [command-line interface](#command-line-interface)
 
