@@ -1,4 +1,4 @@
-/*! resilient - v0.2.6 - MIT License - https://github.com/resilient-http/resilient.js */
+/*! resilient - v0.3.0 - MIT License - https://github.com/resilient-http/resilient.js */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.resilient=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /*! lil-http - v0.1 - MIT License - https://github.com/lil-js/http */
 (function (root, factory) {
@@ -278,7 +278,7 @@ Cache.prototype.set = function (key, data) {
 },{"./utils":18}],3:[function(require,module,exports){
 var _ = require('./utils')
 var resolver = require('./resolver')
-var http = require('./http')
+var http = require('./http-client')
 
 module.exports = Client
 
@@ -356,7 +356,7 @@ function plainHttpRequest(options, cb) {
   return http.call(null, options, cb)
 }
 
-},{"./http":8,"./resolver":13,"./utils":18}],4:[function(require,module,exports){
+},{"./http-client":8,"./resolver":13,"./utils":18}],4:[function(require,module,exports){
 var defaults = module.exports = {}
 
 defaults.service = {
@@ -669,7 +669,7 @@ function mapRequestBody(options) {
 var Resilient = require('./resilient')
 var Options = require('./options')
 var Client = require('./client')
-var http = require('./http')
+var http = require('./http-client')
 var defaults = require('./defaults')
 
 module.exports = ResilientFactory
@@ -686,7 +686,7 @@ ResilientFactory.Client = Client
 ResilientFactory.request = http
 http.LIBRARY_VERSION = ResilientFactory.VERSION
 
-},{"./client":3,"./defaults":4,"./http":8,"./options":10,"./resilient":12}],10:[function(require,module,exports){
+},{"./client":3,"./defaults":4,"./http-client":8,"./options":10,"./resilient":12}],10:[function(require,module,exports){
 var _ = require('./utils')
 var defaults = require('./defaults')
 var Servers = require('./servers')
@@ -763,7 +763,7 @@ function getRaw(options) {
 
 },{"./defaults":4,"./servers":17,"./utils":18}],11:[function(require,module,exports){
 var _ = require('./utils')
-var http = require('./http')
+var http = require('./http-client')
 var resilientOptions = require('./defaults').resilientOptions
 var ResilientError = require('./error')
 var DiscoveryServers = require('./discovery-servers')
@@ -894,7 +894,7 @@ function getOperation(method) {
   return !method || method.toUpperCase() === 'GET' ? 'read' : 'write'
 }
 
-},{"./defaults":4,"./discovery-servers":6,"./error":7,"./http":8,"./utils":18}],12:[function(require,module,exports){
+},{"./defaults":4,"./discovery-servers":6,"./error":7,"./http-client":8,"./utils":18}],12:[function(require,module,exports){
 var _ = require('./utils')
 var Options = require('./options')
 var Client = require('./client')

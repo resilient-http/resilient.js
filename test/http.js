@@ -1,6 +1,6 @@
 var expect = require('chai').expect
 var nock = require('nock')
-var http = require('../lib/http')
+var http = require('../lib/http-client')
 
 describe('HTTP', function () {
   describe('GET', function () {
