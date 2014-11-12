@@ -678,7 +678,7 @@ function ResilientFactory(options) {
   return new Resilient(options)
 }
 
-ResilientFactory.VERSION = '0.2.6'
+ResilientFactory.VERSION = '0.3.0'
 ResilientFactory.CLIENT_VERSION = http.VERSION
 ResilientFactory.defaults = defaults
 ResilientFactory.Options = Options
@@ -1177,9 +1177,9 @@ function getRefreshBasePath(options) {
 }
 
 },{"./discovery-resolver":5,"./error":7,"./requester":11,"./servers":17,"./servers-discovery":16,"./utils":18}],14:[function(require,module,exports){
-module.exports = resolver
+module.exports = createRound
 
-function resolver(arr, size) {
+function createRound(arr, size) {
   size = size < 2 ? 2 : size
   return roundRobin(size, arr)[getRandom(size)].shift()
 }
@@ -1215,18 +1215,17 @@ function getRandom(max) {
 
 },{}],15:[function(require,module,exports){
 var _ = require('./utils')
-var defaults = require('./defaults')
+var balancerOptions = require('./defaults').balancer
 
 module.exports = Server
 
-function Server(url, options) {
+function Server(url) {
   this.url = url
-  this.setStats()
-  this.setOptions(options)
+  this.statsStore = createServerStats()
 }
 
 Server.prototype.report = function (operation, latency, type) {
-  var stats = this.getStats(operation)
+  var stats = this.stats(operation)
   if (stats) {
     stats[type || 'request'] += 1
     if (latency > 0) {
@@ -1239,33 +1238,21 @@ Server.prototype.reportError = function (operation, latency) {
   this.report(operation, latency, 'error')
 }
 
-Server.prototype.getBalance = function (operation, options) {
-  var stats = this.getStats(operation)
-  var weight = this.applyOptions(options).weight
+Server.prototype.balance = function (operation, options) {
+  var stats = this.stats(operation)
+  var weight = balancerOptions.weight
   var total = stats.request + stats.error
   return total === 0 ? 0 : calculateStatsBalance(stats, weight, total)
 }
 
-Server.prototype.getStats = function (operation, field) {
-  var stats = this.stats[operation || 'read']
+Server.prototype.stats = function (operation, field) {
+  var stats = this.statsStore[operation || 'read']
   if (stats && field) stats = stats[field]
   return stats
 }
 
-Server.prototype.setOptions = function (options) {
-  this.options = _.merge({}, defaults.balancer, options)
-}
-
-Server.prototype.applyOptions = function (options) {
-  if (_.isObj(options)) {
-    return _.merge({}, this.options, options)
-  } else {
-    return this.options
-  }
-}
-
-Server.prototype.setStats = function (stats) {
-  this.stats = stats || {
+function createServerStats() {
+  return {
     read: createStats(),
     write: createStats()
   }
@@ -1422,7 +1409,7 @@ function Servers(servers) {
 
 Servers.prototype.sort = function (operation, options) {
   var servers = this.servers.slice(0).sort(function (x, y) {
-    return x.getBalance(operation, options) - y.getBalance(operation, options)
+    return x.balance(operation, options) - y.balance(operation, options)
   })
   return roundRobinSort(servers, options)
 }
