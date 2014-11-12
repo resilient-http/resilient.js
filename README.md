@@ -2,7 +2,7 @@
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-A browser and [node.js](http://nodejs.org) highly configurable and full featured HTTP client with awesome superpowers such as fault tolerant, dynamic server discovery, built-in balancer, round-robin requests distribution and more... designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless resource-oriented services, redundant high available HTTP APIs, multicloud services...
+A **browser** and **[node.js](http://nodejs.org)** highly **configurable** and **full featured HTTP client** with awesome superpowers such as **fault tolerant**, **dynamic server/s discovery**, built-in **balancer**, round-robin requests load distribution and more... designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless resource-oriented services, redundant high available HTTP APIs, multicloud services...
 
 It provides an elegant [programmatic API](#api) and a featured [command-line interface](#command-line-interface)
 
@@ -10,7 +10,7 @@ For more information, see the [project site](http://resilient-http.github.io), t
 
 ## Features
 
-- Reliable failover and error handling with transparent server fallback
+- Reliable failover and excellent error handling with transparent server fallback
 - Client-side based balancer using a simple best availability algorithm
 - Smart balancer logic based on server score (network latency, errors and succesfull requests)
 - Discern best servers based on scoring per read and write operations when balancing
@@ -28,7 +28,7 @@ For more information, see the [project site](http://resilient-http.github.io), t
 - Server-side dynamic client configuration support (experimental)
 - Support round robin scheduling algorithm for traffic distribution (experimental)
 - Lightweight library (7KB gzipped)
-- Provides command-line support
+- Featured cURL-inspired command-line interface
 
 ## Installation
 
