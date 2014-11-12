@@ -21,10 +21,6 @@ describe('Resilient', function () {
       expect(Resilient.request).to.be.a('function')
     })
 
-    it('should expose the Servers constructor', function () {
-      expect(Resilient.Servers).to.be.a('function')
-    })
-
     it('should expose the Options constructor', function () {
       expect(Resilient.Options).to.be.a('function')
     })

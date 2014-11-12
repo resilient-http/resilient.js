@@ -1,4 +1,4 @@
-/*! resilient - v0.1 - MIT License - https://github.com/resilient-http/resilient.js */
+/*! resilient - v0.2.6 - MIT License - https://github.com/resilient-http/resilient.js */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.resilient=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /*! lil-http - v0.1 - MIT License - https://github.com/lil-js/http */
 (function (root, factory) {
@@ -290,6 +290,7 @@ Client.prototype.send = function (path, options, cb, method) {
   var args = normalizeArgs.call(this, path, options, cb, method)
   this._resilient.emit('request:start', args[0], this._resilient)
   requester.apply(this, args)
+  return this
 }
 
 Client.prototype.get = function (path, options, cb) {
@@ -304,7 +305,7 @@ Client.prototype.put = function (path, options, cb) {
   return this.send(path, options, cb, 'PUT')
 }
 
-Client.prototype.del = Client.prototype.delete = function (path, options, cb) {
+Client.prototype.delete = Client.prototype.del = function (path, options, cb) {
   return this.send(path, options, cb, 'DELETE')
 }
 
@@ -389,14 +390,13 @@ defaults.discovery = {
   parallel: true,
   cacheExpiration: 60 * 10 * 1000,
   promiscuousErrors: true,
-  enableRefreshServers: true,
   refreshInterval: 60 * 1000,
+  enableRefreshServers: true,
   refreshServersInterval: 60 * 3 * 1000,
   refreshServers: null,
   refreshOptions: null,
   refreshPath: null,
-  useDiscoveryServersToRefresh: false,
-  discoverBeforeRetry: false // review
+  useDiscoveryServersToRefresh: false
 }
 
 defaults.resilientOptions = [
@@ -529,7 +529,7 @@ function DiscoveryServers(resilient) {
   }
 
   function emit(name, data) {
-    resilient.emit('discovery:' + name, data, resilient)
+    resilient.emit('servers:' + name, data, resilient)
   }
 
   return function defineServers(cb) {
@@ -668,10 +668,9 @@ function mapRequestBody(options) {
 },{"../bower_components/lil-http/http":1,"./utils":18,"request":19}],9:[function(require,module,exports){
 var Resilient = require('./resilient')
 var Options = require('./options')
-var defaults = require('./defaults')
-var Servers = require('./servers')
 var Client = require('./client')
 var http = require('./http')
+var defaults = require('./defaults')
 
 module.exports = ResilientFactory
 
@@ -679,16 +678,15 @@ function ResilientFactory(options) {
   return new Resilient(options)
 }
 
-ResilientFactory.VERSION = '0.2.0'
+ResilientFactory.VERSION = '0.2.6'
 ResilientFactory.CLIENT_VERSION = http.VERSION
 ResilientFactory.defaults = defaults
 ResilientFactory.Options = Options
-ResilientFactory.Servers = Servers
 ResilientFactory.Client = Client
 ResilientFactory.request = http
 http.LIBRARY_VERSION = ResilientFactory.VERSION
 
-},{"./client":3,"./defaults":4,"./http":8,"./options":10,"./resilient":12,"./servers":17}],10:[function(require,module,exports){
+},{"./client":3,"./defaults":4,"./http":8,"./options":10,"./resilient":12}],10:[function(require,module,exports){
 var _ = require('./utils')
 var defaults = require('./defaults')
 var Servers = require('./servers')
@@ -786,24 +784,24 @@ function Requester(resilient) {
     var serversList = getServersList(servers, operation)
     options = _.clone(options)
 
-    function nextServer(previousError) {
+    function requestNextServer(previousError) {
       var handler, server = serversList.shift()
       if (server) {
         options.url = _.join(server.url, options.basePath, options.path)
-        handler = requestHandler(server, operation, options, cb, nextServer)
+        handler = requestHandler(server, operation, options, cb, requestNextServer)
         sendRequest(resilient, options, handler, buf)
       } else {
         handleMissingServers(servers, options, previousError, cb)
       }
     }
 
-    nextServer()
+    requestNextServer()
   }
 
   function handleMissingServers(servers, options, previousError, cb) {
     var retry = null
     if (options.retry) {
-      retry = delayRetry(servers, options, cb)
+      retry = waitBeforeRetry(servers, options, cb)
       if (options.discoverBeforeRetry && resilient.hasDiscoveryServers()) {
         updateAndRetry(resilient, retry)
       } else {
@@ -814,7 +812,7 @@ function Requester(resilient) {
     }
   }
 
-  function delayRetry(servers, options, cb) {
+  function waitBeforeRetry(servers, options, cb) {
     return function () {
       _.delay(retry(servers, options, cb), options.retryWait)
     }
@@ -837,7 +835,7 @@ function Requester(resilient) {
 
 function requestHandler(server, operation, options, cb, nextServer) {
   var start = _.now()
-  return function requestReport(err, res) {
+  return function requestReporter(err, res) {
     var latency = _.now() - start
     if (isErrorResponse(options, err, res)) {
       server.reportError(operation, latency)
@@ -924,10 +922,8 @@ Resilient.prototype.options = function (type, options) {
     if (store instanceof Options) store.set(options)
   } else if (_.isObj(type)) {
     this._options = Options.define(type)
-  } else if (typeof type === 'string') {
-    return this._options.get(type)
   } else {
-    return this._options.get()
+    return this._options.get(type)
   }
 }
 
@@ -1041,8 +1037,7 @@ Resilient.prototype.unmock = function () {
   this.restoreHttpClient()
 }
 
-var VERBS = ['get', 'post', 'put', 'del', 'delete', 'head', 'patch']
-VERBS.forEach(defineMethodProxy)
+;['get', 'post', 'put', 'del', 'delete', 'head', 'patch'].forEach(defineMethodProxy)
 
 function defineMethodProxy(verb) {
   Resilient.prototype[verb] = function (path, options, cb) {
@@ -1051,10 +1046,7 @@ function defineMethodProxy(verb) {
 }
 
 function updateServers(resilient, method, options, cb) {
-  if (typeof options === 'function') {
-    cb = options
-    options = null
-  }
+  if (typeof options === 'function') { cb = options; options = null }
   DiscoveryResolver[method](resilient, options, cb || _.noop)
   return resilient
 }
@@ -1082,13 +1074,13 @@ function Resolver(resilient, options, cb) {
     } else if (hasValidServers()) {
       next()
     } else if (hasDiscoveryServers()) {
-      updateServers(next)
+      updateServersFromDiscovery(next)
     } else {
       next(new ResilientError(1002))
     }
   }
 
-  function updateServers(next) {
+  function updateServersFromDiscovery(next) {
     DiscoveryResolver.update(resilient, null, next)
   }
 
@@ -1104,37 +1096,38 @@ function Resolver(resilient, options, cb) {
       if (err) {
         next(new ResilientError(1001, err))
       } else if (res && res.data) {
-        options.servers(res.data)
-        if (!hasValidServers()) {
-          updateServers(next)
-        } else {
-          next()
-        }
+        refreshDiscoveryServers(res.data, options, next)
       } else {
         next(new ResilientError(1004, err))
       }
     }
   }
 
-  function hasDiscoveryServersOutdated() {
-    var outdate = false
+  function refreshDiscoveryServers(data, options, next) {
+    resilient.emit('discovery:refresh', data, resilient)
+    options.servers(data)
+    updateServersFromDiscovery(next)
+  }
+
+  function hasDiscoveryServersOutdated(options) {
+    var outdated = false
     var options = resilient.options('discovery')
     var servers = options.get('servers')
     var refreshServers = options.get('refreshServers')
     if (options.get('enableRefreshServers')) {
       if (options.get('useDiscoveryServersToRefresh') || (refreshServers && refreshServers.exists())) {
         if (servers && servers.exists()) {
-          outdate = servers.lastUpdate() > options.get('refreshServersInterval')
+          outdated = servers.lastUpdate() > options.get('refreshServersInterval')
         } else {
-          outdate = true
+          outdated = true
         }
       }
     }
-    return outdate
+    return outdated
   }
 
   function hasValidServers() {
-    var servers = resilient.servers('service')
+    var servers = resilient.servers()
     return servers && servers.exists() && serversAreUpdated(servers) || false
   }
 
@@ -1151,18 +1144,14 @@ function Resolver(resilient, options, cb) {
   }
 
   function resolver(err, res) {
-    if (err) {
-      cb(err)
-    } else {
-      handleResolution(res)
-    }
+    err ? cb(err) : handleResolution(res)
   }
 
   function handleResolution(res) {
     var servers = resilient.servers()
     if (res && res._cache) {
       servers = new Servers(res.data)
-    } else if (!hasValidServers('service')) {
+    } else if (!hasValidServers()) {
       return cb(new ResilientError(1003))
     }
     Requester(resilient)(servers, options, cb)
@@ -1240,7 +1229,7 @@ Server.prototype.report = function (operation, latency, type) {
   var stats = this.getStats(operation)
   if (stats) {
     stats[type || 'request'] += 1
-    if (latency) {
+    if (latency > 0) {
       stats.latency = calculateAvgLatency(latency, stats)
     }
   }
@@ -1427,7 +1416,7 @@ module.exports = Servers
 function Servers(servers) {
   this.servers = []
   this.updated = 0
-  this.force = false
+  this.forceUpdate = false
   this.set(servers)
 }
 
@@ -1455,7 +1444,7 @@ Servers.prototype.get = function () {
 
 Servers.prototype.set = function (servers) {
   if (_.isArr(servers)) {
-    this.force = true
+    this.forceUpdate = true
     this.updated = _.now()
     this.servers = mapServers.call(this, servers)
   }
@@ -1475,12 +1464,6 @@ Servers.prototype.exists = function () {
 
 Servers.prototype.size = function () {
   return this.servers.length
-}
-
-Servers.prototype.forceUpdate = function () {
-  var force = this.force
-  if (force) this.force = false
-  return force
 }
 
 Servers.prototype.urls = function () {

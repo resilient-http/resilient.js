@@ -6,46 +6,66 @@ var util = require('util')
 var yargs = require('yargs')
 
 var argv = yargs
-  .usage('Resilient HTTP client.\nUsage: $0')
+  .usage('Resilient command-line HTTP client\nUsage: $0')
   .example('resilient http://httpbin.org/user-agent', '')
+  .example('resilient http://httpbin.org/status/201 --status', '')
+  .example('resilient http://httpbin.org/get --debug', '')
   .example('resilient http://httpbin.org/post -x POST \\\n            -d \'{"hello":"world"}\' -h "Content-Type: application/json"', '')
   .example('resilient /api/users -s http://server1.me,http://server2.me', '')
-  .example('resilient /api/users -d http://discover1.me,http://discover1.me', '')
-  .example('resilient --discover -d http://discover1.me,http://discover1.me', '')
+  .example('resilient /api/users -z http://discover1.me,http://discover1.me', '')
+  .example('resilient --discover -z http://discover1.me,http://discover1.me --discovery-timeout 500', '')
   .describe('version', 'Show the server version')
   .alias('version', 'v')
-  .describe('url', 'Complete request URL')
-  .alias('url', 'u')
+  .boolean('version')
   .describe('path', 'Request path')
   .alias('path', 'p')
   .describe('servers', 'Define the service servers (comma separated)')
   .alias('servers', 's')
-  .describe('method', 'HTTP method. Default GET')
+  .describe('method', 'HTTP method')
   .alias('method', 'x')
+  .default('method', 'GET')
   .describe('header', 'Define custom request header')
   .alias('header', 'h')
   .describe('body', 'HTTP request body data to send')
   .alias('body', 'b')
+  .describe('retry', 'Request retry attempts')
+  .alias('retry', 'r')
+  .default('retry', 0)
   .describe('timeout', 'Request timeout in miliseconds')
   .alias('timeout', 't')
   .describe('discover', 'Get an updated list of servers asking for discovery servers')
   .alias('discover', 'k')
+  .boolean('discover')
   .describe('discovery-servers', 'Define the discovery service servers (comma separated)')
-  .alias('discovery-servers', 'd')
-  .describe('discovery-basepath', 'Discovery servers base path')
-  .alias('discovery-basepath', 'l')
+  .alias('discovery-servers', 'z')
+  .describe('discovery-retry', 'Discovery servers retry attempts')
+  .alias('discovery-retry', 'R')
+  .default('discovery-retry', 0)
+  .describe('discovery-timeout', 'Discovery servers request maximum timeout in miliseconds')
+  .alias('discovery-timeout', 'T')
+  .describe('info', 'Show response headers and info')
+  .alias('info', 'i')
+  .boolean('info')
+  .describe('status', 'Print the response status code')
+  .alias('status', 'c')
+  .boolean('status')
   .describe('debug', 'Enable debug mode')
+  .alias('debug', 'd')
+  .boolean('debug')
   .describe('help', 'Show help')
+  .alias('help', 'H')
+  .boolean('help')
   .argv
 
 if (argv.help) return echo(yargs.help())
 if (argv.version) return echo(Resilient.VERSION)
+if (process.argv.length < 3) return echo('Missing required arguments')
 
 try {
-  newResilientClient(buildOptions(argv))
+  newResilientClient(buildOptions(parseIntegerParams(argv)))
 } catch (e) {
-  console.error(e)
-  if (argv.debug) console.error(e.stack)
+  echoError(e)
+  if (argv.debug) echoError(e.stack)
   process.exit(1)
 }
 
@@ -60,39 +80,54 @@ function newResilientClient(options) {
 
 function handler(err, res) {
   if (err) {
-    console.error('Error:', err.message) && process.exit(1)
-  } else if (res.status >= 400) {
-    console.error('Error status:', res.status)
+    echoError('Error:', err.message, err.status ? '(' + err.status + ')' : '') && process.exit(1)
+  } else if (res.status >= 400 && !argv.status) {
+    printToStderr(res)
   } else {
-    echo(util.inspect(res.data || res, { depth: null }))
+    printToStdout(res)
   }
 }
 
+function printToStdout(res) {
+  if (argv.info) printInfo(res)
+  if (argv.status) echo(res.status)
+  else if (res.data) echo(util.inspect(res.data, { depth: null }))
+}
+
+function printToStderr(res) {
+  if (argv.info) printInfo(res)
+  echoError('Error status:', res.status)
+  process.exit(1)
+}
+
 function buildOptions(argv) {
-  var config = { discovery: { retry: 0 } }
+  var config = { discovery: {}, service: {} }
   var options = { headers: {} }
   options.path = argv._[0]
-
   Object.keys(argv).forEach(function (key) {
-    var value = argv[key]
     if (key.length > 3 && key.indexOf('-') === -1) {
-      if (/^discovery/.test(key)) {
-        key = key.replace('discovery', '').toLowerCase()
-        if (key === 'servers') value = parseServers(value)
-        config.discovery[key] = value
-      } else {
-        if (key === 'servers') {
-          config.service[key] = parseServers(value)
-        } else if (key === 'header') {
-          setHeader(value, options.headers)
-        } else {
-          options[key] = value
-        }
-      }
+      mapOptionField(config, options, key)
     }
   })
-
   return { config: config, options: options }
+}
+
+function mapOptionField(config, options, key) {
+  var value = argv[key]
+  if (/retry/.test(key)) value = parseInt(value, 10)
+  if (/^discovery/.test(key)) {
+    key = key.replace('discovery', '').toLowerCase()
+    if (key === 'servers') value = parseServers(value)
+    config.discovery[key] = value
+  } else {
+    if (key === 'servers' && typeof argv[key] !== 'boolean') {
+      config.service[key] = parseServers(value)
+    } else if (key === 'header') {
+      setHeader(value, options.headers)
+    } else {
+      options[key] = value
+    }
+  }
 }
 
 function setHeader(header, headers) {
@@ -100,10 +135,31 @@ function setHeader(header, headers) {
   headers[header[0]] = header[1]
 }
 
+function printInfo(res) {
+  echo('HTTP/' + res.httpVersion, res.status)
+  Object.keys(res.headers).forEach(function (key) {
+    echo(key + ':', res.headers[key])
+  })
+  echo('')
+}
+
 function parseServers(value) {
   return value.split(',').map(function (v) { return v.trim() })
 }
 
+function parseIntegerParams(params) {
+  ['retry', 'timeout', 'discoveryTimeout', 'retryWait'].forEach(function (key) {
+    if (params.hasOwnProperty(key) && typeof params[key] !== 'boolean') {
+      params[key] = parseInt(params[key], 10)
+    }
+  })
+  return params
+}
+
 function echo() {
   console.log.apply(console, arguments)
+}
+
+function echoError() {
+  console.error.apply(console, arguments)
 }

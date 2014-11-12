@@ -2,15 +2,15 @@
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-A browser and [node.js](http://nodejs.org) fault tolerant, dynamic servers auto discovery, balanced, highly configurable and full featured HTTP client for distributed and reactive systems architectures, stateless-oriented services, redundant high available HTTP APIs and more...
+A **browser** and **[node.js](http://nodejs.org)** highly **configurable** and **full featured HTTP client** with awesome **superpowers** such as **fault tolerant**, **dynamic server/s discovery**, built-in **balancer**, round-robin requests **load distribution** and more... designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless resource-oriented services, redundant high available HTTP APIs, multicloud services...
 
 It provides an elegant [programmatic API](#api) and a featured [command-line interface](#command-line-interface)
 
-For more information about **Resilient**, see the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-it-works) and [compatible servers](http://resilient-http.github.io/#servers)
+For more information, see the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-it-works) and [compatible servers](http://resilient-http.github.io/#servers)
 
 ## Features
 
-- Reliable failover and error handling with transparent server fallback
+- Reliable failover and excellent error handling with transparent server fallback
 - Client-side based balancer using a simple best availability algorithm
 - Smart balancer logic based on server score (network latency, errors and succesfull requests)
 - Discern best servers based on scoring per read and write operations when balancing
@@ -28,7 +28,7 @@ For more information about **Resilient**, see the [project site](http://resilien
 - Server-side dynamic client configuration support (experimental)
 - Support round robin scheduling algorithm for traffic distribution (experimental)
 - Lightweight library (7KB gzipped)
-- Provides command-line support
+- Featured cURL-inspired command-line interface
 
 ## Installation
 
@@ -45,14 +45,14 @@ Via [Bower](http://bower.io)
 bower install resilient
 ```
 
-Via [Component](http://component.io/)
+Via [Component](https://github.com/componentjs/component)
 ```bash
 component install resilient-http/resilient.js
 ```
 
 Or loading the script remotely
 ```html
-<script src="//cdn.rawgit.com/resilient-http/resilient.js/0.2.0/resilient.js"></script>
+<script src="//cdn.rawgit.com/resilient-http/resilient.js/0.2.6/resilient.js"></script>
 ```
 
 ## Environments
@@ -146,31 +146,37 @@ For more usage examples, see [examples](https://github.com/resilient-http/resili
 For better approach, you could install `Resilient` as global package: `npm install -g resilient`
 
 ```bash
-Resilient HTTP client.
+Resilient command-line HTTP client
 Usage: node ./bin/resilient
 
 Examples:
   resilient http://httpbin.org/user-agent
+  resilient http://httpbin.org/status/201 --status
+  resilient http://httpbin.org/get --debug
   resilient http://httpbin.org/post -x POST \
             -d '{"hello":"world"}' -h "Content-Type: application/json"
   resilient /api/users -s http://server1.me,http://server2.me
-  resilient /api/users -d http://discover1.me,http://discover1.me
-  resilient --discover -d http://discover1.me,http://discover1.me
+  resilient /api/users -z http://discover1.me,http://discover1.me
+  resilient --discover -z http://discover1.me,http://discover1.me --discovery-timeout 500
+
 
 Options:
-  --version, -v             Show the server version
-  --url, -u                 Complete request URL
-  --path, -p                Request path
-  --servers, -s             Define the service servers (comma separated)
-  --method, -x              HTTP method. Default GET
-  --header, -h              Define custom request header
-  --body, -b                HTTP request body data to send
-  --timeout, -t             Request timeout in miliseconds
-  --discover, -k            Get an updated list of servers asking for discovery servers
-  --discovery-servers, -d   Define the discovery service servers (comma separated)
-  --discovery-basepath, -l  Discovery servers base path
-  --debug                   Enable debug mode
-  --help                    Show help
+  --version, -v            Show the server version
+  --path, -p               Request path
+  --servers, -s            Define the service servers (comma separated)
+  --method, -x             HTTP method. Default GET
+  --header, -h             Define custom request header
+  --body, -b               HTTP request body data to send
+  --retry, -r              Request retry attempts. [default: 0]
+  --timeout, -t            Request timeout in miliseconds
+  --discover, -k           Get an updated list of servers asking for discovery servers
+  --discovery-servers, -z  Define the discovery service servers (comma separated)
+  --discovery-retry, -R    Discovery servers retry attempts. [default: 0]
+  --discovery-timeout, -T  Discovery servers request maximum timeout in miliseconds
+  --info, -i               Show response headers and info
+  --status, -c             Print the response status code
+  --debug, -d              Enable debug mode
+  --help, -H               Show help
 ```
 
 ## API
@@ -244,12 +250,12 @@ Specific configuration for discovery servers requests, behavior and logic
 - **retryWait** `number` - Number of milisenconds to wait before retry attempt cycle. Default to `1000`
 - **parallel** `boolean` - Discover servers in parallel. This will improve service availability and decrement server lookup delays. Default `true`
 - **refreshInterval** `number` - Servers list time to live in miliseconds. Default to `60000`
-- **enableRefreshServers** `boolean` - Enable/disable discovery servers auto discovery and refresh. Default `true`
+- **enableRefreshServers** `boolean` - Enable/disable discovery servers auto refresh. This option requires `refreshServers` or `useDiscoveryServersToRefresh` be defined. Default `true`
+- **refreshServers** `array` - Servers list of refresh servers. This will enable automatically update discovery servers list asking for them selves to the following list of servers on each interval. Default `null`
 - **refreshServersInterval** `number` - Discovery servers list time to live in miliseconds. Default to `180000`
-- **refreshServers** `array` - Servers list for auto discover and refresh discovery servers. This will enable automatically update discovery servers list asking for them selves to the following list of servers. Default `null`
-- **refreshPath** `string` - Discovery refresh servers lookup path. Example: `/app/hydra` for Hydra. Default `null`
+- **useDiscoveryServersToRefresh** `boolean` - Enable/disable self-discovery using the discovery servers pools (useful for Hydra). This options requires the `refreshPath` option be defined. Default `false`
+- **refreshPath** `string` - Discovery refresh servers lookup path. Example: `/app/hydra` for Hydra. This options requires you define `useDiscoveryServersToRefresh` to `true`. Default `null`
 - **refreshOptions** `object` - Custom HTTP options for discovery servers refresh. By default inherits from discovery options
-- **useDiscoveryServersToRefresh** `boolean` - Enable/disable self-discovery using the discovery servers pools (useful for Hydra). This options requires the `refreshPath` be defined. Default `false`
 - **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be treated as failed request, retrying it until it has valid status (when `retry` is enabled). Default `false`
 
 Specific shared configuration options for the HTTP client for discovering processes
@@ -293,7 +299,7 @@ It will be an `Error` instance with the following members
 - **code** `number` - Optional error code (node.js only)
 - **stack** `string` - Optional stack error trace
 - **request** `object` - Original response object (node.js only). Optional
-- **error** `Error` - Original throwed error object (node.js only). Optional
+- **error** `Error` - Original throwed Error instance (node.js only). Optional
 - **xhr** `XMLHttpRequest` - XHR native instance (browser only)
 
 ##### Built-in error codes
@@ -311,18 +317,18 @@ It will be an `Error` instance with the following members
 Resilient client has a built-in support for internal states event dispacher and notifier to the public interface
 
 This could be useful really useful while using an interceptor pattern in order to detect states and data changes.
-You can intercept and change any request configuration and response subscribing to the pre/post hooks.
-Note that mutation is required, you should modify it by reference and do not lose it
+You can intercept and change any request configuration and response subscribing to the pre/post process hooks.
+Note that mutation is required, you should modify the `object` by reference and do not lose it
 
-##### discovery:refresh
-Arguments: `servers<Array>`, `resilient<Resilient>`
-
-Fired every time that servers are updated from discovery servers
-
-##### discovery:cache
-Arguments: `servers<Array>`, `resilient<Resilient>`
-
-Fired every time that servers cache is updated
+```js
+// subscribe to every outgoing request before be dropped to the network
+resilientClient.on('request:start', function handler(options, resilient) {
+  // mutate the options, adding an aditional header
+  options.headers['API-Token'] = 'awesome!'
+  // unsubscribe example
+  resilientClient.off('request:start', handler)
+})
+```
 
 ##### request:start
 Arguments: `options<Object>`, `resilient<Resilient>`
@@ -348,33 +354,54 @@ Fired as when a request performs a retry attempt cycle, that means all the previ
 You can intercept and modify the `options` object on the fly,
 but you must mutate it and do not lose its reference
 
+##### servers:refresh
+Arguments: `servers<Array>`, `resilient<Resilient>`
+
+Fired every time that service servers list is updated from discovery servers
+
+##### servers:cache
+Arguments: `servers<Array>`, `resilient<Resilient>`
+
+Fired every time that servers cache is updated
+
+##### discovery:refresh
+Arguments: `servers<Array>`, `resilient<Resilient>`
+
+Fired every time that discovery servers are updated form refresh servers
+
 ### resilient#send(path, options, callback)
 
 Performs a custom request with the given options.
 It's recommended using as generic interface to make multi verb requests
 
 ### resilient#get(path, options, callback)
+Return `Client`
 
 Creates a GET request with optional custom options
 
 ### resilient#post(path, options, callback)
+Return `Client`
 
 Creates a POST request with optional custom options
+Return `Client`
 
 ### resilient#put(path, options, callback)
+Return `Client`
 
 Creates a PUT request with optional custom options
 
 ### resilient#delete(path, options, callback)
-Alias: `del`
+Alias: `del` | Return `Client`
 
 Creates a DELETE request with optional custom options
 
 ### resilient#patch(path, options, callback)
+Return `Client`
 
 Creates a PATCH request with optional custom options
 
 ### resilient#head(path, options, callback)
+Return `Client`
 
 Creates a HEAD request with optional custom options
 
@@ -382,23 +409,33 @@ Creates a HEAD request with optional custom options
 
 Getter/setter accessor for resilient options, optionally per type. See [supported options](#options)
 
-### resilient#serviceOptions(options)
+### resilient#serviceOptions([ options ])
 
-Getter/setter accessor for [service-level options](#service)
+Getter/setter accessor for [service-level config options](#service)
 
-### resilient#discoveryOptions(options)
+### resilient#discoveryOptions([ options ])
 
-Getter/setter accessor for [discovery-level options](#discovery)
+Getter/setter accessor for [discovery-level config options](#discovery)
+
+### resilient#balancer([ options ])
+Return: `object`
+
+Getter/Setter accessor for [balancer-level config options](#balancer)
 
 ### resilient#getHttpOptions(type)
 Return: `object`
 
 Get a map of HTTP specific options
 
+### resilient#areServersUpdated()
+Return: `boolean`
+
+Returns `true` if servers are up-to-date. Otherwise `false`
+
 ### resilient#servers([ type = 'service' ])
 Return: `Servers`
 
-Return a the current servers list. Allowed types are: `service` and `discovery`
+Return a `Servers` instance with the current used servers per type. Allowed types are: `service` and `discovery`
 
 ### resilient#discoveryServers([ servers ])
 Return: `Servers`
@@ -485,17 +522,8 @@ Return: `Client` Alias: `http`
 Returns an HTTP client-only interface.
 Useful to provide encapsulation from public usage and
 avoid resilient-specific configuration methods to be called from the public API.
+
 This is a restricted API useful to provide for high-level developers
-
-### resilient#areServersUpdated()
-Return: `boolean`
-
-Returns `true` if servers are up-to-date. Otherwise `false`
-
-### resilient#balancer([ options ])
-Return: `object`
-
-Returns the current balancer config options
 
 ### resilient.VERSION
 Type: `string`

@@ -7,6 +7,8 @@ function run(args, cb) {
 }
 
 describe('CLI', function () {
+  var server = null
+
   describe('--help', function () {
     it('should show the help', function (done) {
       run('--help', function (error, stdout) {
@@ -25,9 +27,7 @@ describe('CLI', function () {
     })
   })
 
-  describe('request URL', function () {
-    var server = null
-
+  describe('full URL request', function () {
     before(function (done) {
       server = new Stubby()
       server.start({
@@ -52,8 +52,6 @@ describe('CLI', function () {
   })
 
   describe('--method', function () {
-    var server = null
-
     before(function (done) {
       server = new Stubby()
       server.start({
@@ -78,8 +76,6 @@ describe('CLI', function () {
   })
 
   describe('--header', function () {
-    var server = null
-
     before(function (done) {
       server = new Stubby()
       server.start({
@@ -95,9 +91,153 @@ describe('CLI', function () {
       server.stop(done)
     })
 
-    it('should perform a URL request', function (done) {
+    it('should add the request header', function (done) {
       run('http://localhost:9999/sample -h "Version: 0.1.0"', function (error, stdout) {
         expect(stdout).to.match(/hello/)
+        done()
+      })
+    })
+
+    it('should print to stderr the request header', function (done) {
+      run('http://localhost:9999/not-found -h "Version: 0.1.0"', function (error, stdout, stderr) {
+        expect(stderr).to.match(/Error status\: 404/)
+        done()
+      })
+    })
+  })
+
+  describe('--info', function () {
+    before(function (done) {
+      server = new Stubby()
+      server.start({
+        stubs: 9999,
+        data: [{
+          request: { url: '/sample' },
+          response: { status: 200, body: 'hello' }
+        }]
+      }, done)
+    })
+
+    after(function (done) {
+      server.stop(done)
+    })
+
+    it('should print the response headers', function (done) {
+      run('http://localhost:9999/sample -i', function (error, stdout) {
+        expect(stdout).to.match(/server\:/)
+        done()
+      })
+    })
+
+    it('should print error response headers', function (done) {
+      run('http://localhost:9999/not-found -i', function (error, stdout, stderr) {
+        expect(stderr).to.match(/Error status\: 404/)
+        done()
+      })
+    })
+  })
+
+  describe('--status', function () {
+    before(function (done) {
+      server = new Stubby()
+      server.start({
+        stubs: 9999,
+        data: [{
+          request: { url: '/sample' },
+          response: { status: 200, body: 'hello' }
+        }]
+      }, done)
+    })
+
+    after(function (done) {
+      server.stop(done)
+    })
+
+    it('should print the response status code', function (done) {
+      run('http://localhost:9999/sample -c', function (error, stdout) {
+        expect(stdout).to.match(/200/)
+        done()
+      })
+    })
+
+    it('should print the error status code', function (done) {
+      run('http://localhost:9999/not-found -c', function (error, stdout) {
+        expect(stdout).to.match(/404/)
+        done()
+      })
+    })
+  })
+
+  describe('--servers', function () {
+    before(function (done) {
+      server = new Stubby()
+      server.start({
+        stubs: 9999,
+        data: [{
+          request: { url: '/server1' },
+          response: { status: 500, body: 'hello' }
+        }, {
+          request: { url: '/server2/sample' },
+          response: { status: 200, body: 'hello' }
+        }]
+      }, done)
+    })
+
+    after(function (done) {
+      server.stop(done)
+    })
+
+    it('should print the response status code', function (done) {
+      run('/sample -c -s http://localhost:9999/server1,http://localhost:9999/server2', function (error, stdout) {
+        expect(stdout).to.match(/200/)
+        done()
+      })
+    })
+
+    it('should print the error status code if servers are invalid', function (done) {
+      run('/hello -c -s http://localhost:9999/server1,http://localhost:9999/server1', function (error, stdout, stderr) {
+        expect(stderr).to.match(/Error\:/i)
+        expect(stderr).to.match(/all requests failed/i)
+        expect(stderr).to.match(/\(1000\)/)
+        done()
+      })
+    })
+  })
+
+  describe('--discovery-servers', function () {
+    before(function (done) {
+      server = new Stubby()
+      server.start({
+        stubs: 9999,
+        data: [{
+          request: { url: '/discovery1' },
+          response: { status: 500, body: 'hello' }
+        }, {
+          request: { url: '/discovery2' },
+          response: { status: 200, body: ['http://localhost:9999/server'] }
+        }, {
+          request: { url: '/server/hello' },
+          response: { status: 200, body: 'hello' }
+        }]
+      }, done)
+    })
+
+    after(function (done) {
+      server.stop(done)
+    })
+
+    it('should print the response status code', function (done) {
+      run('/hello -c -z http://localhost:9999/discovery1,http://localhost:9999/discovery2', function (error, stdout) {
+        expect(stdout).to.match(/200/)
+        done()
+      })
+    })
+
+    it('should print the error status code if servers are invalid', function (done) {
+      run('/hello -c -z http://localhost:9999/discovery1,http://localhost:9999/discovery1', function (error, stdout, stderr) {
+        expect(stderr).to.match(/Error\:/i)
+        expect(stderr).to.match(/all requests failed/i)
+        expect(stderr).to.match(/\(1000\)/)
         done()
       })
     })

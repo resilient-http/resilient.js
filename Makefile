@@ -1,9 +1,10 @@
+VERSION = 0.2.6
 BROWSERIFY = node ./node_modules/browserify/bin/cmd.js
 MOCHA = ./node_modules/.bin/mocha
 UGLIFYJS = ./node_modules/.bin/uglifyjs
 CUCUMBER = ./node_modules/.bin/cucumber-js
 STUBBY = ./node_modules/.bin/stubby
-BANNER = "/*! resilient - v0.1 - MIT License - https://github.com/resilient-http/resilient.js */"
+BANNER = "/*! resilient - v$(VERSION) - MIT License - https://github.com/resilient-http/resilient.js */"
 
 define release
 	VERSION=`node -pe "require('./bower.json').version"` && \
@@ -38,7 +39,7 @@ browserify:
 		--entry ./lib/index.js >> ./resilient.js
 
 uglify:
-	$(UGLIFYJS) resilient.js --mangle --preamble $(BANNER) --source-map resilient.min.js.map > resilient.min.js
+	$(UGLIFYJS) resilient.js --mangle --preamble $(BANNER) --source-map resilient.min.js.map --source-map-url http://cdn.rawgit.com/resilient-http/resilient.js/$(VERSION)/resilient.min.js.map > resilient.min.js
 
 mocha:
 	$(MOCHA) --reporter spec --ui tdd --timeout 2000
