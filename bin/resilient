@@ -35,12 +35,12 @@ var argv = yargs
   .alias('discover', 'k')
   .describe('discovery-servers', 'Define the discovery service servers (comma separated)')
   .alias('discovery-servers', 'z')
-  .describe('debug', 'Enable debug mode')
   .describe('discovery-retry', 'Discovery servers retry attempts. Default to 0')
   .alias('discovery-retry', 'R')
   .default('discovery-retry', 0)
   .describe('discovery-timeout', 'Discovery servers request maximum timeout in miliseconds')
   .alias('discovery-timeout', 'T')
+  .describe('debug', 'Enable debug mode')
   .alias('debug', 'd')
   .describe('info', 'Show response headers and info')
   .alias('info', 'i')
@@ -51,6 +51,7 @@ var argv = yargs
 
 if (argv.help) return echo(yargs.help())
 if (argv.version) return echo(Resilient.VERSION)
+if (process.argv.length < 3) return echo('Missing required arguments')
 
 try {
   newResilientClient(buildOptions(parseIntegerParams(argv)))

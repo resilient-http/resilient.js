@@ -159,7 +159,6 @@ Examples:
   resilient /api/users -z http://discover1.me,http://discover1.me
   resilient --discover -z http://discover1.me,http://discover1.me --discovery-timeout 500
 
-
 Options:
   --version, -v            Show the server version
   --path, -p               Request path
@@ -171,9 +170,9 @@ Options:
   --timeout, -t            Request timeout in miliseconds
   --discover, -k           Get an updated list of servers asking for discovery servers
   --discovery-servers, -z  Define the discovery service servers (comma separated)
-  --debug, -d              Enable debug mode
   --discovery-retry, -R    Discovery servers retry attempts. Default to 0               [default: 0]
   --discovery-timeout, -T  Discovery servers request maximum timeout in miliseconds
+  --debug, -d              Enable debug mode
   --info, -i               Show response headers and info
   --status, -c             Print the response status code
   --help                   Show help
