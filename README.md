@@ -434,7 +434,7 @@ Returns `true` if servers are up-to-date. Otherwise `false`
 ### resilient#servers([ type = 'service' ])
 Return: `Servers`
 
-Return a the current servers list. Allowed types are: `service` and `discovery`
+Return a `Servers` instance with the current used servers per type. Allowed types are: `service` and `discovery`
 
 ### resilient#discoveryServers([ servers ])
 Return: `Servers`
