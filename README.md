@@ -146,7 +146,7 @@ For more usage examples, see [examples](https://github.com/resilient-http/resili
 For better approach, you could install `Resilient` as global package: `npm install -g resilient`
 
 ```bash
-Resilient HTTP client (beta)
+Resilient command-line HTTP client
 Usage: node ./bin/resilient
 
 Examples:
@@ -159,6 +159,7 @@ Examples:
   resilient /api/users -z http://discover1.me,http://discover1.me
   resilient --discover -z http://discover1.me,http://discover1.me --discovery-timeout 500
 
+
 Options:
   --version, -v            Show the server version
   --path, -p               Request path
@@ -166,16 +167,16 @@ Options:
   --method, -x             HTTP method. Default GET
   --header, -h             Define custom request header
   --body, -b               HTTP request body data to send
-  --retry, -r              Request retry attempts. Default 0                            [default: 0]
+  --retry, -r              Request retry attempts. [default: 0]
   --timeout, -t            Request timeout in miliseconds
   --discover, -k           Get an updated list of servers asking for discovery servers
   --discovery-servers, -z  Define the discovery service servers (comma separated)
-  --discovery-retry, -R    Discovery servers retry attempts. Default to 0               [default: 0]
+  --discovery-retry, -R    Discovery servers retry attempts. [default: 0]
   --discovery-timeout, -T  Discovery servers request maximum timeout in miliseconds
-  --debug, -d              Enable debug mode
   --info, -i               Show response headers and info
   --status, -c             Print the response status code
-  --help                   Show help
+  --debug, -d              Enable debug mode
+  --help, -H               Show help
 ```
 
 ## API

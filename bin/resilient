@@ -6,7 +6,7 @@ var util = require('util')
 var yargs = require('yargs')
 
 var argv = yargs
-  .usage('Resilient HTTP client (beta).\nUsage: $0')
+  .usage('Resilient command-line HTTP client\nUsage: $0')
   .example('resilient http://httpbin.org/user-agent', '')
   .example('resilient http://httpbin.org/status/201 --status', '')
   .example('resilient http://httpbin.org/get --debug', '')
@@ -16,37 +16,45 @@ var argv = yargs
   .example('resilient --discover -z http://discover1.me,http://discover1.me --discovery-timeout 500', '')
   .describe('version', 'Show the server version')
   .alias('version', 'v')
+  .boolean('version')
   .describe('path', 'Request path')
   .alias('path', 'p')
   .describe('servers', 'Define the service servers (comma separated)')
   .alias('servers', 's')
-  .describe('method', 'HTTP method. Default GET')
+  .describe('method', 'HTTP method')
   .alias('method', 'x')
+  .default('method', 'GET')
   .describe('header', 'Define custom request header')
   .alias('header', 'h')
   .describe('body', 'HTTP request body data to send')
   .alias('body', 'b')
-  .describe('retry', 'Request retry attempts. Default 0')
+  .describe('retry', 'Request retry attempts')
   .alias('retry', 'r')
   .default('retry', 0)
   .describe('timeout', 'Request timeout in miliseconds')
   .alias('timeout', 't')
   .describe('discover', 'Get an updated list of servers asking for discovery servers')
   .alias('discover', 'k')
+  .boolean('discover')
   .describe('discovery-servers', 'Define the discovery service servers (comma separated)')
   .alias('discovery-servers', 'z')
-  .describe('discovery-retry', 'Discovery servers retry attempts. Default to 0')
+  .describe('discovery-retry', 'Discovery servers retry attempts')
   .alias('discovery-retry', 'R')
   .default('discovery-retry', 0)
   .describe('discovery-timeout', 'Discovery servers request maximum timeout in miliseconds')
   .alias('discovery-timeout', 'T')
-  .describe('debug', 'Enable debug mode')
-  .alias('debug', 'd')
   .describe('info', 'Show response headers and info')
   .alias('info', 'i')
+  .boolean('info')
   .describe('status', 'Print the response status code')
   .alias('status', 'c')
+  .boolean('status')
+  .describe('debug', 'Enable debug mode')
+  .alias('debug', 'd')
+  .boolean('debug')
   .describe('help', 'Show help')
+  .alias('help', 'H')
+  .boolean('help')
   .argv
 
 if (argv.help) return echo(yargs.help())
@@ -81,13 +89,13 @@ function handler(err, res) {
 }
 
 function printToStdout(res) {
-  if (argv.debug || argv.info) printHeaders(res.headers)
-  if (argv.status || argv.info) echo('Status:', res.status)
+  if (argv.info) printInfo(res)
+  if (argv.status) echo(res.status)
   else if (res.data) echo(util.inspect(res.data, { depth: null }))
 }
 
 function printToStderr(res) {
-  if (argv.debug || argv.info) printHeaders(res.headers)
+  if (argv.info) printInfo(res)
   echoError('Error status:', res.status)
   process.exit(1)
 }
@@ -96,13 +104,11 @@ function buildOptions(argv) {
   var config = { discovery: {}, service: {} }
   var options = { headers: {} }
   options.path = argv._[0]
-
   Object.keys(argv).forEach(function (key) {
     if (key.length > 3 && key.indexOf('-') === -1) {
       mapOptionField(config, options, key)
     }
   })
-
   return { config: config, options: options }
 }
 
@@ -129,9 +135,10 @@ function setHeader(header, headers) {
   headers[header[0]] = header[1]
 }
 
-function printHeaders(headers) {
-  Object.keys(headers).forEach(function (key) {
-    echo(key + ':', headers[key])
+function printInfo(res) {
+  echo('HTTP/' + res.httpVersion, res.status)
+  Object.keys(res.headers).forEach(function (key) {
+    echo(key + ':', res.headers[key])
   })
   echo('')
 }

@@ -155,14 +155,14 @@ describe('CLI', function () {
 
     it('should print the response status code', function (done) {
       run('http://localhost:9999/sample -c', function (error, stdout) {
-        expect(stdout).to.match(/Status\: 200/)
+        expect(stdout).to.match(/200/)
         done()
       })
     })
 
     it('should print the error status code', function (done) {
       run('http://localhost:9999/not-found -c', function (error, stdout) {
-        expect(stdout).to.match(/Status\: 404/)
+        expect(stdout).to.match(/404/)
         done()
       })
     })
@@ -189,7 +189,7 @@ describe('CLI', function () {
 
     it('should print the response status code', function (done) {
       run('/sample -c -s http://localhost:9999/server1,http://localhost:9999/server2', function (error, stdout) {
-        expect(stdout).to.match(/Status\: 200/)
+        expect(stdout).to.match(/200/)
         done()
       })
     })
@@ -228,7 +228,7 @@ describe('CLI', function () {
 
     it('should print the response status code', function (done) {
       run('/hello -c -z http://localhost:9999/discovery1,http://localhost:9999/discovery2', function (error, stdout) {
-        expect(stdout).to.match(/Status\: 200/)
+        expect(stdout).to.match(/200/)
         done()
       })
     })
