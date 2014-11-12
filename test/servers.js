@@ -23,9 +23,9 @@ describe('Servers', function () {
 
   it('should define servers with custom stats', function () {
     servers.servers.forEach(function (server, index) {
-      server.stats.read.request = stats[index][0]
-      server.stats.read.error = stats[index][1]
-      server.stats.read.latency = stats[index][2]
+      server.statsStore.read.request = stats[index][0]
+      server.statsStore.read.error = stats[index][1]
+      server.statsStore.read.latency = stats[index][2]
     })
   })
 
@@ -63,7 +63,7 @@ describe('Servers', function () {
     })
 
     it('should persist the stats when server update', function () {
-      expect(servers.servers[0].stats.read.request).to.be.equal(12)
+      expect(servers.servers[0].statsStore.read.request).to.be.equal(12)
     })
   })
 })
