@@ -801,7 +801,7 @@ function Requester(resilient) {
   function handleMissingServers(servers, options, previousError, cb) {
     var retry = null
     if (options.retry) {
-      retry = delayBeforeRetry(servers, options, cb)
+      retry = waitBeforeRetry(servers, options, cb)
       if (options.discoverBeforeRetry && resilient.hasDiscoveryServers()) {
         updateAndRetry(resilient, retry)
       } else {
@@ -812,7 +812,7 @@ function Requester(resilient) {
     }
   }
 
-  function delayBeforeRetry(servers, options, cb) {
+  function waitBeforeRetry(servers, options, cb) {
     return function () {
       _.delay(retry(servers, options, cb), options.retryWait)
     }
@@ -1106,11 +1106,7 @@ function Resolver(resilient, options, cb) {
   function refreshDiscoveryServers(data, options, next) {
     resilient.emit('discovery:refresh', data, resilient)
     options.servers(data)
-    if (!hasValidServers()) {
-      updateServersFromDiscovery(next)
-    } else {
-      next()
-    }
+    updateServersFromDiscovery(next)
   }
 
   function hasDiscoveryServersOutdated(options) {
@@ -1148,11 +1144,7 @@ function Resolver(resilient, options, cb) {
   }
 
   function resolver(err, res) {
-    if (err) {
-      cb(err)
-    } else {
-      handleResolution(res)
-    }
+    err ? cb(err) : handleResolution(res)
   }
 
   function handleResolution(res) {
@@ -1424,7 +1416,7 @@ module.exports = Servers
 function Servers(servers) {
   this.servers = []
   this.updated = 0
-  this.force = false
+  this.forceUpdate = false
   this.set(servers)
 }
 
@@ -1452,7 +1444,7 @@ Servers.prototype.get = function () {
 
 Servers.prototype.set = function (servers) {
   if (_.isArr(servers)) {
-    this.force = true
+    this.forceUpdate = true
     this.updated = _.now()
     this.servers = mapServers.call(this, servers)
   }
@@ -1472,12 +1464,6 @@ Servers.prototype.exists = function () {
 
 Servers.prototype.size = function () {
   return this.servers.length
-}
-
-Servers.prototype.forceUpdate = function () {
-  var force = this.force
-  if (force) this.force = false
-  return force
 }
 
 Servers.prototype.urls = function () {
