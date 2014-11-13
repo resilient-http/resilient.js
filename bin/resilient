@@ -61,13 +61,7 @@ if (argv.help) return echo(yargs.help())
 if (argv.version) return echo(Resilient.VERSION)
 if (process.argv.length < 3) return echo('Missing required arguments')
 
-try {
-  newResilientClient(buildOptions(parseIntegerParams(argv)))
-} catch (e) {
-  echoError(e)
-  if (argv.debug) echoError(e.stack)
-  process.exit(1)
-}
+newResilientClient(buildOptions(parseIntegerParams(argv)))
 
 function newResilientClient(options) {
   var client = Resilient(options.config)
