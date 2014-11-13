@@ -1,6 +1,6 @@
-/*! resilient - v0.2.7 - MIT License - https://github.com/resilient-http/resilient.js */
+/*! resilient - v0.2.8 - MIT License - https://github.com/resilient-http/resilient.js */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.resilient=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-/*! lil-http - v0.1 - MIT License - https://github.com/lil-js/http */
+/*! lil-http - v0.1.10 - MIT License - https://github.com/lil-js/http */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
     define(['exports'], factory)
@@ -14,7 +14,7 @@
   }
 }(this, function (exports) {
   'use strict'
-  var VERSION = '0.1.9'
+  var VERSION = '0.1.10'
   var toStr = Object.prototype.toString
   var slicer = Array.prototype.slice
   var hasOwn = Object.prototype.hasOwnProperty
@@ -50,21 +50,21 @@
   function setHeaders(xhr, headers) {
     if (isObj(headers)) {
       headers['Content-Type'] = headers['Content-Type'] || http.defaultContent
-      for (var field in headers) {
+      for (var field in headers) if (hasOwn.call(headers, field)) {
         xhr.setRequestHeader(field, headers[field])
       }
     }
   }
 
   function getHeaders(xhr) {
-    var map = {}, headers = xhr.getAllResponseHeaders().split('\n')
-    headers.forEach(function (header) {
-      if (header) {
-        header = header.split(':')
-        map[header[0].trim()] = (header[1] || '').trim()
-      }
+    var headers = {}, rawHeaders = xhr.getAllResponseHeaders().trim().split('\n')
+    rawHeaders.forEach(function (header) {
+      var split = header.trim().split(':')
+      var key = split.shift().trim()
+      var value = split.join(':').trim()
+      headers[key] = value
     })
-    return map
+    return headers
   }
 
   function isJSONResponse(xhr) {
@@ -121,6 +121,7 @@
   function onLoad(xhr, cb) {
     return function () {
       if (xhr.readyState === 4) {
+        if (xhr.status === 1223) status = 204 // IE9 fix
         if (xhr.status >= 200 && xhr.status < 400) {
           cb(null, buildResponse(xhr))
         } else {
@@ -678,7 +679,7 @@ function ResilientFactory(options) {
   return new Resilient(options)
 }
 
-ResilientFactory.VERSION = '0.2.7'
+ResilientFactory.VERSION = '0.2.8'
 ResilientFactory.CLIENT_VERSION = http.VERSION
 ResilientFactory.defaults = defaults
 ResilientFactory.Options = Options
