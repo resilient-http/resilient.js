@@ -540,10 +540,6 @@ Type: `object`
 
 Default config options
 
-### resilient.Servers(list)
-
-Create a new servers store
-
 ### resilient.Options(options)
 
 Create a new options store
