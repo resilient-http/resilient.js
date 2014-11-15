@@ -510,7 +510,8 @@ function DiscoveryServers(resilient) {
   }
 
   function hasValidCache(cache) {
-    var valid = false, expires = resilient.options('discovery').get('cacheExpiration')
+    var valid = false
+    var expires = resilient.options('discovery').get('cacheExpiration')
     return cache && _.isArr(cache.data) && (_.now() - cache.time) > expires || false
   }
 
@@ -557,13 +558,19 @@ function isValidResponse(res) {
     if (_.isArr(res.data) && res.data.length) {
       valid = true
     } else if (typeof res.data === 'string') {
-      try {
-        res.data = JSON.parse(res.data)
-        valid = true
-      } catch (e) {}
+      valid = parseAsJSON(res)
     }
   }
   return valid
+}
+
+function parseAsJSON(res) {
+  try {
+    res.data = JSON.parse(res.data)
+    return true
+  } catch (e) {
+    return false
+  }
 }
 
 },{"./error":7,"./utils":18}],7:[function(require,module,exports){
