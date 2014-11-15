@@ -289,7 +289,6 @@ function Client(resilient) {
 
 Client.prototype.send = function (path, options, cb, method) {
   var args = normalizeArgs.call(this, path, options, cb, method)
-  this._resilient.emit('request:start', args[0], this._resilient)
   requester.apply(this, args)
   return this
 }
@@ -319,6 +318,7 @@ Client.prototype.head = function (path, options, cb) {
 }
 
 function requester(options, cb) {
+  this._resilient.emit('request:start', options, this._resilient)
   return isFullUrlSchema(options)
     ? plainHttpRequest(options, cb)
     : resolver(this._resilient, options, cb)
