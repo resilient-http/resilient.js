@@ -2,9 +2,11 @@
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-A **browser** and **[node.js](http://nodejs.org)** highly **configurable** and **full featured HTTP client** with awesome **superpowers** such as **fault tolerant**, **dynamic server/s discovery**, server **fallback**, built-in **balancer**, round-robin requests **load distribution** and more... designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless resource-oriented services, redundant high available HTTP APIs, multicloud services...
+A **browser** and **[node.js](http://nodejs.org)** highly **configurable** and **full featured HTTP client** with awesome **superpowers** such as **fault tolerant**, **dynamic server/s discovery**, server **fallback**, built-in **balancer**, round-robin requests **load distribution** and more...
 
-It provides an elegant [programmatic API](#api) and a featured [command-line interface](#command-line-interface)
+It was designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless resource-oriented services, redundant high available HTTP APIs, multicloud services... among others
+
+It provides an elegant [programmatic API](#api) and featured [command-line interface](#command-line-interface)
 
 For more information, see the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-it-works) and [compatible servers](http://resilient-http.github.io/#servers)
 
@@ -71,6 +73,10 @@ It runs properly in any [ES5 compliant](http://kangax.github.io/compat-table/es5
 - [hydra](http://innotech.github.io/hydra) - Multicloud balancer and application discovery server
 - [resilient-server](https://github.com/h2non/resilient-server) - node.js powered dummy HTTP discovery server for testing/development
 - [angular-resilient](https://github.com/h2non/angular-resilient) - Turn $http resilient and fault tolerant
+
+## How to use?
+
+See the [examples](https://github.com/resilient-http/resilient.js/tree/master/examples) for detailed use cases
 
 ## How it works?
 
