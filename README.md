@@ -8,7 +8,7 @@ It was designed for distributed and [reactive](http://www.reactivemanifesto.org/
 
 It provides an elegant [programmatic API](#api) and featured [command-line interface](#command-line-interface)
 
-For more information, see the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-it-works) and [compatible servers](http://resilient-http.github.io/#servers)
+For more information, see the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-it-works), [compatible servers](http://resilient-http.github.io/#servers) or read the [FAQs](#faq)
 
 ## Features
 
