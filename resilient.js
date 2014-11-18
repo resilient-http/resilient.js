@@ -598,7 +598,7 @@ function ResilientError(status, error) {
   } else if (error) {
     this.request = error
   }
-  this.status = status || 1000
+  this.status = status
   this.message = MESSAGES[this.status]
 }
 
@@ -638,7 +638,9 @@ function mapResponse(cb) {
   return function (err, res, body) {
     if (res) {
       if (res.statusCode) res.status = res.statusCode
-      if (body) res.data = isJSONContent(res) ? JSON.parse(body) : body
+    }
+    if (body) {
+      (err || res).data = isJSONContent(err || res) ? JSON.parse(body) : body
     }
     cb(err, res)
   }
@@ -853,7 +855,7 @@ function requestHandler(server, operation, options, cb, nextServer) {
       nextServer(err)
     } else {
       server.report(operation, latency)
-      resolve(res, cb)
+      resolveRequest(err, res, cb)
     }
   }
 }
@@ -873,8 +875,10 @@ function updateAndRetry(resilient, onRetry) {
   Requester.DiscoveryResolver.update(resilient, null, onRetry)
 }
 
-function resolve(res, cb) {
-  http.mapResponse(cb)(null, res, res.body)
+function resolveRequest(err, res, cb) {
+  var resolution = err || res
+  var body = resolution ? resolution.body || resolution.data : null
+  http.mapResponse(cb)(err, res, body)
 }
 
 function getHttpClient(resilient) {
@@ -882,11 +886,16 @@ function getHttpClient(resilient) {
 }
 
 function isErrorResponse(options, err, res) {
-  return (options.promiscuousErrors && (isErrorStatus(err || res)) || isUnavailableStatus(err, res))
+  return (options.promiscuousErrors && (isErrorStatus(err || res)))
+    || isUnavailableStatus(err, res)
 }
 
 function isUnavailableStatus(err, res) {
-  return (err && err.code !== undefined) || res == undefined || isInvalidStatus(err || res) || false
+  return (err
+    && (err.code !== undefined
+    || (err.status === undefined && res == undefined)))
+    || isInvalidStatus(err || res)
+    || false
 }
 
 function isInvalidStatus(res) {
