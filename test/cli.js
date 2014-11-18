@@ -143,7 +143,7 @@ describe('CLI', function () {
       server.start({
         stubs: 9999,
         data: [{
-          request: { url: '/sample', method: 'POST', post: '"hello":"world"' },
+          request: { url: '/sample', method: 'POST', file: __dirname + '/fixtures/payload.json' },
           response: { status: 200, body: 'hello' }
         }]
       }, done)
