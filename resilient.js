@@ -365,7 +365,7 @@ defaults.service = {
   timeout: 10 * 1000,
   servers: null,
   retry: 0,
-  retryWait: 1000,
+  retryWait: 50,
   discoverBeforeRetry: true,
   promiscuousErrors: false
 }
