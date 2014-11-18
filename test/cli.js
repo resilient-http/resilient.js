@@ -27,30 +27,6 @@ describe('CLI', function () {
     })
   })
 
-  describe('full URL request', function () {
-    before(function (done) {
-      server = new Stubby()
-      server.start({
-        stubs: 9999,
-        data: [{
-          request: { url: '/sample' },
-          response: { status: 200, body: 'hello' }
-        }]
-      }, done)
-    })
-
-    after(function (done) {
-      server.stop(done)
-    })
-
-    it('should perform a URL request', function (done) {
-      run('http://localhost:9999/sample', function (error, stdout) {
-        expect(stdout).to.match(/hello/)
-        done()
-      })
-    })
-  })
-
   describe('--method', function () {
     before(function (done) {
       server = new Stubby()
@@ -340,4 +316,29 @@ describe('CLI', function () {
       })
     })
   })
+
+  describe('direct URL request', function () {
+    before(function (done) {
+      server = new Stubby()
+      server.start({
+        stubs: 9999,
+        data: [{
+          request: { url: '/sample' },
+          response: { status: 200, body: 'hello' }
+        }]
+      }, done)
+    })
+
+    after(function (done) {
+      server.stop(done)
+    })
+
+    it('should perform a URL request', function (done) {
+      run('http://localhost:9999/sample', function (error, stdout) {
+        expect(stdout).to.match(/hello/)
+        done()
+      })
+    })
+  })
+
 })
