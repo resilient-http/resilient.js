@@ -458,7 +458,7 @@ Return: `Resilient` Alias: `getUpdatedServers`
 
 Pass to the callback an up-to-date list of servers, with or without discovery servers configured
 
-### resilient#updateServers([ options, callback ])
+### resilient#updateServers([ options, cb ])
 
 Force to update the servers list from discovery servers, if they are defined,
 optionally passing a callback to handle the result
