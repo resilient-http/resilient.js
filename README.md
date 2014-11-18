@@ -455,7 +455,7 @@ Pass to the callback an up-to-date list of servers asking to discovery servers
 
 Passed arguments to the callback are:
 - **error** `object` - Error, if it happend
-- **servers** `array` - Array of current service servers
+- **servers** `array` - Array of `string` with the current service servers URL
 
 ### resilient#latestServers([ options, ] cb)
 Return: `Resilient` Alias: `getUpdatedServers`
@@ -464,7 +464,7 @@ Pass to the callback an up-to-date list of servers, with or without discovery se
 
 Passed arguments to the callback are:
 - **error** `object` - Error, if it happend
-- **servers** `array` - Array of current service servers
+- **servers** `array` - Array of `string` with the current service servers URL
 
 ### resilient#updateServers([ options, cb ])
 
@@ -473,7 +473,7 @@ optionally passing a callback to handle the result
 
 Passed arguments to the callback are:
 - **error** `object` - Error, if it happend
-- **servers** `array` - Array of current service servers
+- **servers** `array` - Array of `string` with the current service servers URL
 
 ### resilient#useHttpClient(fn)
 
