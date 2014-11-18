@@ -206,7 +206,7 @@ describe('Refresh discovery servers', function () {
         .filteringPath(function () { return '/' })
         .get('/')
         .times(8)
-        .delayConnection(100)
+        .delayConnection(500)
         .reply(500)
     })
 

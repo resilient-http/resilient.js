@@ -153,7 +153,7 @@ For better approach, you could install `Resilient` as global package: `npm insta
 
 ```bash
 Resilient command-line HTTP client
-Usage: node ./bin/resilient
+Usage: resilient [url] [options]
 
 Examples:
   resilient http://httpbin.org/user-agent
@@ -165,23 +165,23 @@ Examples:
   resilient /api/users -z http://discover1.me,http://discover1.me
   resilient --discover -z http://discover1.me,http://discover1.me --discovery-timeout 500
 
-
 Options:
   --version, -v            Show the server version
   --path, -p               Request path
   --servers, -s            Define the service servers (comma separated)
-  --method, -x             HTTP method. Default GET
+  --method, -x             HTTP method [default: "GET"]
   --header, -h             Define custom request header
-  --body, -b               HTTP request body data to send
-  --retry, -r              Request retry attempts. [default: 0]
+  --data, -d               Value data to send as HTTP request body
+  --file, -f               File path to send as HTTP request body
+  --retry, -r              Request retry attempts [default: 0]
   --timeout, -t            Request timeout in miliseconds
   --discover, -k           Get an updated list of servers asking for discovery servers
   --discovery-servers, -z  Define the discovery service servers (comma separated)
-  --discovery-retry, -R    Discovery servers retry attempts. [default: 0]
+  --discovery-retry, -R    Discovery servers retry attempts [default: 0]
   --discovery-timeout, -T  Discovery servers request maximum timeout in miliseconds
   --info, -i               Show response headers and info
   --status, -c             Print the response status code
-  --debug, -d              Enable debug mode
+  --debug, -D              Enable debug mode
   --help, -H               Show help
 ```
 
@@ -210,7 +210,7 @@ Resilient is a resource-oriented HTTP client, which could be ideal for RESTful W
 
 - **servers** `array` - A list of valid URIs of servers to reach for the given service. Default `null`. It's recommended you use discovery servers instead
 - **retry** `number` - Number of times to retry if all requests failed. Use `Infinity` for infinitive attemps. Default `0`
-- **retryWait** `number` - Number of milisenconds to wait before retry attempt cycle. Default to `1000`
+- **retryWait** `number` - Number of milisenconds to wait before start the request retry cycle. Default to `50`
 - **discoverBeforeRetry** `boolean` - Force to refresh service servers list from asking for discovery servers on each retry attempt. You must define the discovery servers in order to use this feature. Default `true`
 - **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be treated as failed request, retrying it until it has valid status (when `retry` is enabled). Default `false`
 
@@ -253,7 +253,7 @@ Specific configuration for discovery servers requests, behavior and logic
 - **cache** `boolean` - Enable/disable discovery servers cache in case of global fallback. Default `true`
 - **cacheExpiration** `number` - Maximum cache time to live. Default to `10` minutes
 - **retry** `number` - Number of times to retry if all requests failed. Use `Infinity` for infinitive attemps. Default `3`
-- **retryWait** `number` - Number of milisenconds to wait before retry attempt cycle. Default to `1000`
+- **retryWait** `number` - Number of milisenconds to wait before start the request retry cycle. Default to `1000`
 - **parallel** `boolean` - Discover servers in parallel. This will improve service availability and decrement server lookup delays. Default `true`
 - **refreshInterval** `number` - Servers list time to live in miliseconds. Default to `60000`
 - **enableRefreshServers** `boolean` - Enable/disable discovery servers auto refresh. This option requires `refreshServers` or `useDiscoveryServersToRefresh` be defined. Default `true`

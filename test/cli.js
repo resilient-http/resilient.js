@@ -106,6 +106,68 @@ describe('CLI', function () {
     })
   })
 
+  describe('--data', function () {
+    before(function (done) {
+      server = new Stubby()
+      server.start({
+        stubs: 9999,
+        data: [{
+          request: { url: '/sample', method: 'POST', post: 'hello' },
+          response: { status: 200, body: 'hello' }
+        }]
+      }, done)
+    })
+
+    after(function (done) {
+      server.stop(done)
+    })
+
+    it('should send the request payload', function (done) {
+      run('http://localhost:9999/sample -d "hello"', function (error, stdout) {
+        expect(stdout).to.match(/hello/)
+        done()
+      })
+    })
+
+    it('should print to stderr for invalid payload', function (done) {
+      run('http://localhost:9999/not-found -d "goodbye"', function (error, stdout, stderr) {
+        expect(stderr).to.match(/Error status\: 404/)
+        done()
+      })
+    })
+  })
+
+  describe('--file', function () {
+    before(function (done) {
+      server = new Stubby()
+      server.start({
+        stubs: 9999,
+        data: [{
+          request: { url: '/sample', method: 'POST', post: '"hello":"world"' },
+          response: { status: 200, body: 'hello' }
+        }]
+      }, done)
+    })
+
+    after(function (done) {
+      server.stop(done)
+    })
+
+    it('should send the file from disk', function (done) {
+      run('http://localhost:9999/sample -f "' + __dirname + '/fixtures/payload.json"', function (error, stdout) {
+        expect(stdout).to.match(/hello/)
+        done()
+      })
+    })
+
+    it('should print to stderr the request error', function (done) {
+      run('http://localhost:9999/not-found -f __invalid', function (error, stdout, stderr) {
+        expect(stderr).to.match(/ENOENT/)
+        done()
+      })
+    })
+  })
+
   describe('--info', function () {
     before(function (done) {
       server = new Stubby()

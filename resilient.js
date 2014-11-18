@@ -353,7 +353,10 @@ function isFullUrlSchema(options) {
 }
 
 function plainHttpRequest(options, cb) {
-  if (options.path) options.url = options.path
+  if (options.path) {
+    options.url = options.path
+    options.path = null
+  }
   return http.call(null, options, cb)
 }
 
@@ -665,7 +668,7 @@ function getUserAgent() {
 }
 
 function mapRequestBody(options) {
-  var body = options.data
+  var body = options.data || options.body
   if (body && _.isObj(body) || _.isArr(body)) {
     options.json = true
     options.data = null

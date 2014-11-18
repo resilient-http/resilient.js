@@ -3,6 +3,8 @@
 
 var Resilient = require('../')
 var util = require('util')
+var path = require('path')
+var fs = require('fs')
 var yargs = require('yargs')
 
 var argv = yargs
@@ -23,11 +25,12 @@ var argv = yargs
   .alias('servers', 's')
   .describe('method', 'HTTP method')
   .alias('method', 'x')
-  .default('method', 'GET')
   .describe('header', 'Define custom request header')
   .alias('header', 'h')
-  .describe('body', 'HTTP request body data to send')
-  .alias('body', 'b')
+  .describe('data', 'Value data to send as HTTP request body')
+  .alias('data', 'd')
+  .describe('file', 'File path to send as HTTP request body')
+  .alias('file', 'f')
   .describe('retry', 'Request retry attempts')
   .alias('retry', 'r')
   .default('retry', 0)
@@ -50,7 +53,7 @@ var argv = yargs
   .alias('status', 'c')
   .boolean('status')
   .describe('debug', 'Enable debug mode')
-  .alias('debug', 'd')
+  .alias('debug', 'D')
   .boolean('debug')
   .describe('help', 'Show help')
   .alias('help', 'H')
@@ -98,30 +101,63 @@ function buildOptions(argv) {
   var config = { discovery: {}, service: {} }
   var options = { headers: {} }
   options.path = argv._[0]
-  Object.keys(argv).forEach(function (key) {
-    if (key.length > 3 && key.indexOf('-') === -1) {
-      mapOptionField(config, options, key)
-    }
-  })
+
+  Object.keys(argv)
+    .filter(isValidFlag)
+    .forEach(mapOptionField(config, options))
+
   return { config: config, options: options }
 }
 
-function mapOptionField(config, options, key) {
-  var value = argv[key]
-  if (/retry/.test(key)) value = parseInt(value, 10)
-  if (/^discovery/.test(key)) {
-    key = key.replace('discovery', '').toLowerCase()
-    if (key === 'servers') value = parseServers(value)
-    config.discovery[key] = value
-  } else {
-    if (key === 'servers' && typeof argv[key] !== 'boolean') {
-      config.service[key] = parseServers(value)
-    } else if (key === 'header') {
-      setHeader(value, options.headers)
+function isValidFlag(str) {
+  return str.length > 3 && str.indexOf('-') === -1
+}
+
+function mapOptionField(config, options) {
+  return function (key) {
+    var value = parseFlagValue(key)
+    if (/^discovery/.test(key)) {
+      mapDiscoveryOptions(key, value, config)
     } else {
-      options[key] = value
+      mapRequestOptions(key, value, config, options)
     }
   }
+}
+
+function parseFlagValue(key) {
+  var value = argv[key]
+  if (/retry/.test(key)) {
+    value = parseInt(value, 10)
+  }
+  return value
+}
+
+function mapRequestOptions(key, value, config, options) {
+  if (key === 'servers' && typeof argv[key] !== 'boolean') {
+    config.service[key] = parseServers(value)
+  } else if (key === 'header') {
+    setHeader(value, options.headers)
+  } else if (key === 'file') {
+    if (argv.file) {
+      options.data = fs.readFileSync(path.normalize(argv.file)).toString()
+      setDataHttpMethod(options)
+    }
+  } else {
+    options[key] = value
+    if (key === 'data' && argv.data) {
+      setDataHttpMethod(options)
+    }
+  }
+}
+
+function mapDiscoveryOptions(key, value, config) {
+  key = key.replace('discovery', '').toLowerCase()
+  if (key === 'servers') value = parseServers(value)
+  config.discovery[key] = value
+}
+
+function setDataHttpMethod(options) {
+  options.method = options.method || 'POST'
 }
 
 function setHeader(header, headers) {
