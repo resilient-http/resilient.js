@@ -564,7 +564,7 @@ Use the plain HTTP client
 
 #### It's required to have discovery servers in my infraestructure in order to use Resilient?
 
-Definetly not. Discovery servers only will be used in the case that you configure them in your Resilient client, therefore
+Definitely not. Discovery servers only will be used in the case that you configure them in your Resilient client, therefore
 if in your project ar
 
 #### Can I use Resilient as a simple HTTP client without balancing?
