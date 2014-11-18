@@ -466,7 +466,7 @@ Passed arguments to the callback are:
 - **error** `object` - Error, if it happend
 - **servers** `array` - Array of `string` with the current service servers URL
 
-### resilient#updateServers([ options, cb ])
+### resilient#updateServers([ options, ] cb)
 
 Force to update the servers list from discovery servers, if they are defined,
 optionally passing a callback to handle the result
