@@ -178,7 +178,7 @@ describe('Refresh discovery servers', function () {
     })
   })
 
-  describe('invalid refresh servers', function() {
+  describe('invalid refresh servers with custom retry', function() {
     var resilient = Resilient({
       discovery: {
         timeout: 50,
@@ -206,7 +206,7 @@ describe('Refresh discovery servers', function () {
         .filteringPath(function () { return '/' })
         .get('/')
         .times(8)
-        .delayConnection(500)
+        .delayConnection(1000)
         .reply(500)
     })
 
