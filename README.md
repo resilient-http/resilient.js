@@ -541,6 +541,8 @@ Type: `string`
 
 Current semver HTTP client library version
 
+It uses [request](https://github.com/request/request) in node.js and [lil-http](https://github.com/lil-js/http) in the browser
+
 ### resilient.defaults
 Type: `object`
 
