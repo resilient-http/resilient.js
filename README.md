@@ -76,7 +76,7 @@ It runs properly in any [ES5 compliant](http://kangax.github.io/compat-table/es5
 
 ## How to use?
 
-See the [examples](https://github.com/resilient-http/resilient.js/tree/master/examples) for detailed use cases
+See the [basic usage](#basic-usage) and [examples](https://github.com/resilient-http/resilient.js/tree/master/examples) for detailed use cases
 
 ## How it works?
 
@@ -559,6 +559,36 @@ Useful to provide encapsulation to the resilient API and expose only the HTTP cl
 ### resilient.request(options [, cb])
 
 Use the plain HTTP client
+
+## FAQ
+
+#### It's required to have discovery servers in my infraestructure in order to use Resilient?
+
+Definetly not. Discovery servers only will be used in the case that you configure them in your Resilient client, therefore
+if in your project ar
+
+#### Can I use Resilient as a simple HTTP client without balancing?
+
+Yes. If your perform a request with a full URI schema, Resilient will avoid to apply any internal balacing logic
+and it will treat the request directly
+
+```js
+var client = Resilient({
+  service: {
+    servers: ['http://server1.me', 'http://server2.me']
+  }
+})
+
+// direct plain request (no balancing, no discovery, no fallback...)
+client.get('http//custom.server/hello', function (err, res) {
+  // ...
+})
+
+// resilient powered request (with balancing, fallback, discovery server, cache...)
+client.get('/hello', function (err, res) {
+  // ...
+})
+```
 
 ## Contributing
 
