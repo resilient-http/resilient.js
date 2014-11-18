@@ -191,7 +191,7 @@ describe('Refresh discovery servers', function () {
           'http://refresh-unavailable',
           'http://refresh-timeout',
           'http://refresh-unavailable',
-          'http://refresh-timeout',
+          'http://refresh-timeout'
         ]
       }
     })
@@ -228,7 +228,7 @@ describe('Refresh discovery servers', function () {
       resilient.get('/hello', function (err, res) {
         expect(err).to.be.an('object')
         expect(err.status).to.be.equal(1001)
-        expect(err.error.code).to.be.equal('ETIMEDOUT')
+        expect(err.error.code).to.match(/ETIMEDOUT|ENOTFOUND/)
         done()
       })
     })
