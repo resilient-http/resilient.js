@@ -87,8 +87,12 @@ function handler(err, res) {
 
 function printToStdout(res) {
   if (argv.info) printInfo(res)
-  if (argv.status) echo(res.status)
-  else if (res.data) echo(util.inspect(res.data, { depth: null }))
+  if (argv.status) {
+    echo(res.status)
+  } else {
+    if (res.data) res = res.data
+    echo(util.inspect(res, { depth: null }))
+  }
 }
 
 function printToStderr(res) {

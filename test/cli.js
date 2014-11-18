@@ -304,4 +304,40 @@ describe('CLI', function () {
       })
     })
   })
+
+  describe('--discover', function () {
+    before(function (done) {
+      server = new Stubby()
+      server.start({
+        stubs: 9999,
+        data: [{
+          request: { url: '/discovery1' },
+          response: { status: 500, body: 'hello' }
+        }, {
+          request: { url: '/discovery2' },
+          response: { status: 200, body: ['http://localhost:9999/server'] }
+        }]
+      }, done)
+    })
+
+    after(function (done) {
+      server.stop(done)
+    })
+
+    it('should print the server list', function (done) {
+      run('--discover -z http://localhost:9999/discovery1,http://localhost:9999/discovery2', function (error, stdout) {
+        expect(stdout).to.match(/http:\/\/localhost\:9999/)
+        done()
+      })
+    })
+
+    it('should print the error status code if servers are invalid', function (done) {
+      run('--discover -z http://localhost:9999/discovery1,http://localhost:9999/discovery1', function (error, stdout, stderr) {
+        expect(stderr).to.match(/Error\:/i)
+        expect(stderr).to.match(/all requests failed/i)
+        expect(stderr).to.match(/\(1000\)/)
+        done()
+      })
+    })
+  })
 })
