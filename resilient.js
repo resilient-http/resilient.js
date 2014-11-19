@@ -1,6 +1,6 @@
-/*! resilient - v0.2.11 - MIT License - https://github.com/resilient-http/resilient.js */
+/*! resilient - v0.2.12 - MIT License - https://github.com/resilient-http/resilient.js */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.resilient=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-/*! lil-http - v0.1.10 - MIT License - https://github.com/lil-js/http */
+/*! lil-http - v0.1.11 - MIT License - https://github.com/lil-js/http */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
     define(['exports'], factory)
@@ -14,7 +14,7 @@
   }
 }(this, function (exports) {
   'use strict'
-  var VERSION = '0.1.10'
+  var VERSION = '0.1.11'
   var toStr = Object.prototype.toString
   var slicer = Array.prototype.slice
   var hasOwn = Object.prototype.hasOwnProperty
@@ -28,8 +28,8 @@
     method: 'GET',
     timeout: 30 * 1000,
     auth: null,
+    data: null,
     headers: null,
-    async: true,
     withCredentials: false,
     responseType: 'text'
   }
@@ -81,12 +81,14 @@
   }
 
   function parseData(xhr) {
-    var data
-    if (xhr.responseType === 'text') {
-      data = xhr.responseText
-      if (isJSONResponse(xhr) && data) data = JSON.parse(data)
-    } else {
-      data = xhr.response
+    var data = null
+    if (xhr.readyState === 4) {
+      if (xhr.responseType === 'text') {
+        data = xhr.responseText
+        if (isJSONResponse(xhr) && data) data = JSON.parse(data)
+      } else {
+        data = xhr.response
+      }
     }
     return data
   }
@@ -154,11 +156,15 @@
 
   function createClient(config) {
     var method = (config.method || 'GET').toUpperCase()
-    var auth = config.auth || {}
+    var auth = config.auth
     var url = getURL(config)
 
     var xhr = XHRFactory(url)
-    xhr.open(method, url, config.async, auth.user, auth.password)
+    if (auth) {
+      xhr.open(method, url, true, auth.user, auth.password)
+    } else {
+      xhr.open(method, url)
+    }
     xhr.withCredentials = config.withCredentials
     xhr.responseType = config.responseType
     xhr.timeout = config.timeout
@@ -691,7 +697,7 @@ function ResilientFactory(options) {
   return new Resilient(options)
 }
 
-ResilientFactory.VERSION = '0.2.11'
+ResilientFactory.VERSION = '0.2.12'
 ResilientFactory.CLIENT_VERSION = http.VERSION
 ResilientFactory.defaults = defaults
 ResilientFactory.Options = Options
