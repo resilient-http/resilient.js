@@ -320,7 +320,7 @@ Client.prototype.head = function (path, options, cb) {
 function requester(options, cb) {
   this._resilient.emit('request:start', options, this._resilient)
   return isFullUrlSchema(options)
-    ? plainHttpRequest(options, cb)
+    ? plainHttpRequest(this._resilient, options, cb)
     : resolver(this._resilient, options, cb)
 }
 
@@ -352,12 +352,12 @@ function isFullUrlSchema(options) {
   return options && (_.isURI(options.path) || _.isURI(options.url)) || false
 }
 
-function plainHttpRequest(options, cb) {
+function plainHttpRequest(resilient, options, cb) {
   if (options.path) {
     options.url = options.path
     options.path = null
   }
-  return http.call(null, options, cb)
+  return (resilient._httpClient || http).call(null, options, cb)
 }
 
 },{"./http":8,"./resolver":13,"./utils":18}],4:[function(require,module,exports){
