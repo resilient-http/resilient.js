@@ -82,24 +82,27 @@
 
   function parseData(xhr) {
     var data = null
-    if (xhr.readyState === 4) {
-      if (xhr.responseType === 'text') {
-        data = xhr.responseText
-        if (isJSONResponse(xhr) && data) data = JSON.parse(data)
-      } else {
-        data = xhr.response
-      }
+    if (xhr.responseType === 'text') {
+      data = xhr.responseText
+      if (isJSONResponse(xhr) && data) data = JSON.parse(data)
+    } else {
+      data = xhr.response
     }
     return data
   }
 
   function buildResponse(xhr) {
-    return {
+    var response = {
       xhr: xhr,
       status: xhr.status,
-      data: parseData(xhr),
-      headers: getHeaders(xhr)
+      data: null,
+      headers: {}
     }
+    if (xhr.readyState === 4) {
+      response.data = parseData(xhr)
+      response.headers = getHeaders(xhr)
+    }
+    return response
   }
 
   function buildErrorResponse(xhr, error) {
