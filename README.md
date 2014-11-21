@@ -15,7 +15,7 @@ For more information, see the [project site](http://resilient-http.github.io), t
 - Reliable failover and excellent error handling with transparent server fallback
 - Client-side based balancer using a simple best availability algorithm
 - Smart balancer logic based on server score (network latency, errors and succesfull requests)
-- Transparent request retry cycle attemps on failure
+- Transparent request retry cycle attempts on failure
 - Discern best servers based on scoring per read and write operations when balancing
 - Configurable balancer policy by weight
 - Highly configurable (timeout, retry loop, cache, wait delay fallback...)
