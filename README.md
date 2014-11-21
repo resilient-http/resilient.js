@@ -340,7 +340,7 @@ resilientClient.on('request:start', function handler(options, resilient) {
 ##### request:start
 Arguments: `options<Object>`, `resilient<Resilient>`
 
-Fired as before a request is created
+Fired before a request is created
 
 You can intercept and modify the request options on the fly,
 but you must mutate the options `object` and do not lose its reference
@@ -348,7 +348,7 @@ but you must mutate the options `object` and do not lose its reference
 ##### request:finish
 Arguments: `error<Error>`, `response<Object|http.IncomingMessage>`, `resilient<Resilient>`
 
-Fired as after a request was completed
+Fired after a request was completed
 
 You can intercept and modify the error/response on the fly,
 but you must mutate the options `object` and do not lose its reference
@@ -356,7 +356,7 @@ but you must mutate the options `object` and do not lose its reference
 ##### request:retry
 Arguments: `options<Object>`, `servers<Servers>`
 
-Fired as when a request performs a retry attempt cycle, that means all the previous requests has failed
+Fired when a request performs a retry attempt cycle, that means all the previous requests has failed
 
 You can intercept and modify the `options` object on the fly,
 but you must mutate it and do not lose its reference
