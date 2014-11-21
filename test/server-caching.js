@@ -18,8 +18,8 @@ describe('Servers caching', function () {
 
     var resilient = Resilient({
       discovery: {
-        cache: true,
         timeout: 100,
+        cacheEnabled: true,
         servers: initialServers
       },
       balancer: { roundRobin: false }

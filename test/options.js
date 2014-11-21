@@ -22,7 +22,7 @@ describe('Options', function () {
   })
 
   it('should have a default cache', function () {
-    expect(options.get('cache')).to.be.true
+    expect(options.get('cacheEnabled')).to.be.true
   })
 
   it('should override the refresh property', function () {
@@ -31,7 +31,7 @@ describe('Options', function () {
 
   it('should get HTTP sepcific options', function () {
     expect(options.http()).to.have.property('method')
-    expect(options.http()).to.not.have.property('cache')
+    expect(options.http()).to.not.have.property('cacheEnabled')
     expect(options.http()).to.not.have.property('parallel')
     expect(options.http()).to.not.have.property('refreshInterval')
   })

@@ -250,7 +250,7 @@ See all HTTP options supported for `node.js` [here](https://github.com/mikeal/re
 Specific configuration for discovery servers requests, behavior and logic
 
 - **servers** `array` - A list of valid URIs of endpoints to use as discovery servers
-- **cache** `boolean` - Enable/disable discovery servers cache in case of global fallback. Default `true`
+- **cacheEnabled** `boolean` - Enable/disable discovery servers cache in case of global fallback. Default `true`
 - **cacheExpiration** `number` - Maximum cache time to live. Default to `10` minutes
 - **retry** `number` - Number of times to retry if all requests failed. Use `Infinity` for infinitive attemps. Default `3`
 - **retryWait** `number` - Number of milisenconds to wait before start the request retry cycle. Default to `1000`

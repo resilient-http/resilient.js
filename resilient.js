@@ -1,6 +1,6 @@
 /*! resilient - v0.2.12 - MIT License - https://github.com/resilient-http/resilient.js */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.resilient=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-/*! lil-http - v0.1.11 - MIT License - https://github.com/lil-js/http */
+/*! lil-http - v0.1.14 - MIT License - https://github.com/lil-js/http */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
     define(['exports'], factory)
@@ -14,7 +14,8 @@
   }
 }(this, function (exports) {
   'use strict'
-  var VERSION = '0.1.11'
+
+  var VERSION = '0.1.14'
   var toStr = Object.prototype.toString
   var slicer = Array.prototype.slice
   var hasOwn = Object.prototype.hasOwnProperty
@@ -45,6 +46,16 @@
       for (x in cur) if (hasOwn.call(cur, x)) target[x] = cur[x]
     }
     return target
+  }
+
+  function once(fn) {
+    var called = false
+    return function () {
+      if (called === false) {
+        called = true
+        fn.apply(null, arguments)
+      }
+    }
   }
 
   function setHeaders(xhr, headers) {
@@ -106,31 +117,37 @@
   }
 
   function buildErrorResponse(xhr, error) {
-    var response = new Error(error.message)
+    var response = new Error(error.message || 'Request error')
     extend(response, buildResponse(xhr))
     response.error = error
     response.stack = error.stack
     return response
   }
 
-  function onError(xhr, cb) {
-    var called = false
-    return function (err) {
-      if (!called) {
-        cb(buildErrorResponse(xhr, err), null)
-        called = true
-      }
-    }
+  function cleanReferences(xhr) {
+    xhr.onreadystatechange = xhr.onerror = xhr.ontimeout = null
   }
 
-  function onLoad(xhr, cb) {
-    return function () {
+  function isValidResponseStatus(xhr) {
+    if (xhr.status === 1223) xhr.status = 204 // IE9 fix
+    return xhr.status >= 200 && xhr.status < 300 || xhr.status === 304
+  }
+
+  function onError(xhr, cb) {
+    return once(function (err) {
+      cb(buildErrorResponse(xhr, err), null)
+    })
+  }
+
+  function onLoad(config, xhr, cb) {
+    return function (ev) {
       if (xhr.readyState === 4) {
-        if (xhr.status === 1223) status = 204 // IE9 fix
-        if (xhr.status >= 200 && xhr.status < 400) {
+        cleanReferences(xhr)
+        console.log(config.method, config.url, xhr.status, isValidResponseStatus(xhr))
+        if (isValidResponseStatus(xhr)) {
           cb(null, buildResponse(xhr))
         } else {
-          cb(buildResponse(xhr), null)
+          onError(xhr, cb)(ev)
         }
       }
     }
@@ -177,27 +194,46 @@
 
   function updateProgress(xhr, cb) {
     return function (ev) {
-      if (evt.lengthComputable) {
-        cb(ev, evt.loaded / evt.total)
+      if (ev.lengthComputable) {
+        cb(ev, ev.loaded / ev.total)
       } else {
         cb(ev)
       }
     }
   }
 
+  function hasContentTypeHeader(config) {
+    return config && isObj(config.headers)
+      && (config.headers['content-type'] || config.headers['Content-Type'])
+      || false
+  }
+
+  function buildPayload(xhr, config) {
+    var data = config.data
+    if (isObj(config.data) || Array.isArray(config.data)) {
+      if (hasContentTypeHeader(config) === false) {
+        xhr.setRequestHeader('Content-Type', 'application/json')
+      }
+      data = JSON.stringify(config.data)
+    }
+    return data
+  }
+
   function request(config, cb, progress) {
     var xhr = createClient(config)
-    var data = isObj(config.data) || Array.isArray(config.data) ? JSON.stringify(config.data) : config.data
+    var data = buildPayload(xhr, config)
     var errorHandler = onError(xhr, cb)
 
-    xhr.onload = onLoad(xhr, cb)
+    xhr.onreadystatechange = onLoad(config, xhr, cb)
+    //xhr.onload = onLoad(xhr, cb)
     xhr.onerror = errorHandler
     xhr.ontimeout = errorHandler
-    xhr.onabort = errorHandler
-    if (typeof progress === 'function') xhr.onprogress = updateProgress(xhr, progress)
+    if (typeof progress === 'function') {
+      xhr.onprogress = updateProgress(xhr, progress)
+    }
 
     try {
-      xhr.send(data)
+      xhr.send(data ? data : null)
     } catch (e) {
       errorHandler(e)
     }
@@ -214,8 +250,11 @@
       for (i = 0, l = args.length; i < l; i += 1) {
         cur = args[i]
         if (typeof cur === 'function') {
-          cb = cur
-          if (cb !== cur) progress = cur
+          if (args.length === (i + 1) && typeof args[i - 1] === 'function') {
+            progress = cur
+          } else {
+            cb = cur
+          }
         } else if (isObj(cur)) {
           extend(config, cur)
         } else if (typeof cur === 'string' && !config.url) {
@@ -223,7 +262,7 @@
         }
       }
 
-      return request(config, cb || noop, progress)
+      return request(config, cb || noop, progress)
     }
   }
 
@@ -396,11 +435,11 @@ defaults.balancer = {
 defaults.discovery = {
   servers: null,
   method: 'GET',
-  cache: true,
   retry: 3,
+  parallel: true,
   retryWait: 1000,
   timeout: 2 * 1000,
-  parallel: true,
+  cacheEnabled: true,
   cacheExpiration: 60 * 10 * 1000,
   promiscuousErrors: true,
   refreshInterval: 60 * 1000,
@@ -417,12 +456,13 @@ defaults.resilientOptions = [
   'retry',
   'retryWait',
   'parallel',
+  'cacheEnabled',
   'cacheExpiration',
-  'cache',
   'refreshInterval',
   'refreshServers',
   'refreshOptions',
   'refreshPath',
+  'promiscuousErrors',
   'enableRefreshServers',
   'refreshServersInterval',
   'discoverBeforeRetry',
@@ -535,7 +575,7 @@ function DiscoveryServers(resilient) {
   }
 
   function isCacheEnabled() {
-    return resilient.options('discovery').get('cache')
+    return resilient.options('discovery').get('cacheEnabled')
   }
 
   function getCache() {
@@ -1345,21 +1385,31 @@ function ServersDiscovery(resilient, options, servers) {
     }
   }
 
+  function counter(total) {
+    return function decrement(reset) {
+      return (total = reset ? 0 : total - 1)
+    }
+  }
+
   function updateServersInParallel(options, cb) {
-    var buf = [], servers = getServers().sort('read', resilient.balancer())
+    var buf = []
+    var servers = getServers().sort('read', resilient.balancer())
+    var pending = counter(servers.length > 2 ? 3 : servers.length)
+
     servers.slice(0, 3).forEach(function (server, index) {
       server = [ server ]
       if (index === 2 && servers.length > 3) {
         server = server.concat(servers.slice(3))
       }
-      Requester(resilient)(new Servers(server), options, onUpdateInParallel(servers, index, buf, cb), buf)
+      Requester(resilient)(new Servers(server), options, onUpdateInParallel(servers, pending, buf, cb), buf)
     })
   }
 
-  function onUpdateInParallel(servers, index, buf, cb) {
+  function onUpdateInParallel(servers, counter, buf, cb) {
     return function (err, res) {
-      if (err) buf[index] = null
-      if (res || index === (servers.length > 3 ? 2 : servers.length - 1)) {
+      var pending = counter()
+      if (!err || pending === 0) {
+        counter(true) // reset
         onUpdateServers(cb, buf)(err, res)
       }
     }
@@ -1407,14 +1457,16 @@ function closePendingRequest(client) {
       if (client.xhr.readyState !== 4) {
         closeClient(client.xhr)
       }
-    } else if (typeof client.abort === 'function') {
+    } else {
       closeClient(client)
     }
   }
 }
 
 function closeClient(client) {
-  try { client.abort() } catch (e) {}
+  if (typeof client.abort === 'function') {
+    try { client.abort() } catch (e) {}
+  }
 }
 
 function isEmptyBuffer(buf) {

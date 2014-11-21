@@ -95,7 +95,7 @@
       - POST
   response:
     - status: 202
-      latency: 500
+      latency: 1000
       headers:
         content-type: application/json
       body: >
@@ -103,8 +103,7 @@
 
 - request:
     url: ^/server/([0-9])
-    method:
-      - GET
+    method: GET
   response:
     - status: 200
       latency: 50
@@ -114,13 +113,16 @@
         {"hello": "world"}
 
 - request:
-    url: ^/server/(.*)
+    url: ^/server/([0-9])
     method:
+      - PUT
       - POST
+      - HEAD
+      - PATCH
+      - DELETE
     headers:
        content-type: application/json
-    post: >
-       {"hello":"world"}
+    post: hello
   response:
     - status: 200
       latency: 50

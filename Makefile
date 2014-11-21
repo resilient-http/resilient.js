@@ -4,6 +4,7 @@ MOCHA = ./node_modules/.bin/mocha
 UGLIFYJS = ./node_modules/.bin/uglifyjs
 CUCUMBER = ./node_modules/.bin/cucumber-js
 STUBBY = ./node_modules/.bin/stubby
+MOCHA_PHANTOM = ./node_modules/.bin/mocha-phantomjs -s localToRemoteUrlAccessEnabled=true -s webSecurityEnabled=false
 BANNER = "/*! resilient - v$(VERSION) - MIT License - https://github.com/resilient-http/resilient.js */"
 
 define release
@@ -26,7 +27,8 @@ endef
 default: all
 all: test
 browser: banner browserify uglify
-test: browser mocha
+test: browser mocha test-browser cucumber
+test-browser: mock-server mock-server-stop mocha-phantom mock-server-stop
 
 banner:
 	@echo $(BANNER) > resilient.js
@@ -42,14 +44,22 @@ uglify:
 	$(UGLIFYJS) resilient.js --mangle --preamble $(BANNER) --source-map resilient.min.js.map --source-map-url http://cdn.rawgit.com/resilient-http/resilient.js/$(VERSION)/resilient.min.js.map > resilient.min.js
 
 mocha:
-	$(MOCHA) --reporter spec --ui tdd --timeout 3000
+	$(MOCHA) --reporter spec --ui tdd
+
+mocha-phantom:
+	$(MOCHA_PHANTOM) --reporter spec --ui bdd test/runner.html
+
+cucumber:
 	$(CUCUMBER) -f pretty -r features/support -r features/step_definitions
 
 loc:
 	wc -l resilient.js
 
 mock-server:
-	$(STUBBY) --data test/fixtures/mocks.yaml
+	{ $(STUBBY) -d ./test/fixtures/mocks.yaml > /dev/null & echo $$! > .server.pid; }
+
+mock-server-stop:
+	@-if [ -f .server.pid ] && kill -9 `cat .server.pid | head -n 1` && rm $<
 
 gzip:
 	gzip -c resilient.min.js | wc -c
