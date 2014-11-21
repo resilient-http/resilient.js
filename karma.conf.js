@@ -7,9 +7,6 @@ module.exports = function(config) {
       'test/browser.js'
     ],
     frameworks: ['mocha'],
-    sauceLabs: {
-      testName: 'thread.js'
-    },
     browsers: [
       'Chrome',
       'ChromeCanary',
