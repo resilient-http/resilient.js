@@ -5,5 +5,8 @@ bower_components
 bower.json
 component.json
 .travis.yml
+.editorconfig
 .gitignore
 .*.pid
+karma.conf.js
+Makefile
