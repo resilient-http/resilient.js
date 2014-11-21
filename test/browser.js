@@ -1,8 +1,8 @@
-var Resilient = resilient
-var expect = chai.expect
-
 describe('Browser', function () {
   if (typeof window === 'undefined') return;
+
+  var Resilient = resilient
+  var expect = chai.expect
 
   describe('embedded HTTP client', function () {
     var client = Resilient({
