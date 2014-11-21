@@ -28,7 +28,7 @@ default: all
 all: test
 browser: banner browserify uglify
 test: browser mocha test-browser cucumber
-test-browser: mock-server mock-server-stop mocha-phantom mock-server-stop
+test-browser: mock-server-stop mock-server mocha-phantom mock-server-stop
 
 banner:
 	@echo $(BANNER) > resilient.js
@@ -48,6 +48,7 @@ mocha:
 
 mocha-phantom:
 	$(MOCHA_PHANTOM) --reporter spec --ui bdd test/runner.html
+	$(MAKE) mock-server-stop
 
 cucumber:
 	$(CUCUMBER) -f pretty -r features/support -r features/step_definitions
@@ -56,10 +57,10 @@ loc:
 	wc -l resilient.js
 
 mock-server:
-	{ $(STUBBY) -d ./test/fixtures/mocks.yaml > /dev/null & echo $$! > .server.pid; }
+	$(STUBBY) -d ./test/fixtures/mocks.yaml > /dev/null & echo $$! > .server.pid
 
 mock-server-stop:
-	@-if [ -f .server.pid ] && kill -9 `cat .server.pid | head -n 1` && rm $<
+	[ -f .server.pid ] && kill -9 `cat .server.pid | head -n 1` && rm -f .server.pid || exit 0
 
 gzip:
 	gzip -c resilient.min.js | wc -c

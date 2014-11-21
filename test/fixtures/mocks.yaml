@@ -21,7 +21,11 @@
     url: ^/discovery/fail
     method:
       - GET
+      - PUT
       - POST
+      - HEAD
+      - PATCH
+      - DELETE
   response:
     - status: 500
       latency: 50
@@ -30,7 +34,11 @@
     url: ^/discovery/timeout
     method:
       - GET
+      - PUT
       - POST
+      - HEAD
+      - PATCH
+      - DELETE
   response:
     - status: 200
       latency: 10000
@@ -39,7 +47,11 @@
     url: ^/discovery/not-found
     method:
       - GET
+      - PUT
       - POST
+      - HEAD
+      - PATCH
+      - DELETE
   response:
     - status: 404
       latency: 50
@@ -48,7 +60,11 @@
     url: ^/discovery/bad-request
     method:
       - GET
+      - PUT
       - POST
+      - HEAD
+      - PATCH
+      - DELETE
   response:
     - status: 400
       latency: 50
@@ -57,7 +73,11 @@
     url: ^/discovery/forbidden
     method:
       - GET
+      - PUT
       - POST
+      - HEAD
+      - PATCH
+      - DELETE
   response:
     - status: 403
       latency: 50
@@ -66,7 +86,11 @@
     url: ^/server/(unavailable|fail)
     method:
       - GET
+      - PUT
       - POST
+      - HEAD
+      - PATCH
+      - DELETE
   response:
     - status: 503
       latency: 50
@@ -79,7 +103,11 @@
     url: ^/server/timeout
     method:
       - GET
+      - PUT
       - POST
+      - HEAD
+      - PATCH
+      - DELETE
   response:
     - status: 502
       latency: 10000
@@ -92,7 +120,11 @@
     url: ^/server/delay
     method:
       - GET
+      - PUT
       - POST
+      - HEAD
+      - PATCH
+      - DELETE
   response:
     - status: 202
       latency: 1000
@@ -103,7 +135,8 @@
 
 - request:
     url: ^/server/([0-9])
-    method: GET
+    method:
+      - GET
   response:
     - status: 200
       latency: 50
@@ -120,8 +153,6 @@
       - HEAD
       - PATCH
       - DELETE
-    headers:
-       content-type: application/json
     post: hello
   response:
     - status: 200

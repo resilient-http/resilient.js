@@ -7,11 +7,12 @@
     <div id="mocha"></div>
     <script src="../node_modules/mocha-phantomjs/node_modules/mocha/mocha.js"></script>
     <script src="../node_modules/chai/chai.js"></script>
+    <script src="../bower_components/zepto/zepto.min.js"></script>
     <script src="../resilient.js"></script>
     <script>
       mocha.ui('bdd')
       mocha.reporter('html')
-      mocha.timeout(3 * 1000)
+      mocha.timeout(15 * 1000)
       expect = chai.expect
       require = function (module) {
         var exported = resilient
@@ -22,7 +23,7 @@
         return exported
       }
     </script>
-    <script src="real-server.js"></script>
+    <script src="browser.js"></script>
     <script>
       if (window.mochaPhantomJS) { mochaPhantomJS.run(); }
       else { mocha.run(); }

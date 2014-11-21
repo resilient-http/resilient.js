@@ -19,6 +19,7 @@
   var toStr = Object.prototype.toString
   var slicer = Array.prototype.slice
   var hasOwn = Object.prototype.hasOwnProperty
+  var hasBind = typeof Function.prototype.bind === 'function'
   var origin = location.origin
   var originRegex = /^(http[s]?:\/\/[a-z0-9\-\.\:]+)[\/]?/i
   var jsonMimeRegex = /application\/json/
@@ -39,7 +40,7 @@
     return o && toStr.call(o) === '[object Object]' || false
   }
 
-  function extend(target) {
+  function assign(target) {
     var i, l, x, cur, args = slicer.call(arguments).slice(1)
     for (i = 0, l = args.length; i < l; i += 1) {
       cur = args[i]
@@ -106,6 +107,7 @@
     var response = {
       xhr: xhr,
       status: xhr.status,
+      statusText: xhr.statusText,
       data: null,
       headers: {}
     }
@@ -117,10 +119,9 @@
   }
 
   function buildErrorResponse(xhr, error) {
-    var response = new Error(error.message || 'Request error')
-    extend(response, buildResponse(xhr))
+    var response = buildResponse(xhr)
     response.error = error
-    response.stack = error.stack
+    if (error.stack) response.stack = error.stack
     return response
   }
 
@@ -129,8 +130,8 @@
   }
 
   function isValidResponseStatus(xhr) {
-    if (xhr.status === 1223) xhr.status = 204 // IE9 fix
-    return xhr.status >= 200 && xhr.status < 300 || xhr.status === 304
+    var status = xhr.status = xhr.status === 1223 ? 204 : xhr.status // IE9 fix
+    return status >= 200 && status < 300 || status === 304
   }
 
   function onError(xhr, cb) {
@@ -143,7 +144,6 @@
     return function (ev) {
       if (xhr.readyState === 4) {
         cleanReferences(xhr)
-        console.log(config.method, config.url, xhr.status, isValidResponseStatus(xhr))
         if (isValidResponseStatus(xhr)) {
           cb(null, buildResponse(xhr))
         } else {
@@ -219,15 +219,32 @@
     return data
   }
 
+  function timeoutResolver(cb, timeoutId) {
+    return function () {
+      clearTimeout(timeoutId)
+      cb.apply(null, arguments)
+    }
+  }
+
   function request(config, cb, progress) {
     var xhr = createClient(config)
     var data = buildPayload(xhr, config)
     var errorHandler = onError(xhr, cb)
 
+    if (hasBind) {
+      xhr.ontimeout = errorHandler
+    } else {
+      var timeoutId = setTimeout(function abort() {
+        if (xhr.readyState !== 4) {
+          xhr.abort()
+        }
+      }, config.timeout)
+      cb = timeoutResolver(cb, timeoutId)
+      errorHandler = onError(xhr, cb)
+    }
+
     xhr.onreadystatechange = onLoad(config, xhr, cb)
-    //xhr.onload = onLoad(xhr, cb)
     xhr.onerror = errorHandler
-    xhr.ontimeout = errorHandler
     if (typeof progress === 'function') {
       xhr.onprogress = updateProgress(xhr, progress)
     }
@@ -244,7 +261,7 @@
   function requestFactory(method) {
     return function (url, options, cb, progress) {
       var i, l, cur = null
-      var config = extend({}, defaults, { method: method })
+      var config = assign({}, defaults, { method: method })
       var args = slicer.call(arguments)
 
       for (i = 0, l = args.length; i < l; i += 1) {
@@ -256,7 +273,7 @@
             cb = cur
           }
         } else if (isObj(cur)) {
-          extend(config, cur)
+          assign(config, cur)
         } else if (typeof cur === 'string' && !config.url) {
           config.url = cur
         }
@@ -934,6 +951,7 @@ function getHttpClient(resilient) {
   return typeof resilient._httpClient === 'function' ? resilient._httpClient : http
 }
 
+// to do: unify err-res arguments
 function isErrorResponse(options, err, res) {
   return (options.promiscuousErrors && (isErrorStatus(err || res)))
     || isUnavailableStatus(err, res)
@@ -1387,7 +1405,7 @@ function ServersDiscovery(resilient, options, servers) {
 
   function counter(total) {
     return function decrement(reset) {
-      return (total = reset ? 0 : total - 1)
+      return (total = reset ? -1 : (total - 1))
     }
   }
 
