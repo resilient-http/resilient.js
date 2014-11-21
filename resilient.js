@@ -955,7 +955,6 @@ function getHttpClient(resilient) {
   return typeof resilient._httpClient === 'function' ? resilient._httpClient : http
 }
 
-// to do: unify err-res arguments
 function isErrorResponse(options, err, res) {
   return (options.promiscuousErrors && (isErrorStatus(err || res)))
     || isUnavailableStatus(err, res)
