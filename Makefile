@@ -4,6 +4,7 @@ MOCHA = ./node_modules/.bin/mocha
 UGLIFYJS = ./node_modules/.bin/uglifyjs
 CUCUMBER = ./node_modules/.bin/cucumber-js
 STUBBY = ./node_modules/.bin/stubby
+KARMA = ./node_modules/karma/bin/karma
 MOCHA_PHANTOM = ./node_modules/.bin/mocha-phantomjs -s localToRemoteUrlAccessEnabled=true -s webSecurityEnabled=false
 BANNER = "/*! resilient - v$(VERSION) - MIT License - https://github.com/resilient-http/resilient.js */"
 
@@ -27,8 +28,9 @@ endef
 default: all
 all: test
 browser: banner browserify uglify
-test: browser mocha test-browser cucumber
-test-browser: mock-server-stop mock-server mocha-phantom mock-server-stop
+test: browser mocha test-phantom cucumber
+test-phantom: mock-server-stop mock-server mocha-phantom mock-server-stop
+test-browser: mock-server-stop mock-server karma mock-server-stop
 
 banner:
 	@echo $(BANNER) > resilient.js
@@ -61,6 +63,12 @@ mock-server:
 
 mock-server-stop:
 	[ -f .server.pid ] && kill -9 `cat .server.pid | head -n 1` && rm -f .server.pid || exit 0
+
+karma:
+	$(KARMA) start
+
+karma-ci:
+	$(KARMA) start --single-run --browsers Firefox
 
 gzip:
 	gzip -c resilient.min.js | wc -c

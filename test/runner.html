@@ -14,14 +14,6 @@
       mocha.reporter('html')
       mocha.timeout(15 * 1000)
       expect = chai.expect
-      require = function (module) {
-        var exported = resilient
-        switch (module) {
-          case '../': exported = resilient; break
-          case 'chai': exported = chai; break
-        }
-        return exported
-      }
     </script>
     <script src="browser.js"></script>
     <script>

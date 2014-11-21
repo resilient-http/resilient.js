@@ -1,5 +1,5 @@
-var Resilient = require('../')
-var expect = require('chai').expect
+var Resilient = resilient
+var expect = chai.expect
 
 describe('Browser', function () {
   if (typeof window === 'undefined') return;
