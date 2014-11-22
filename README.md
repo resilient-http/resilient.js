@@ -55,7 +55,7 @@ component install resilient-http/resilient.js
 
 Or loading the script remotely
 ```html
-<script src="//cdn.rawgit.com/resilient-http/resilient.js/0.2.13/resilient.js"></script>
+<script src="//cdn.rawgit.com/resilient-http/resilient.js/0.2.14/resilient.js"></script>
 ```
 
 ## Environments

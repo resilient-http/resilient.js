@@ -3,7 +3,6 @@ var nock = require('nock')
 var Resilient = require('../')
 
 describe('Discovery', function () {
-
   describe('servers', function() {
     var resilient = Resilient({
       discovery: {

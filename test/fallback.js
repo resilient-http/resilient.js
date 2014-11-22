@@ -3,7 +3,6 @@ var nock = require('nock')
 var Resilient = require('../')
 
 describe('Fallback', function () {
-
   describe('invalid servers with invalid status', function () {
     var client = Resilient({
       service: {
