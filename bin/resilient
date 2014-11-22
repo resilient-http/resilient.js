@@ -2,6 +2,7 @@
 'use strict'
 
 var Resilient = require('../')
+var STATUS_CODES = require('http').STATUS_CODES
 var util = require('util')
 var path = require('path')
 var fs = require('fs')
@@ -69,9 +70,18 @@ newResilientClient(buildOptions(parseIntegerParams(argv)))
 function newResilientClient(options) {
   var client = Resilient(options.config)
   if (argv.discover) {
-    client.discoverServers(handler)
+    client.discoverServers(discoverHandler(handler))
   } else {
     client.send(options.options, handler)
+  }
+}
+
+function discoverHandler(handler) {
+  return function (err, res) {
+    if (!err) {
+      res = { data: res, status: 200 }
+    }
+    handler(err, res)
   }
 }
 
@@ -86,12 +96,13 @@ function handler(err, res) {
 }
 
 function printToStdout(res) {
-  if (argv.info) printInfo(res)
+  if (argv.info) {
+    printInfo(res)
+  }
   if (argv.status) {
     echo(res.status)
-  } else {
-    if (res.data) res = res.data
-    echo(util.inspect(res, { depth: null }))
+  } else if (res.data) {
+    echo(util.inspect(res.data, { depth: null }))
   }
 }
 
@@ -166,11 +177,11 @@ function setDataHttpMethod(options) {
 
 function setHeader(header, headers) {
   header = header.split(':').map(function (str) { return str.trim() })
-  headers[header[0]] = header[1]
+  headers[header.shift()] = header.shift()
 }
 
 function printInfo(res) {
-  echo('HTTP/' + res.httpVersion, res.status)
+  echo('HTTP/' + res.httpVersion, res.status, (STATUS_CODES ? STATUS_CODES[res.status] : null) || '')
   Object.keys(res.headers).forEach(function (key) {
     echo(key + ':', res.headers[key])
   })
