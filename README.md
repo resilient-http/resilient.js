@@ -32,6 +32,7 @@ For more information, see the [project site](http://resilient-http.github.io), t
 - Support round robin scheduling algorithm for traffic distribution (experimental)
 - Lightweight library (7KB gzipped)
 - Featured cURL-inspired command-line interface
+- Well tested (in both node.js and browser engines)
 
 ## Installation
 
