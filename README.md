@@ -606,6 +606,28 @@ client.get('/hello', function (err, res) {
 })
 ```
 
+#### Could I use a custom HTTP client instead the embedded one?
+
+Of course you could do that. For example, in browser environments this is a common premise, for example you want to use the custom HTTP client of the framework you are using, or a custom library like zepto or jQuery.
+
+You could simple do that defining a function middleware which will handle all the HTTP communication
+
+```js
+var client = Resilient({})
+// example using Zepto.js AJAX interface
+client.useHttpClient(function httpProxy(options, cb) {
+  options.success = function (data, status, xhr) {
+    cb(null, { status: xhr.status, data: data, xhr: xhr })
+  }
+  options.error = function (xhr) {
+    cb({ status: xhr.status, xhr: xhr })
+  }
+  $.ajax(options)
+})
+```
+
+For more information, see the [API method documentation](#resilientusehttpclientfn)
+
 ## Contributing
 
 Wanna help? Cool! It will be appreciated :)
