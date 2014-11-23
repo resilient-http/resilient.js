@@ -606,11 +606,11 @@ client.get('/hello', function (err, res) {
 })
 ```
 
-#### Could I use a custom HTTP client instead the embedded one?
+#### Can I use a custom HTTP client instead of the embedded one?
 
-Of course you could do that. For example, in browser environments this is a common premise, for example you want to use the custom HTTP client of the framework you are using, or a custom library like zepto or jQuery.
+Of course you can do that. In browser environments this is a common premise, for example you need to use the custom HTTP client of the framework you are using in your application, or a custom library like zepto or jQuery that provides a well-know AJAX features
 
-You could simple do that defining a function middleware which will handle all the HTTP communication
+You could simple do that defining a function middleware with which all the HTTP communication will be handled
 
 ```js
 var client = Resilient({})
