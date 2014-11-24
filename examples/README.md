@@ -10,3 +10,12 @@ Run the examples
 node examples/discovery
 node examples/get-servers
 ```
+
+Local HTTP server for browser testing
+```bash
+$ npm install -g http-server
+```
+
+```bash
+$ http-server ../
+```
