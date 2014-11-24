@@ -229,7 +229,6 @@ Specific shared configuration options for the HTTP client for final service requ
 
 **Browser specific options**
 
-- **async** `boolean` - Set to `false` if the request must be performed as synchronous operation (not recommended, browser only)
 - **withCredentials** `boolean` - Whether to set the withCredentials flag on the XHR object. See [MDN][withcredentials] for more information
 - **responseType** `string` - Define how to handle the response data. Allowed values are: `text`, `arraybuffer`, `blob` or `document`
 
