@@ -299,10 +299,10 @@ See [http.IncomingMessage][httpMessage]
 
 #### Error
 
-It will be an `Error` instance with the following members
+It could be an `Error` or plain `Object` instance with the following members
 
-- **message** `string` - Human readable error message
-- **status** `number` - Internal error code or HTTP status
+- **message** `string` - Human readable error message description
+- **status** `number` - Internal error code or server HTTP response status
 - **code** `number` - Optional error code (node.js only)
 - **stack** `string` - Optional stack error trace
 - **request** `object` - Original response object (node.js only). Optional
