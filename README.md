@@ -158,33 +158,34 @@ Resilient command-line HTTP client
 Usage: resilient [url] [options]
 
 Examples:
-  resilient http://httpbin.org/user-agent
-  resilient http://httpbin.org/status/201 --status
-  resilient http://httpbin.org/get --debug
+  resilient http://httpbin.org/user-agent                                                                               
+  resilient --status http://httpbin.org/status/201                                                                      
+  resilient --info http://httpbin.org/status/204                                                                        
   resilient http://httpbin.org/post -x POST \
-            -d '{"hello":"world"}' -h "Content-Type: application/json"
-  resilient /api/users -s http://server1.me,http://server2.me
-  resilient /api/users -z http://discover1.me,http://discover1.me
-  resilient --discover -z http://discover1.me,http://discover1.me --discovery-timeout 500
+            -d '{"hello":"world"}' -h "Content-Type: application/json"    
+  resilient /api/users -s http://server1.net,http://server2.net                                                         
+  resilient /api/users -z http://discover1.net,http://discover2.net                                                     
+  resilient --discover -z http://discover1.net,http://discover2.net --discovery-timeout 500                             
+
 
 Options:
-  --version, -v            Show the server version
-  --path, -p               Request path
-  --servers, -s            Define the service servers (comma separated)
-  --method, -x             HTTP method [default: "GET"]
-  --header, -h             Define custom request header
-  --data, -d               Value data to send as HTTP request body
-  --file, -f               File path to send as HTTP request body
-  --retry, -r              Request retry attempts [default: 0]
-  --timeout, -t            Request timeout in miliseconds
+  --version, -v            Show the server version                                    
+  --path, -p               Request path                                               
+  --servers, -s            Define the service servers (comma separated)               
+  --method, -x             HTTP method                                                
+  --header, -h             Define custom request header                               
+  --data, -d               Value data to send as HTTP request body                    
+  --file, -f               File path to send as HTTP request body                     
+  --retry, -r              Request retry attempts                                       [default: 0]
+  --timeout, -t            Request timeout in miliseconds                             
   --discover, -k           Get an updated list of servers asking for discovery servers
-  --discovery-servers, -z  Define the discovery service servers (comma separated)
-  --discovery-retry, -R    Discovery servers retry attempts [default: 0]
-  --discovery-timeout, -T  Discovery servers request maximum timeout in miliseconds
-  --info, -i               Show response headers and info
-  --status, -c             Print the response status code
-  --debug, -D              Enable debug mode
-  --help, -H               Show help
+  --discovery-servers, -z  Define the discovery service servers (comma separated)     
+  --discovery-retry, -R    Discovery servers retry attempts                             [default: 0]
+  --discovery-timeout, -T  Discovery servers request maximum timeout in miliseconds   
+  --info, -i               Show response headers and info                             
+  --status, -c             Print the response status code                             
+  --debug, -D              Enable debug mode                                          
+  --help, -H               Show help  
 ```
 
 ## API
