@@ -19,6 +19,7 @@ For more information, see the [project site](http://resilient-http.github.io), t
 - Discern best servers based on scoring per read and write operations when balancing
 - Configurable balancer policy by weight
 - Highly configurable (timeout, retry loop, cache, wait delay fallback...)
+- Avoid fallback/retry cycles per custom HTTP responses codes or methods
 - Parallel servers discovering for a faster availability
 - Built-in support for request/response interceptors
 - Built-in support for servers caching to improve reliability when fallback
@@ -56,7 +57,7 @@ component install resilient-http/resilient.js
 
 Or loading the script remotely
 ```html
-<script src="//cdn.rawgit.com/resilient-http/resilient.js/0.2.14/resilient.js"></script>
+<script src="//cdn.rawgit.com/resilient-http/resilient.js/0.2.15/resilient.js"></script>
 ```
 
 ## Environments
