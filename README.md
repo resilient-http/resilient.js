@@ -221,6 +221,7 @@ Resilient is a resource-oriented HTTP client, which could be ideal for RESTful W
 - **omitFallbackOnMethods** `array<string>` - Omit fallback to the next best available server if the method is on the given array. If you use this option, retry cycles will be disables too for the given methods. Default `null`
 - **omitRetryOnErrorCodes** `array<number>` - Omit a retry cycle attempt if the latest request response status code is one of the given array. Default `null`
 - **omitFallbackOnErrorCodes** `array<number>` - Omit fallback to the next best available server if the latest request response status code is one of the given array. Default `null`
+- **timeouts** `object` - Define custom request timeout values in miliseconds per HTTP method, useful to differ read/write requests. This option has priority over the `timeout` option. Default: `null`
 
 Specific shared configuration options for the HTTP client for final service requests
 

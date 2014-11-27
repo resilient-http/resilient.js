@@ -435,6 +435,7 @@ var defaults = module.exports = {}
 defaults.service = {
   method: 'GET',
   timeout: 10 * 1000,
+  timeouts: null,
   servers: null,
   retry: 0,
   retryWait: 50,
@@ -484,6 +485,7 @@ defaults.resilientOptions = [
   'servers',
   'retry',
   'retryWait',
+  'timeouts',
   'parallel',
   'cacheEnabled',
   'cacheExpiration',
@@ -882,7 +884,7 @@ function Requester(resilient) {
     function requestNextServer(previousError) {
       var handler, server = serversList.shift()
       if (server) {
-        options.url = _.join(server.url, options.basePath, options.path)
+        options = defineRequestOptions(server, options)
         handler = requestHandler(server, operation, options, resolveRequest(cb), requestNextServer)
         sendRequest(resilient, options, handler, buf)
       } else {
@@ -970,6 +972,22 @@ function resolveRequest(cb) {
     var body = resolution ? resolution.body || resolution.data : null
     mapAndResolve(err, res, body)
   }
+}
+
+function defineRequestOptions(server, options) {
+  options.url = _.join(server.url, options.basePath, options.path)
+  options.timeout = getTimeout(options)
+  return options
+}
+
+function getTimeout(options) {
+  var timeout = options.timeout
+  var timeouts = options.timeouts
+  var method = options.method
+  if (_.isObj(timeouts)) {
+    timeout = timeouts[method] || timeouts[method.toLowerCase()] || timeout
+  }
+  return timeout
 }
 
 function memoizeReponse(err, res) {
@@ -1133,7 +1151,8 @@ Resilient.prototype.setServers = function (list) {
 }
 
 Resilient.prototype.resetScore = Resilient.prototype.resetStats = function (type) {
-  this.options(type || 'service').servers().resetStats()
+  var servers = this.options(type || 'service').servers()
+  if (servers) servers.resetStats()
   return this
 }
 
@@ -1541,8 +1560,7 @@ function ServersDiscovery(resilient, options, servers) {
 }
 
 function addTimeStamp(options) {
-  var time = _.now() + Math.floor(Math.random() * 10000)
-  return _.extend(options.params || options.qs || {}, { _time: time })
+  return _.extend(options.params || options.qs || {}, { _time: _.now() })
 }
 
 function closePendingRequests(buf) {
