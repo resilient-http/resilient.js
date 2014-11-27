@@ -62,7 +62,7 @@ Or loading the script remotely
 
 ## Environments
 
-It runs properly in any [ES5 compliant](http://kangax.github.io/compat-table/es5/) engine
+It runs in any [ES5 compliant](http://kangax.github.io/compat-table/es5/) engine
 
 - Node.js
 - Chrome >= 5
