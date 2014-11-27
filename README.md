@@ -158,34 +158,34 @@ Resilient command-line HTTP client
 Usage: resilient [url] [options]
 
 Examples:
-  resilient http://httpbin.org/user-agent                                                                               
-  resilient --status http://httpbin.org/status/201                                                                      
-  resilient --info http://httpbin.org/status/204                                                                        
+  resilient http://httpbin.org/user-agent
+  resilient --status http://httpbin.org/status/201
+  resilient --info http://httpbin.org/status/204
   resilient http://httpbin.org/post -x POST \
-            -d '{"hello":"world"}' -h "Content-Type: application/json"    
-  resilient /api/users -s http://server1.net,http://server2.net                                                         
-  resilient /api/users -z http://discover1.net,http://discover2.net                                                     
-  resilient --discover -z http://discover1.net,http://discover2.net --discovery-timeout 500                             
+            -d '{"hello":"world"}' -h "Content-Type: application/json"
+  resilient /api/users -s http://server1.net,http://server2.net
+  resilient /api/users -z http://discover1.net,http://discover2.net
+  resilient --discover -z http://discover1.net,http://discover2.net --discovery-timeout 500
 
 
 Options:
-  --version, -v            Show the server version                                    
-  --path, -p               Request path                                               
-  --servers, -s            Define the service servers (comma separated)               
-  --method, -x             HTTP method                                                
-  --header, -h             Define custom request header                               
-  --data, -d               Value data to send as HTTP request body                    
-  --file, -f               File path to send as HTTP request body                     
+  --version, -v            Show the server version
+  --path, -p               Request path
+  --servers, -s            Define the service servers (comma separated)
+  --method, -x             HTTP method
+  --header, -h             Define custom request header
+  --data, -d               Value data to send as HTTP request body
+  --file, -f               File path to send as HTTP request body
   --retry, -r              Request retry attempts                                       [default: 0]
-  --timeout, -t            Request timeout in miliseconds                             
+  --timeout, -t            Request timeout in miliseconds
   --discover, -k           Get an updated list of servers asking for discovery servers
-  --discovery-servers, -z  Define the discovery service servers (comma separated)     
+  --discovery-servers, -z  Define the discovery service servers (comma separated)
   --discovery-retry, -R    Discovery servers retry attempts                             [default: 0]
-  --discovery-timeout, -T  Discovery servers request maximum timeout in miliseconds   
-  --info, -i               Show response headers and info                             
-  --status, -c             Print the response status code                             
-  --debug, -D              Enable debug mode                                          
-  --help, -H               Show help  
+  --discovery-timeout, -T  Discovery servers request maximum timeout in miliseconds
+  --info, -i               Show response headers and info
+  --status, -c             Print the response status code
+  --debug, -D              Enable debug mode
+  --help, -H               Show help
 ```
 
 ## API
@@ -216,6 +216,10 @@ Resilient is a resource-oriented HTTP client, which could be ideal for RESTful W
 - **retryWait** `number` - Number of milisenconds to wait before start the request retry cycle. Default to `50`
 - **discoverBeforeRetry** `boolean` - Force to refresh service servers list from asking for discovery servers on each retry attempt. You must define the discovery servers in order to use this feature. Default `true`
 - **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be treated as failed request, retrying it until it has valid status (when `retry` is enabled). Default `false`
+- **omitRetryOnMethods** `array<string>` - Omit a retry cycle attempt if the request method is on the given array. Default `null`
+- **omitFallbackOnMethods** `array<string>` - Omit fallback to the next best available server if the method is on the given array. If you use this option, retry cycles will be disables too for the given methods. Default `null`
+- **omitRetryOnErrorCodes** `array<number>` - Omit a retry cycle attempt if the latest request response status code is one of the given array. Default `null`
+- **omitFallbackOnErrorCodes** `array<number>` - Omit fallback to the next best available server if the latest request response status code is one of the given array. Default `null`
 
 Specific shared configuration options for the HTTP client for final service requests
 
@@ -265,6 +269,10 @@ Specific configuration for discovery servers requests, behavior and logic
 - **refreshPath** `string` - Discovery refresh servers lookup path. Example: `/app/hydra` for Hydra. This options requires you define `useDiscoveryServersToRefresh` to `true`. Default `null`
 - **refreshOptions** `object` - Custom HTTP options for discovery servers refresh. By default inherits from discovery options
 - **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be treated as failed request, retrying it until it has valid status (when `retry` is enabled). Default `false`
+- **omitRetryOnMethods** `array<string>` - Omit a retry cycle attempt if the request method is on the given array. Default `null`
+- **omitFallbackOnMethods** `array<string>` - Omit fallback to the next best available server if the method is on the given array. If you use this option, retry cycles will be disables too for the given methods. Default `null`
+- **omitRetryOnErrorCodes** `array<number>` - Omit a retry cycle attempt if the latest request response status code is one of the given array. Default `null`
+- **omitFallbackOnErrorCodes** `array<number>` - Omit fallback to the next best available server if the latest request response status code is one of the given array. Default `null`
 
 Specific shared configuration options for the HTTP client for discovering processes
 
@@ -444,6 +452,16 @@ Returns `true` if servers are up-to-date. Otherwise `false`
 Return: `Servers`
 
 Return a `Servers` instance with the current used servers per type. Allowed types are: `service` and `discovery`
+
+### resilient#resetScore([ type = 'service' ])
+Return: `Resilient` Alias: `resetStats`
+
+Reset servers stats score based on network latency, percentage of success and failed requests.
+
+This score is an average calculus of the amount of sent requests from the client, used in the the scheudling algorithm in order
+to determinate the best available server (in the case that the balancer is enabled)
+
+Allowed types are: `service` and `discovery`
 
 ### resilient#discoveryServers([ servers ])
 Return: `Servers`

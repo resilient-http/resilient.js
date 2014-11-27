@@ -66,4 +66,17 @@ describe('Servers', function () {
       expect(servers.servers[0].statsStore.read.request).to.be.equal(12)
     })
   })
+
+  describe('reset', function () {
+    it('should reset servers list stats', function () {
+      servers.resetStats()
+    })
+
+    it('should have empty stats values', function () {
+      expect(servers.servers[0].statsStore.read.request).to.be.equal(0)
+      expect(servers.servers[0].statsStore.write.request).to.be.equal(0)
+      expect(servers.servers[0].statsStore.read.error).to.be.equal(0)
+      expect(servers.servers[0].statsStore.write.error).to.be.equal(0)
+    })
+  })
 })

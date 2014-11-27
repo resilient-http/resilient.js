@@ -57,4 +57,23 @@ describe('Server', function () {
       expect(server.stats().latency).to.be.equal(17.08)
     })
   })
+
+  describe('reset server stats', function () {
+    it('should reset values', function () {
+      server.resetStats()
+    })
+
+    it('should have empty values', function () {
+      expect(server.statsStore.read).to.be.deep.equal({
+        latency: 0,
+        error: 0,
+        request: 0
+      })
+      expect(server.statsStore.write).to.be.deep.equal({
+        latency: 0,
+        error: 0,
+        request: 0
+      })
+    })
+  })
 })

@@ -439,7 +439,11 @@ defaults.service = {
   retry: 0,
   retryWait: 50,
   discoverBeforeRetry: true,
-  promiscuousErrors: false
+  promiscuousErrors: false,
+  omitRetryOnMethods: null,
+  omitFallbackOnMethods: null,
+  omitRetryOnErrorCodes: null,
+  omitFallbackOnErrorCodes: null
 }
 
 defaults.balancer = {
@@ -461,14 +465,18 @@ defaults.discovery = {
   retryWait: 1000,
   timeout: 2 * 1000,
   cacheEnabled: true,
-  cacheExpiration: 60 * 10 * 1000,
+  cacheExpiration: 60 * 15 * 1000,
   promiscuousErrors: true,
-  refreshInterval: 60 * 1000,
+  refreshInterval: 60 * 2 * 1000,
   enableRefreshServers: true,
-  refreshServersInterval: 60 * 3 * 1000,
+  refreshServersInterval: 60 * 5 * 1000,
   refreshServers: null,
   refreshOptions: null,
   refreshPath: null,
+  omitRetryOnMethods: null,
+  omitFallbackOnMethods: null,
+  omitRetryOnErrorCodes: null,
+  omitFallbackOnErrorCodes: null,
   useDiscoveryServersToRefresh: false
 }
 
@@ -484,6 +492,10 @@ defaults.resilientOptions = [
   'refreshOptions',
   'refreshPath',
   'promiscuousErrors',
+  'omitRetryOnMethods',
+  'omitFallbackOnMethods',
+  'omitRetryOnErrorCodes',
+  'omitFallbackOnErrorCodes',
   'enableRefreshServers',
   'refreshServersInterval',
   'discoverBeforeRetry',
@@ -920,9 +932,16 @@ function requestHandler(server, operation, options, cb, nextServer) {
   var start = _.now()
   return function requestReporter(err, res) {
     var latency = _.now() - start
-    if (isErrorResponse(options, err, res)) {
+    if (shouldOmitOnErrorCode(options.omitFallbackOnErrorCodes, err || res)) {
       server.reportError(operation, latency)
-      nextServer(err)
+      resolveRequest(err, res, cb)
+    } else if (isErrorResponse(options, err, res)) {
+      server.reportError(operation, latency)
+      if (shouldOmitFallback(options)) {
+        resolveRequest(err, res, cb)
+      } else {
+        nextServer(err || res)
+      }
     } else {
       server.report(operation, latency)
       resolveRequest(err, res, cb)
@@ -940,19 +959,41 @@ function sendRequest(resilient, options, handler, buf) {
   }
 }
 
-function updateAndRetry(resilient, onRetry) {
-  resilient._updating = false
-  Requester.DiscoveryResolver.update(resilient, null, onRetry)
-}
-
 function resolveRequest(err, res, cb) {
   var resolution = err || res
   var body = resolution ? resolution.body || resolution.data : null
   http.mapResponse(cb)(err, res, body)
 }
 
-function getHttpClient(resilient) {
-  return typeof resilient._httpClient === 'function' ? resilient._httpClient : http
+function updateAndRetry(resilient, onRetry) {
+  resilient._updating = false
+  Requester.DiscoveryResolver.update(resilient, null, onRetry)
+}
+
+function shouldOmitRetryRequest(options, res) {
+  return shouldOmitOnErrorCode(options.omitRetryOnErrorCodes, res)
+    && options.retry === 0
+}
+
+function shouldOmitFallback(options) {
+  var methods = options.omitFallbackOnMethods
+  return _.isArr(methods)
+    && matchHttpMethod(methods, options.method)
+}
+
+function shouldOmitOnErrorCode(codes, res) {
+  return res && res.status
+    && _.isArr(codes)
+    && !!~codes.indexOf(res.status)
+    && res.status >= 300
+}
+
+function matchHttpMethod(methods, method) {
+  return methods
+    .filter(function (m) { return typeof m === 'string' })
+    .map(function (m) { return m.toUpperCase().trim() })
+    .filter(function (m) { return m === method.toUpperCase() })
+    .length > 0
 }
 
 function isErrorResponse(options, err, res) {
@@ -982,6 +1023,10 @@ function checkResponseStatus(code, res) {
 
 function getOperation(method) {
   return !method || method.toUpperCase() === 'GET' ? 'read' : 'write'
+}
+
+function getHttpClient(resilient) {
+  return typeof resilient._httpClient === 'function' ? resilient._httpClient : http
 }
 
 },{"./defaults":4,"./discovery-servers":6,"./error":7,"./http":8,"./utils":18}],12:[function(require,module,exports){
@@ -1058,6 +1103,11 @@ Resilient.prototype.hasDiscoveryServers = function () {
 
 Resilient.prototype.setServers = function (list) {
   this.options('service').servers(list)
+  return this
+}
+
+Resilient.prototype.resetScore = Resilient.prototype.resetStats = function (type) {
+  this.options(type || 'service').servers().resetStats()
   return this
 }
 
@@ -1310,7 +1360,7 @@ module.exports = Server
 
 function Server(url) {
   this.url = url
-  this.statsStore = createServerStats()
+  this.resetStats()
 }
 
 Server.prototype.report = function (operation, latency, type) {
@@ -1338,6 +1388,10 @@ Server.prototype.stats = function (operation, field) {
   var stats = this.statsStore[operation || 'read']
   if (stats && field) stats = stats[field]
   return stats
+}
+
+Server.prototype.resetStats = function () {
+  this.statsStore = createServerStats()
 }
 
 function createServerStats() {
@@ -1557,6 +1611,12 @@ Servers.prototype.size = function () {
 Servers.prototype.urls = function () {
   return this.servers.map(function (server) {
     return server.url
+  })
+}
+
+Servers.prototype.resetStats = function () {
+  this.servers.forEach(function (server) {
+    server.resetStats()
   })
 }
 
