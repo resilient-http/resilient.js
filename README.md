@@ -314,7 +314,7 @@ It could be an `Error` or plain `Object` instance with the following members
 - **status** `number` - Internal error code or server HTTP response status
 - **code** `number` - Optional error code (node.js only)
 - **stack** `string` - Optional stack error trace
-- **request** `object` - Original response object (node.js only). Optional
+- **request** `object` - Original response object in case that a custom Resilient error happends. Optional
 - **error** `Error` - Original throwed Error instance (node.js only). Optional
 - **xhr** `XMLHttpRequest` - XHR native instance (browser only)
 
@@ -456,10 +456,11 @@ Return a `Servers` instance with the current used servers per type. Allowed type
 ### resilient#resetScore([ type = 'service' ])
 Return: `Resilient` Alias: `resetStats`
 
-Reset servers stats score based on network latency, percentage of success and failed requests.
+Reset servers stats score based on network latency and percentage of success and failed requests
 
-This score is an average calculus of the amount of sent requests from the client, used in the the scheudling algorithm in order
-to determinate the best available server (in the case that the balancer is enabled)
+This score is the average calculus of the total amount of sent requests from the client to each server.
+This score is used in the scheduling algorithm in order
+to determinate the best available server (in the case that the `balance` option is enabled)
 
 Allowed types are: `service` and `discovery`
 

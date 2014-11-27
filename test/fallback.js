@@ -225,4 +225,137 @@ describe('Fallback', function () {
     })
   })
 
+  describe('omit retry cycly on custom HTTP methods', function () {
+    var client = Resilient({
+      service: {
+        retry: 1,
+        omitFallbackOnMethods: ['POST', 'PUT'],
+        servers: ['http://unavailable', 'http://unavailable', 'http://unavailable']
+      }
+    })
+
+    before(function () {
+      nock('http://unavailable')
+        .get('/hello')
+        .times(6)
+        .reply(503)
+      nock('http://unavailable')
+        .post('/hello')
+        .times(3)
+        .reply(503)
+      nock('http://unavailable')
+        .put('/hello')
+        .times(3)
+        .reply(503)
+      nock('http://unavailable')
+        .delete('/hello')
+        .times(6)
+        .reply(503)
+    })
+
+    after(function () {
+      nock.cleanAll()
+    })
+
+    beforeEach(function () {
+      client.resetStats()
+    })
+
+    it('should resolve a GET request with success status', function (done) {
+      client.get('/hello', function (err, res) {
+        expect(err.status).to.be.equal(1000)
+        expect(err.request.status).to.be.equal(503)
+        done()
+      })
+    })
+
+    it('should resolve POST request with invalid status', function (done) {
+      client.post('/hello', function (err, res) {
+        expect(res.status).to.be.equal(503)
+        done()
+      })
+    })
+
+    it('should resolve PUT request with invalid status', function (done) {
+      client.put('/hello', function (err, res) {
+        expect(res.status).to.be.equal(503)
+        done()
+      })
+    })
+
+    it('should resolve DELETE request with valid status', function (done) {
+      client.delete('/hello', function (err, res) {
+        expect(err.status).to.be.equal(1000)
+        expect(err.request.status).to.be.equal(503)
+        done()
+      })
+    })
+  })
+
+
+  describe('omit retry cycle on custom response status codes', function () {
+    var client = Resilient({
+      service: {
+        retry: 2,
+        omitRetryOnErrorCodes: [ 503 ],
+        servers: ['http://unavailable', 'http://unavailable', 'http://unavailable']
+      }
+    })
+
+    before(function () {
+      nock('http://unavailable')
+        .get('/hello')
+        .times(12)
+        .reply(503)
+      nock('http://unavailable')
+        .post('/hello')
+        .times(12)
+        .reply(503)
+      nock('http://unavailable')
+        .put('/hello')
+        .times(12)
+        .reply(503)
+      nock('http://unavailable')
+        .delete('/hello')
+        .times(12)
+        .reply(503)
+    })
+
+    after(function () {
+      nock.cleanAll()
+    })
+
+    beforeEach(function () {
+      client.resetStats()
+    })
+
+    it('should resolve a GET request with success status', function (done) {
+      client.get('/hello', function (err, res) {
+        expect(res.status).to.be.equal(503)
+        done()
+      })
+    })
+
+    it('should resolve POST request with invalid status', function (done) {
+      client.post('/hello', function (err, res) {
+        expect(res.status).to.be.equal(503)
+        done()
+      })
+    })
+
+    it('should resolve PUT request with invalid status', function (done) {
+      client.put('/hello', function (err, res) {
+        expect(res.status).to.be.equal(503)
+        done()
+      })
+    })
+
+    it('should resolve DELETE request with valid status', function (done) {
+      client.delete('/hello', function (err, res) {
+        expect(res.status).to.be.equal(503)
+        done()
+      })
+    })
+  })
+
 })
