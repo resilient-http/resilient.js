@@ -20,7 +20,7 @@ For more information, see the [project site](http://resilient-http.github.io), t
 - Configurable balancer policy by weight
 - Highly configurable (timeout, retry loop, cache, wait delay fallback...)
 - Avoid fallback/retry cycles per custom HTTP responses codes or methods
-- Support custom timeouts config per HTTP method
+- Support to configure custom request timeouts per HTTP method (useful to differ get/post requests)
 - Parallel servers discovering for a faster availability
 - Built-in support for request/response interceptors
 - Built-in support for servers caching to improve reliability when fallback
@@ -218,6 +218,8 @@ Resilient is a resource-oriented HTTP client, which could be ideal for RESTful W
 - **retryWait** `number` - Number of milisenconds to wait before start the request retry cycle. Default to `50`
 - **discoverBeforeRetry** `boolean` - Force to refresh service servers list from asking for discovery servers on each retry attempt. You must define the discovery servers in order to use this feature. Default `true`
 - **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be treated as failed request, retrying it until it has valid status (when `retry` is enabled). Default `false`
+- **omitRetryWhen** `array<object>` - A collection of rules per method and status code to match in order to omit a request retry cycle. See the usage [example](https://github.com/resilient-http/resilient.js/blob/master/examples/omit-fallback-options.js). Default `null`
+- **omitFallbackWhen** `array<object>` - A collection of rules per method and status code to match in order to omit a request server fallback. See usage [example](https://github.com/resilient-http/resilient.js/blob/master/examples/omit-fallback-options.js). Default `null`
 - **omitRetryOnMethods** `array<string>` - Omit a retry cycle attempt if the request method is on the given array. Default `null`
 - **omitFallbackOnMethods** `array<string>` - Omit fallback to the next best available server if the method is on the given array. If you use this option, retry cycles will be disables too for the given methods. Default `null`
 - **omitRetryOnErrorCodes** `array<number>` - Omit a retry cycle attempt if the latest request response status code is one of the given array. Default `null`
@@ -272,10 +274,13 @@ Specific configuration for discovery servers requests, behavior and logic
 - **refreshPath** `string` - Discovery refresh servers lookup path. Example: `/app/hydra` for Hydra. This options requires you define `useDiscoveryServersToRefresh` to `true`. Default `null`
 - **refreshOptions** `object` - Custom HTTP options for discovery servers refresh. By default inherits from discovery options
 - **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be treated as failed request, retrying it until it has valid status (when `retry` is enabled). Default `false`
+- **omitRetryWhen** `array<object>` - A collection of rules per method and status code to match in order to omit a request retry cycle. See the usage [example](https://github.com/resilient-http/resilient.js/blob/master/examples/omit-fallback-options.js). Default `null`
+- **omitFallbackWhen** `array<object>` - A collection of rules per method and status code to match in order to omit a request server fallback. See usage [example](https://github.com/resilient-http/resilient.js/blob/master/examples/omit-fallback-options.js). Default `null`
 - **omitRetryOnMethods** `array<string>` - Omit a retry cycle attempt if the request method is on the given array. Default `null`
 - **omitFallbackOnMethods** `array<string>` - Omit fallback to the next best available server if the method is on the given array. If you use this option, retry cycles will be disables too for the given methods. Default `null`
 - **omitRetryOnErrorCodes** `array<number>` - Omit a retry cycle attempt if the latest request response status code is one of the given array. Default `null`
 - **omitFallbackOnErrorCodes** `array<number>` - Omit fallback to the next best available server if the latest request response status code is one of the given array. Default `null`
+- **timeouts** `object` - Define custom request timeout values in miliseconds per HTTP method, useful to differ read/write requests. This option has priority over the `timeout` option. Default: `null`
 
 Specific shared configuration options for the HTTP client for discovering processes
 
