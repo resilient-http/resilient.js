@@ -6,10 +6,10 @@ describe('Timeouts', function () {
   describe('per method timeouts', function () {
     var client = Resilient({
       service: {
-        timeout: 200,
+        timeout: 250,
         timeouts: {
           GET: 10,
-          PUT: 30
+          PUT: 300
         },
         servers: ['http://server']
       }
@@ -18,15 +18,19 @@ describe('Timeouts', function () {
     before(function () {
       nock('http://server')
         .get('/hello')
-        .delayConnection(100)
+        .delayConnection(150)
         .reply(500)
       nock('http://server')
         .post('/hello')
-        .delayConnection(100)
+        .delayConnection(50)
         .reply(204)
       nock('http://server')
         .put('/hello')
-        .delayConnection(150)
+        .delayConnection(500)
+        .reply(204)
+      nock('http://server')
+        .put('/greetings')
+        .delayConnection(100)
         .reply(204)
       nock('http://server')
         .delete('/hello')
@@ -57,6 +61,13 @@ describe('Timeouts', function () {
       client.put('/hello', function (err, res) {
         expect(err.status).to.be.equal(1000)
         expect(err.code).to.be.equal('ETIMEDOUT')
+        done()
+      })
+    })
+
+    it('should resolve a PUT request with valid status', function (done) {
+      client.put('/greetings', function (err, res) {
+        expect(res.status).to.be.equal(204)
         done()
       })
     })

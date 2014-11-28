@@ -398,7 +398,7 @@ function normalizeArgs(path, options, cb, method) {
     cb = options
     options = arguments[0]
   }
-  options = mergeHttpOptions(this._resilient, options)
+  options = mergeHttpOptions(this._resilient, _.isObj(options) ? options : {})
   if (typeof path === 'string') options.path = path
   if (typeof method === 'string') options.method = method
   if (typeof cb !== 'function') cb = _.noop
@@ -406,7 +406,7 @@ function normalizeArgs(path, options, cb, method) {
 }
 
 function wrapCallback(resilient, cb) {
-  return _.once(function finalHandler(err, res) {
+  return _.once(function finalRequestHandler(err, res) {
     resilient.emit('request:finish', err, res, resilient)
     cb(err, res)
   })
@@ -414,6 +414,7 @@ function wrapCallback(resilient, cb) {
 
 function mergeHttpOptions(resilient, options) {
   var defaults = resilient.options('service').get()
+  if (options.timeout) options.$timeout = options.timeout
   return _.merge(defaults, options)
 }
 
@@ -441,6 +442,8 @@ defaults.service = {
   retryWait: 50,
   discoverBeforeRetry: true,
   promiscuousErrors: false,
+  omitRetryWhen: null,
+  omitFallbackWhen: null,
   omitRetryOnMethods: null,
   omitFallbackOnMethods: null,
   omitRetryOnErrorCodes: null,
@@ -474,6 +477,8 @@ defaults.discovery = {
   refreshServers: null,
   refreshOptions: null,
   refreshPath: null,
+  omitRetryWhen: null,
+  omitFallbackWhen: null,
   omitRetryOnMethods: null,
   omitFallbackOnMethods: null,
   omitRetryOnErrorCodes: null,
@@ -486,6 +491,7 @@ defaults.resilientOptions = [
   'retry',
   'retryWait',
   'timeouts',
+  '$timeout',
   'parallel',
   'cacheEnabled',
   'cacheExpiration',
@@ -494,6 +500,8 @@ defaults.resilientOptions = [
   'refreshOptions',
   'refreshPath',
   'promiscuousErrors',
+  'omitRetryWhen',
+  'omitFallbackWhen',
   'omitRetryOnMethods',
   'omitFallbackOnMethods',
   'omitRetryOnErrorCodes',
@@ -903,8 +911,8 @@ function Requester(resilient) {
       cb.apply(null, previousResponse)
     } else if (options.retry) {
       retry = waitBeforeRetry(servers, options, cb)
-      if (options.discoverBeforeRetry && resilient.hasDiscoveryServers()) {
-        updateAndRetry(resilient, retry)
+      if (options.discoverBeforeRetry) {
+        updateDiscoveryServersAndRetry(resilient, retry)
       } else {
         retry()
       }
@@ -938,16 +946,12 @@ function requestHandler(server, operation, options, resolve, nextServer) {
   var start = _.now()
   return function requestReporter(err, res) {
     var latency = _.now() - start
-    if (shouldOmitFallbackOnErrorCode(options, err || res)) {
+    if (shouldOmitFallback(options, err || res)) {
       server.reportError(operation, latency)
       resolve(err, res)
     } else if (isErrorResponse(options, err, res)) {
       server.reportError(operation, latency)
-      if (shouldOmitFallbackOnMethod(options)) {
-        resolve(err, res)
-      } else {
-        nextServer(memoizeReponse(err, res))
-      }
+      nextServer(memoizeResponse(err, res))
     } else {
       server.report(operation, latency)
       resolve(err, res)
@@ -981,16 +985,16 @@ function defineRequestOptions(server, options) {
 }
 
 function getTimeout(options) {
-  var timeout = options.timeout
+  var timeout = options.$timeout || options.timeout
   var timeouts = options.timeouts
   var method = options.method
-  if (_.isObj(timeouts)) {
+  if (!options.$timeout && _.isObj(timeouts)) {
     timeout = timeouts[method] || timeouts[method.toLowerCase()] || timeout
   }
   return timeout
 }
 
-function memoizeReponse(err, res) {
+function memoizeResponse(err, res) {
   return function (cb) {
     return [ err, res ]
   }
@@ -1000,19 +1004,55 @@ function getFirstValue(arr) {
   return arr.filter(function (v) { return v != null }).slice(0).shift()
 }
 
-function updateAndRetry(resilient, onRetry) {
-  resilient._updating = false
-  Requester.DiscoveryResolver.update(resilient, null, onRetry)
+function updateDiscoveryServersAndRetry(resilient, onRetry) {
+  if (resilient.hasDiscoveryServers()) {
+    resilient._updating = false
+    Requester.DiscoveryResolver.update(resilient, null, onRetry)
+  } else {
+    onRetry()
+  }
 }
 
 function shouldOmitRetryCycle(options, err) {
   return shouldOmitOnErrorCode(options.omitRetryOnErrorCodes, err ? err.status : null)
     || shouldOmitOnMethod(options.omitRetryOnMethods, options.method)
+    || shouldOmitWhenRules(options.omitRetryWhen, options.method, err)
+}
+
+function shouldOmitFallback(options, err) {
+  return shouldOmitFallbackOnErrorCode(options, err)
+    || shouldOmitFallbackOnMethod(options)
+    || shouldOmitWhenRules(options.omitFallbackWhen, options.method, err)
 }
 
 function shouldOmitFallbackOnMethod(options) {
   var methods = options.omitFallbackOnMethods
   return shouldOmitOnMethod(methods, options.method)
+}
+
+function shouldOmitWhenRules(rules, method, res) {
+  return _.isArr(rules)
+    && res && res.status
+    && rules.filter(ruleFilter(method, res)).length > 0
+}
+
+function ruleFilter(method, err) {
+  return function (rule) {
+    return _.isObj(rule)
+      && matchRuleMethod(rule, method)
+      && matchRuleStatusCode(rule, err.status)
+  }
+}
+
+function matchRuleMethod(rule, method) {
+  return ((rule.method && rule.method === method)
+    || _.isArr(rule.methods) && matchHttpMethod(rule.methods, method))
+}
+
+function matchRuleStatusCode(rule, status) {
+  return status
+    && ((rule.code && rule.code === status)
+    || (_.isArr(rule.codes) && shouldOmitOnErrorCode(rule.codes, status)))
 }
 
 function shouldOmitFallbackOnErrorCode(options, err) {

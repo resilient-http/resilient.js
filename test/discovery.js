@@ -225,7 +225,7 @@ describe('Discovery', function () {
   describe('invalid response content type header', function () {
     var resilient = Resilient({
       discovery: {
-        timeout: 50,
+        timeout: 100,
         parallel: true,
         servers: [ 'http://valid' ]
       }
@@ -235,6 +235,7 @@ describe('Discovery', function () {
       nock('http://valid')
         .filteringPath(function () { return '/' })
         .get('/')
+        .times(2)
         .delayConnection(10)
         .reply(200, ['http://server'], { 'Content-Type': 'text/plain'})
       nock('http://server')
@@ -253,10 +254,11 @@ describe('Discovery', function () {
       })
     })
 
-    it('should perform find the server', function () {
+    it('should find the server', function (done) {
       resilient.get('/hello', function (err, res) {
         expect(res.status).to.be.equal(200)
         expect(res.data).to.be.deep.equal({ hello: 'world' })
+        done()
       })
     })
   })

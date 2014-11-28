@@ -7,17 +7,18 @@ var client = Resilient({
       'http://localhost:8882/server/timeout',
       'http://localhost:8882/server/1'
     ],
-    timeout: 5000, // default timoue
+    // default timeout for all HTTP requests
+    timeout: 5000,
+    // override default timeout for custom HTTP methods
     timeouts: {
-      GET: 1000, // lower timeout for read requests
-      DELETE: 2000 // and for delete
-      PATCH: 2000 // or patch
+      GET: 1000, // read request should be fast
+      DELETE: 2000 // and increment a bit for DELETE
+      PATCH: 2000 // and for PATCH
     }
   }
 })
 
 client.get('/', function (err, res) {
   console.log('Error:', err)
-  console.log('Response:', res)
-  console.log('Body:', res.data)
+  console.log('Response:', res.status)
 })

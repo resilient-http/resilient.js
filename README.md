@@ -20,6 +20,7 @@ For more information, see the [project site](http://resilient-http.github.io), t
 - Configurable balancer policy by weight
 - Highly configurable (timeout, retry loop, cache, wait delay fallback...)
 - Avoid fallback/retry cycles per custom HTTP responses codes or methods
+- Support custom timeouts config per HTTP method
 - Parallel servers discovering for a faster availability
 - Built-in support for request/response interceptors
 - Built-in support for servers caching to improve reliability when fallback
