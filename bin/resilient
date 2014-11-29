@@ -7,6 +7,7 @@ var util = require('util')
 var path = require('path')
 var fs = require('fs')
 var yargs = require('yargs')
+var buffer = require('buffer')
 
 var argv = yargs
   .usage('Resilient command-line HTTP client\nUsage: $0')
@@ -50,6 +51,9 @@ var argv = yargs
   .describe('info', 'Show response headers and info')
   .alias('info', 'i')
   .boolean('info')
+  .describe('info-headers', 'Show only the response status and headers')
+  .alias('info-headers', 'I')
+  .boolean('info-headers')
   .describe('status', 'Print the response status code')
   .alias('status', 'c')
   .boolean('status')
@@ -96,13 +100,19 @@ function handler(err, res) {
 }
 
 function printToStdout(res) {
-  if (argv.info) {
+  if (argv.info || argv.infoHeaders) {
     printInfo(res)
   }
   if (argv.status) {
     echo(res.status)
-  } else if (res.data) {
-    echo(util.inspect(res.data, { depth: null }))
+  } else if (res.data && !argv.infoHeaders) {
+    if (typeof res.data === 'string') {
+      echo(res.data)
+    } else if (buffer.isBuffer(res.data)) {
+      echo(res.data.toString('utf8'))
+    } else {
+      echo(util.inspect(res.data, { depth: null }))
+    }
   }
 }
 
