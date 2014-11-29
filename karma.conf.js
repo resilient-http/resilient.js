@@ -12,8 +12,8 @@ module.exports = function(config) {
       'ChromeCanary',
       'Firefox',
       'PhantomJS',
-      'Opera',
-      'Safari'
+      'Safari',
+      'Opera'
     ],
     reports: ['progress'],
     singleRun: true
