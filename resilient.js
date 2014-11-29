@@ -399,9 +399,11 @@ function normalizeArgs(path, options, cb, method) {
     options = arguments[0]
   }
   options = mergeHttpOptions(this._resilient, _.isObj(options) ? options : {})
+
   if (typeof path === 'string') options.path = path
   if (typeof method === 'string') options.method = method
   if (typeof cb !== 'function') cb = _.noop
+
   return [ options, wrapCallback(this._resilient, cb) ]
 }
 
@@ -419,7 +421,7 @@ function mergeHttpOptions(resilient, options) {
 }
 
 function isFullUrlSchema(options) {
-  return options && (_.isURI(options.path) || _.isURI(options.url)) || false
+  return options && ((_.isURI(options.path) || _.isURI(options.url))) || false
 }
 
 function plainHttpRequest(resilient, options, cb) {
@@ -525,26 +527,19 @@ module.exports = DiscoveryResolver
 function DiscoveryResolver(resilient, options, servers) {
   function resolver(cb) {
     return function finish(err, res) {
-      dispatchQueue(err, res)
-      cb(err, res)
+      try {
+        dispatchQueue(resilient, err, res)
+      } catch (e) {
+        throw e
+      } finally {
+        cb(err, res)
+      }
     }
   }
 
   function updateServers(cb) {
     resilient._updating = true
     ServersDiscovery(resilient, options, servers)(resolver(cb))
-  }
-
-  function dispatchQueue(err, res) {
-    resilient._updating = false
-    resilient._queue.forEach(dispatcher(err, res))
-    resilient._queue.splice(0)
-  }
-
-  function dispatcher(err, res) {
-    return function (cb) {
-      try { cb(err, res) } catch (e) {}
-    }
   }
 
   return function resolve(cb) {
@@ -570,6 +565,19 @@ DiscoveryResolver.fetch = function (resilient, options, cb) {
     else if (res && res.data) cb(null, res.data)
     else cb(new ResilientError(1001, res))
   })
+}
+
+function dispatchQueue(resilient, err, res) {
+  var queue = resilient._queue.slice(0)
+  resilient._updating = false
+  resilient._queue.splice(0)
+  queue.forEach(dispatcher(err, res))
+}
+
+function dispatcher(err, res) {
+  return function (cb) {
+    cb(err, res)
+  }
 }
 
 },{"./discovery-servers":6,"./error":7,"./requester":11,"./servers":17,"./servers-discovery":16,"./utils":18}],6:[function(require,module,exports){
@@ -643,7 +651,7 @@ function DiscoveryServers(resilient) {
 }
 
 function resolveWithError(err, cb) {
-  err = err || { status: 1000 }
+  err = err || { status: 1000 }
   return cb(new ResilientError(err.status, err))
 }
 
