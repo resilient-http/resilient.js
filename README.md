@@ -686,9 +686,14 @@ Generate browser bundle source
 $ make browser
 ```
 
-Run tests (in a headless browser)
+Run tests (in both node.js and headless browser)
 ```bash
 $ make test
+```
+
+Run tests in real browsers
+```bash
+$ make test-browser
 ```
 
 ## License
