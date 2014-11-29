@@ -160,15 +160,74 @@ describe('CLI', function () {
       server.stop(done)
     })
 
+    it('should print the HTTP version and status', function (done) {
+      run('http://localhost:9999/sample -i', function (error, stdout) {
+        expect(stdout).to.match(/HTTP\/1\.1 200 OK/)
+        done()
+      })
+    })
+
     it('should print the response headers', function (done) {
       run('http://localhost:9999/sample -i', function (error, stdout) {
-        expect(stdout).to.match(/server\:/)
+        expect(stdout).to.match(/server\: stubby/)
+        done()
+      })
+    })
+
+    it('should print the response body', function (done) {
+      run('http://localhost:9999/sample -i', function (error, stdout) {
+        expect(stdout).to.match(/hello/)
         done()
       })
     })
 
     it('should print error response headers', function (done) {
       run('http://localhost:9999/not-found -i', function (error, stdout, stderr) {
+        expect(stderr).to.match(/Error status\: 404/)
+        done()
+      })
+    })
+  })
+
+  describe('--info-headers', function () {
+    before(function (done) {
+      server = new Stubby()
+      server.start({
+        stubs: 9999,
+        data: [{
+          request: { url: '/sample' },
+          response: { status: 200, body: 'hello' }
+        }]
+      }, done)
+    })
+
+    after(function (done) {
+      server.stop(done)
+    })
+
+    it('should print the HTTP version and status', function (done) {
+      run('http://localhost:9999/sample -I', function (error, stdout) {
+        expect(stdout).to.match(/HTTP\/1\.1 200 OK/)
+        done()
+      })
+    })
+
+    it('should print the response headers', function (done) {
+      run('http://localhost:9999/sample -I', function (error, stdout) {
+        expect(stdout).to.match(/server\: stubby/)
+        done()
+      })
+    })
+
+    it('should not print the response body', function (done) {
+      run('http://localhost:9999/sample -I', function (error, stdout) {
+        expect(stdout).to.not.match(/hello/)
+        done()
+      })
+    })
+
+    it('should print error response headers', function (done) {
+      run('http://localhost:9999/not-found -I', function (error, stdout, stderr) {
         expect(stderr).to.match(/Error status\: 404/)
         done()
       })
