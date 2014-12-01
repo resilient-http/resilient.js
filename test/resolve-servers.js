@@ -271,4 +271,46 @@ describe('Resolve servers', function () {
     })
   })
 
+  describe('callback error exception', function () {
+    var resilient = Resilient({
+      service: {
+        timeout: 50,
+        retryWait: 10,
+        servers: [
+          'http://unavailable',
+          'http://unavailable',
+          'http://valid'
+        ]
+      }
+    })
+
+    before(function () {
+      nock('http://unavailable')
+        .get('/hello')
+        .times(2)
+        .delayConnection(10)
+        .reply(503)
+      nock('http://valid')
+        .get('/hello')
+        .reply(204)
+    })
+
+    after(function () {
+      nock.cleanAll()
+    })
+
+    it('should retry values', function (done) {
+      function callback() {
+        missing()
+      }
+
+      function handler(err, res) {
+        expect(callback).to.throw(ReferenceError)
+        done()
+      }
+
+      resilient.get('/hello', handler)
+    })
+  })
+
 })
