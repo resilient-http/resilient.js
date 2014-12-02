@@ -310,14 +310,14 @@ var _ = require('./utils')
 module.exports = Cache
 
 function Cache() {
-  this.store = {}
+  this.store = _.emptyObject()
 }
 
 Cache.prototype.flush = function (key) {
   if (key) {
     this.store[key] = null
   } else {
-    this.store = {}
+    this.store = _.emptyObject()
   }
 }
 
@@ -433,7 +433,7 @@ function plainHttpRequest(resilient, options, cb) {
 }
 
 },{"./http":8,"./resolver":13,"./utils":18}],4:[function(require,module,exports){
-var defaults = module.exports = {}
+var defaults = module.exports = Object.create(null)
 
 defaults.service = {
   method: 'GET',
@@ -807,7 +807,7 @@ var Servers = require('./servers')
 module.exports = Options
 
 function Options(options, type) {
-  this.store = type ? _.clone(defaults[type]) : {}
+  this.store = type ? _.clone(defaults[type]) : _.emptyObject()
   this.set(options)
 }
 
@@ -856,7 +856,7 @@ Options.define = function (options, defaultOptions) {
 }
 
 function defineDefaults(options, store) {
-  options = _.isObj(options) ? options : {}
+  options = _.isObj(options) ? options : _.emptyObject()
   return function (type) {
     if (type !== 'resilientOptions') {
       store.set(type, new Options(options[type], type))
@@ -865,7 +865,7 @@ function defineDefaults(options, store) {
 }
 
 function getRaw(options) {
-  var buf = {}
+  var buf = Object.create(null)
   _.each(options, function (key, value) {
     if (value instanceof Options) {
       buf[key] = value.get()
@@ -1757,6 +1757,10 @@ _.noop = function noop() {}
 
 _.now = function () {
   return new Date().getTime()
+}
+
+_.emptyObject = function () {
+  return Object.create(null)
 }
 
 _.isObj = function (o) {
