@@ -398,7 +398,7 @@ function normalizeArgs(path, options, cb, method) {
     cb = options
     options = arguments[0]
   }
-  options = mergeHttpOptions(this._resilient, _.isObj(options) ? options : {})
+  options = mergeHttpOptions(this._resilient, _.isObj(options) ? options : _.emptyObject())
 
   if (typeof path === 'string') options.path = path
   if (typeof method === 'string') options.method = method
@@ -408,7 +408,7 @@ function normalizeArgs(path, options, cb, method) {
 }
 
 function wrapCallback(resilient, cb) {
-  return _.once(function finalRequestHandler(err, res) {
+  return once(function finalRequestHandler(err, res) {
     resilient.emit('request:finish', err, res, resilient)
     cb(err, res)
   })
@@ -417,6 +417,7 @@ function wrapCallback(resilient, cb) {
 function mergeHttpOptions(resilient, options) {
   var defaults = resilient.options('service').get()
   if (options.timeout) options.$timeout = options.timeout
+  if (!_.isObj(options.headers)) options.headers = _.emptyObject()
   return _.merge(defaults, options)
 }
 
@@ -430,6 +431,16 @@ function plainHttpRequest(resilient, options, cb) {
     options.path = null
   }
   return (resilient._httpClient || http).call(null, options, cb)
+}
+
+function once(fn) {
+  var called = false
+  return function () {
+    if (called === false) {
+      called = true
+      fn.apply(null, arguments)
+    }
+  }
 }
 
 },{"./http":8,"./resolver":13,"./utils":18}],4:[function(require,module,exports){
@@ -1783,16 +1794,6 @@ _.each = function (obj, fn) {
     for (i = 0, l = obj.length; i < l; i += 1) fn(obj[i], i)
   else if (_.isObj(obj))
     for (i in obj) if (hasOwn.call(obj, i)) fn(i, obj[i])
-}
-
-_.once = function (fn) {
-  var called = false
-  return function () {
-    if (called === false) {
-      called = true
-      fn.apply(null, arguments)
-    }
-  }
 }
 
 _.clone = function (obj) {

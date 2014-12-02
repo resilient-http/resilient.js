@@ -12,6 +12,7 @@ describe('utils', function () {
     it('should be a plain object', function () {
       expect(_.isObj({})).to.be.true
       expect(_.isObj(new Object)).to.be.true
+      expect(_.isObj(Object.create(null))).to.be.true
     })
 
     it('should not be a plain object', function () {
@@ -42,19 +43,16 @@ describe('utils', function () {
     })
   })
 
-  describe('bind', function () {
-    it('should be bind a context', function () {
-      expect(_.bind(_, function () { return typeof this.bind })()).to.be.equal('function')
+  describe('emptyObject', function() {
+    it('should create a plain object without inherited prototype', function () {
+      expect(_.emptyObject()).to.be.an('object')
+      expect(_.emptyObject().hasOwnProperty).to.be.undefined
     })
   })
 
-  describe('once', function () {
-    var times = 0
-    it('should execute a function once time', function () {
-      var fn = _.once(function () { times += 1 })
-      fn()
-      fn()
-      expect(times).to.be.equal(1)
+  describe('bind', function () {
+    it('should be bind a context', function () {
+      expect(_.bind(_, function () { return typeof this.bind })()).to.be.equal('function')
     })
   })
 
