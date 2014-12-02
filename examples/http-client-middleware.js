@@ -12,12 +12,12 @@ var client = Resilient({
 })
 
 // Outgoing request will pass over here
-function proxyRequests(options, cb) {
+function httpRequestProxy(options, cb) {
   console.log('New request:', options.url)
   request(options, cb)
 }
 
-client.useHttpClient(proxyRequests)
+client.useHttpClient(httpRequestProxy)
 
 client.get('/hello', function (err, res) {
   console.log('Error:', err)
