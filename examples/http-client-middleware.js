@@ -17,7 +17,7 @@ function proxyRequests(options, cb) {
   request(options, cb)
 }
 
-client.setHttpClient(proxyRequests)
+client.useHttpClient(proxyRequests)
 
 client.get('/hello', function (err, res) {
   console.log('Error:', err)
