@@ -12,7 +12,7 @@ var client = Resilient({
     // override default timeout for custom HTTP methods
     timeouts: {
       GET: 1000, // read request should be fast
-      DELETE: 2000 // and increment a bit for DELETE
+      DELETE: 2000, // and increment a bit for DELETE
       PATCH: 2000 // and for PATCH
     }
   }
