@@ -1,5 +1,5 @@
 VERSION = 0.2.20
-BROWSERIFY = node ./node_modules/browserify/bin/cmd.js
+BROWSERIFY = node ./node_modules/.bin/browserify
 MOCHA = ./node_modules/.bin/mocha
 UGLIFYJS = ./node_modules/.bin/uglifyjs
 CUCUMBER = ./node_modules/.bin/cucumber-js
