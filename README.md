@@ -18,8 +18,9 @@ For more information, see the [project site](http://resilient-http.github.io), t
 - Transparent request retry cycle attempts on failure
 - Discern best servers based on scoring per read and write operations when balancing
 - Configurable balancer policy by weight
-- Highly configurable (timeout, retry loop, cache, wait delay fallback...)
+- Highly configurable (timeouts, retry loop, cache, fallback behavior, wait before retry...)
 - Avoid fallback/retry cycles per custom HTTP responses codes or methods
+- Define custom timeouts per HTTP method (permissive for POST/PUT/DELETE, aggressive for GET)
 - Configurable specific request timeouts per HTTP method (useful to differ get/post requests)
 - Parallel servers discovering for a faster availability
 - Built-in support for request/response interceptors
