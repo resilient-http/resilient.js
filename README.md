@@ -28,13 +28,12 @@ For more information, see the [project site](http://resilient-http.github.io), t
 - Configurable external HTTP client to use as forward request proxy (instead of using the embedded one)
 - Dynamic servers discovery (based on the resilient [specification](https://github.com/resilient-http/spec) protocol)
 - Support promiscuous errors (400-499 response status code)
-- Support mock/stub working mode
+- Support mock/stub working mode via middleware (useful for testing)
 - Full HTTP features support (it uses internally [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http) for the browser)
-- Server-side dynamic client configuration support (experimental)
 - Support round robin scheduling algorithm for traffic distribution (experimental)
 - Lightweight library (8KB gzipped)
 - Featured cURL-inspired command-line interface
-- Well tested (in both node.js and browser engines)
+- Well tested in both node.js and browsers
 
 ## Installation
 
@@ -149,11 +148,11 @@ client.get('/users', function (err, res) {
 })
 ```
 
-For more usage examples, see [examples](https://github.com/resilient-http/resilient.js/tree/master/examples) folder
+For more usage cases, see the [examples](https://github.com/resilient-http/resilient.js/tree/master/examples) folder
 
 ## Command-line interface
 
-For better approach, you could install `Resilient` as global package: `npm install -g resilient`
+For better approach you could install `Resilient` as global package: `npm install -g resilient`
 
 ```bash
 Resilient command-line HTTP client
@@ -234,7 +233,7 @@ Specific shared configuration options for the HTTP client for final service requ
 - **data** `mixed` - Payload data to send as body request
 - **headers** `object` - Map of strings representing HTTP headers to send to the server
 - **params** `object` - Map of strings representing the query params
-- **timeout** `number` - Request maximum timeout in miliseconds before to abort it. Default to 10 seconds
+- **timeout** `number` - Request maximum timeout in miliseconds before to abort it. Default to `10` seconds
 - **auth** `object` - Authentication credentials to the server. Object must have both `user` and `password` properties
 
 **Browser specific options**
@@ -266,10 +265,10 @@ Specific configuration for discovery servers requests, behavior and logic
 - **retry** `number` - Number of times to retry if all requests failed. Use `Infinity` for infinitive attemps. Default `3`
 - **retryWait** `number` - Number of milisenconds to wait before start the request retry cycle. Default to `1000`
 - **parallel** `boolean` - Discover servers in parallel. This will improve service availability and decrement server lookup delays. Default `true`
-- **refreshInterval** `number` - Servers list time to live in miliseconds. Default to `60000`
+- **refreshInterval** `number` - Servers list time to live in miliseconds. Default to `2` minutes
 - **enableRefreshServers** `boolean` - Enable/disable discovery servers auto refresh. This option requires `refreshServers` or `useDiscoveryServersToRefresh` be defined. Default `true`
 - **refreshServers** `array` - Servers list of refresh servers. This will enable automatically update discovery servers list asking for them selves to the following list of servers on each interval. Default `null`
-- **refreshServersInterval** `number` - Discovery servers list time to live in miliseconds. Default to `180000`
+- **refreshServersInterval** `number` - Discovery servers list time to live in miliseconds. Default to `5` minutes
 - **useDiscoveryServersToRefresh** `boolean` - Enable/disable self-discovery using the discovery servers pools (useful for Hydra). This options requires the `refreshPath` option be defined. Default `false`
 - **refreshPath** `string` - Discovery refresh servers lookup path. Example: `/app/hydra` for Hydra. This options requires you define `useDiscoveryServersToRefresh` to `true`. Default `null`
 - **refreshOptions** `object` - Custom HTTP options for discovery servers refresh. By default inherits from discovery options
