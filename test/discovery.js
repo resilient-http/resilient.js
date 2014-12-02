@@ -69,7 +69,7 @@ describe('Discovery', function () {
         .filteringPath(function () { return '/' })
         .get('/')
         .times(11)
-        .delayConnection(500)
+        .delayConnection(1000)
         .reply(503)
     })
 
