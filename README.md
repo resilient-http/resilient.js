@@ -461,6 +461,11 @@ Return: `Servers`
 
 Return a `Servers` instance with the current used servers per type. Allowed types are: `service` and `discovery`
 
+### resilient#serversURL([ type = 'service' ])
+Return: `array`
+
+Return an `array` of server URLs for the given type. Allowed types are: `service` and `discovery`
+
 ### resilient#resetScore([ type = 'service' ])
 Return: `Resilient` Alias: `resetStats`
 

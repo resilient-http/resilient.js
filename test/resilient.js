@@ -233,6 +233,39 @@ describe('Resilient', function () {
     })
   })
 
+  describe('get servers', function () {
+    var resilient = Resilient({
+      discovery: {
+        servers: ['http://discovery1', 'http://discovery2']
+      }
+    })
+
+    it('should not have service servers', function () {
+      expect(resilient.servers()).to.be.null
+    })
+
+    it('should have service valid discovery servers', function () {
+      expect(resilient.servers('discovery')).to.be.an('object')
+      expect(resilient.servers('discovery').servers.length).to.be.equal(2)
+    })
+  })
+
+  describe('get servers url', function () {
+    var resilient = Resilient({
+      discovery: {
+        servers: ['http://discovery1', 'http://discovery2']
+      }
+    })
+
+    it('should not have service servers', function () {
+      expect(resilient.serversURL()).to.be.null
+    })
+
+    it('should have service valid discovery servers', function () {
+      expect(resilient.serversURL('discovery')).to.be.deep.equal(['http://discovery1', 'http://discovery2'])
+    })
+  })
+
   describe('event listeners', function () {
     var options, response, eventResponse
     var resilient = Resilient({

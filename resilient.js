@@ -1143,11 +1143,13 @@ var EventBus = require('lil-event')
 module.exports = Resilient
 
 function Resilient(options) {
-  this._queue = []
   this._updating = false
+  this._discovering = false
+  this._queue = []
+  this._discoveryQueue = []
+  this._httpClient = null
   this._client = new Client(this)
   this._cache = new Cache()
-  this._httpClient = null
   this._options = Options.define(options)
 }
 
@@ -1189,6 +1191,12 @@ Resilient.prototype.getHttpOptions = function (type) {
 Resilient.prototype.servers = function (type) {
   var options = this.options(type || 'service')
   if (options) return options.servers()
+}
+
+Resilient.prototype.serversURL = function (type) {
+  var servers = this.servers(type)
+  if (servers) servers = servers.urls()
+  return servers
 }
 
 Resilient.prototype.discoveryServers = function (list) {
@@ -1315,7 +1323,7 @@ function Resolver(resilient, options, cb) {
   function resolve(next) {
     if (hasDiscoveryServersOutdated()) {
       updateDiscoveryServers(next)
-    } else if (hasValidServers()) {
+    } else if (hasValidServiceServers()) {
       next()
     } else if (hasDiscoveryServers()) {
       updateServersFromDiscovery(next)
@@ -1332,11 +1340,17 @@ function Resolver(resilient, options, cb) {
     var options = resilient.options('discovery')
     var servers = getRefreshServers(options)
     var refreshOptions = getRefreshOptions(options)
-    ServersDiscovery(resilient, refreshOptions, servers)(onRefreshServers(options, next))
+    if (resilient._discovering) {
+      resilient._discoveryQueue.push(onRefreshServers(options, next))
+    } else {
+      resilient._discovering = true
+      ServersDiscovery(resilient, refreshOptions, servers)(onRefreshServers(options, next))
+    }
   }
 
   function onRefreshServers(options, next) {
     return function (err, res) {
+      dispatchAfterDiscovery(err, res)
       if (err) {
         next(new ResilientError(1001, err))
       } else if (res && res.data) {
@@ -1344,6 +1358,16 @@ function Resolver(resilient, options, cb) {
       } else {
         next(new ResilientError(1004, err))
       }
+    }
+  }
+
+  function dispatchAfterDiscovery(err, res) {
+    var queue = resilient._discoveryQueue
+    if (resilient._discovering) {
+      resilient._discovering = false
+    }
+    if (queue.length) {
+      queue.splice(0).forEach(function dispacher(cb) { cb(err, res) })
     }
   }
 
@@ -1357,30 +1381,14 @@ function Resolver(resilient, options, cb) {
     var outdated = false
     var options = resilient.options('discovery')
     var servers = options.get('servers')
-    var refreshServers = options.get('refreshServers')
-    if (options.get('enableRefreshServers')) {
-      if (options.get('useDiscoveryServersToRefresh') || (refreshServers && refreshServers.exists())) {
-        if (servers && servers.exists()) {
-          outdated = servers.lastUpdate() > options.get('refreshServersInterval')
-        } else {
-          outdated = true
-        }
+    if (canUpdateDiscoveryServers(options)) {
+      if (servers && servers.exists()) {
+        outdated = servers.lastUpdate() > options.get('refreshServersInterval')
+      } else {
+        outdated = true
       }
     }
     return outdated
-  }
-
-  function hasValidServers() {
-    var servers = resilient.servers()
-    return servers && servers.exists() && serversAreUpdated(servers) || false
-  }
-
-  function serversAreUpdated(servers) {
-    var updated = true
-    if (hasDiscoveryServers()) {
-      updated = servers.lastUpdate() < resilient.options('discovery').get('refreshInterval')
-    }
-    return updated
   }
 
   function hasDiscoveryServers() {
@@ -1395,15 +1403,35 @@ function Resolver(resilient, options, cb) {
     var servers = resilient.servers()
     if (res && res._cache) {
       servers = new Servers(res.data)
-    } else if (!hasValidServers()) {
+    } else if (!hasValidServiceServers()) {
       return cb(new ResilientError(1003))
     }
     Requester(resilient)(servers, options, cb)
   }
+
+  function hasValidServiceServers() {
+    var servers = resilient.servers()
+    return servers && servers.exists() && serversAreUpdated(servers) || false
+  }
+
+  function serversAreUpdated(servers) {
+    var updated = true
+    if (hasDiscoveryServers()) {
+      updated = servers.lastUpdate() < resilient.options('discovery').get('refreshInterval')
+    }
+    return updated
+  }
+}
+
+function canUpdateDiscoveryServers(options) {
+  var refreshServers = options.get('refreshServers')
+  return options.get('enableRefreshServers')
+    && (options.get('useDiscoveryServersToRefresh') || (refreshServers && refreshServers.exists()))
 }
 
 function getRefreshServers(options) {
-  return options.get('useDiscoveryServersToRefresh') ? options.get('servers') : options.get('refreshServers')
+  return options.get('useDiscoveryServersToRefresh')
+    ? options.get('servers') : options.get('refreshServers')
 }
 
 function getRefreshOptions(options) {
@@ -1416,7 +1444,7 @@ function getRefreshOptions(options) {
 
 function getRefreshBasePath(options) {
   return options && (options.refreshPath
-    || (options.refreshOptions && (options.refreshOptions.basePath)))
+    || (_.isObj(options.refreshOptions) && options.refreshOptions.basePath))
     || false
 }
 
