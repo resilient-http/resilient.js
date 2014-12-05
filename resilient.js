@@ -1592,12 +1592,6 @@ function ServersDiscovery(resilient, options, servers) {
     }
   }
 
-  function counter(total) {
-    return function decrement(reset) {
-      return (total = reset ? -1 : (total - 1))
-    }
-  }
-
   function updateServersInParallel(options, cb) {
     var buf = []
     var servers = getServers().sort('read', resilient.balancer())
@@ -1622,13 +1616,6 @@ function ServersDiscovery(resilient, options, servers) {
     }
   }
 
-  function onUpdateServers(cb, buf) {
-    return function (err, res) {
-      closePendingRequests(buf)
-      cb(err || null, res)
-    }
-  }
-
   function updateServers(cb) {
     try {
       fetchServers(cb)
@@ -1646,8 +1633,21 @@ function ServersDiscovery(resilient, options, servers) {
   }
 }
 
+function counter(total) {
+  return function decrement(reset) {
+    return (total = reset ? -1 : (total - 1))
+  }
+}
+
 function addTimeStamp(options) {
   return _.extend(options.params || options.qs || {}, { _time: _.now() })
+}
+
+function onUpdateServers(cb, buf) {
+  return function (err, res) {
+    closePendingRequests(buf)
+    cb(err || null, res)
+  }
 }
 
 function closePendingRequests(buf) {

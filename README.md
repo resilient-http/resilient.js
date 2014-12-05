@@ -606,7 +606,7 @@ Useful to provide encapsulation to the resilient API and expose only the HTTP cl
 
 ### resilient.request(options [, cb])
 
-Use the plain HTTP client
+Use the plain HTTP client ([request](https://github.com/request/request) in node.js and [lil-http](https://github.com/lil-js/http) in the browser)
 
 ## FAQ
 
