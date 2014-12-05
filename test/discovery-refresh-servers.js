@@ -431,17 +431,17 @@ describe('Refresh discovery servers', function () {
       nock('http://discovery-refresh')
         .filteringPath(/\?(.*)/g, '')
         .get('/app/hydra')
-        .times(2)
+        .times(3)
         .delayConnection(150)
         .reply(200, ['http://discovery-server'])
       nock('http://discovery-server')
         .filteringPath(/\?(.*)/g, '')
         .get('/')
-        .times(2)
+        .times(3)
         .reply(200, ['http://server'])
       nock('http://server')
         .get('/hello')
-        .times(4)
+        .times(9)
         .reply(200, { hello: 'chuck' })
     })
 
@@ -466,16 +466,33 @@ describe('Refresh discovery servers', function () {
       expect(resilient.serversURL('discovery')).to.be.deep.equal(['http://discovery-server'])
     })
 
-    it('should wait 200 miliseconds to flush the cache', function (done) {
+    it('should wait 200 miliseconds to force discovery servers refresh', function (done) {
       setTimeout(done, 200)
     })
 
     it('should perform multiple requests updating the discovery servers once time', function (done) {
-      var times = 3
+      var times = 4
       function handler(err, res) {
         expecter(function () {})(err, res)
         if ((times -= 1) === 0) done(err)
       }
+      resilient.get('/hello', handler)
+      resilient.get('/hello', handler)
+      resilient.get('/hello', handler)
+      resilient.get('/hello', handler)
+    })
+
+    it('should wait 200 miliseconds to force discovery servers refresh', function (done) {
+      setTimeout(done, 200)
+    })
+
+    it('should perform multiple requests updating the discovery servers once time', function (done) {
+      var times = 4
+      function handler(err, res) {
+        expecter(function () {})(err, res)
+        if ((times -= 1) === 0) done(err)
+      }
+      resilient.get('/hello', handler)
       resilient.get('/hello', handler)
       resilient.get('/hello', handler)
       resilient.get('/hello', handler)
