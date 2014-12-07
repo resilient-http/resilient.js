@@ -170,7 +170,7 @@ Examples:
   resilient --discover -z http://discover1.net,http://discover2.net --discovery-timeout 500
 
 Options:
-  --version, -v            Show the server version
+  --version, -v            Show the Resilient client version
   --path, -p               Request path
   --servers, -s            Define the service servers (comma separated)
   --method, -x             HTTP method
