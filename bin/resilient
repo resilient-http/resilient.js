@@ -18,7 +18,7 @@ var argv = yargs
   .example('resilient /api/users -s http://server1.net,http://server2.net', '')
   .example('resilient /api/users -z http://discover1.net,http://discover2.net', '')
   .example('resilient --discover -z http://discover1.net,http://discover2.net --discovery-timeout 500', '')
-  .describe('version', 'Show the server version')
+  .describe('version', 'Show the Resilient client version')
   .alias('version', 'v')
   .boolean('version')
   .describe('path', 'Request path')
