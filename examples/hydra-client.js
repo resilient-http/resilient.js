@@ -22,7 +22,7 @@ client.discoverServers(function (err, servers) {
   console.log('Service servers:', servers)
 })
 
-// retrieve an up-to-date servers URLs (force asking for discovery servers)
+// retrieve an up-to-date servers URLs (force asking to discovery servers)
 client.getLatestServers(function (err, servers) {
   console.log('Fresh service servers:', servers)
 })
