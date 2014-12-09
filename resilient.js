@@ -1,4 +1,4 @@
-/*! resilient - v0.2.21 - MIT License - https://github.com/resilient-http/resilient.js */
+/*! resilient - v0.2.22 - MIT License - https://github.com/resilient-http/resilient.js */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.resilient=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /*! lil-http - v0.1.15 - MIT License - https://github.com/lil-js/http */
 (function (root, factory) {
@@ -718,14 +718,14 @@ var _ = require('./utils')
 var http = resolveModule()
 var JSON_MIME = /application\/json/
 
-module.exports = client
+module.exports = HttpClient
 
-function client() {
+function HttpClient() {
   return http.apply(null, arguments)
 }
 
-client.VERSION = http.VERSION
-client.mapResponse = mapResponse
+HttpClient.VERSION = http.VERSION
+HttpClient.mapResponse = mapResponse
 
 function resolveModule() {
   if (typeof window === 'object' && window) {
@@ -773,7 +773,7 @@ function setUserAgent(options) {
 }
 
 function getUserAgent() {
-  return 'resilient-http ' + client.LIBRARY_VERSION + ' (node)'
+  return 'resilient-http ' + HttpClient.LIBRARY_VERSION + ' (node)'
 }
 
 function mapRequestBody(options) {
@@ -798,7 +798,7 @@ function ResilientFactory(options) {
   return new Resilient(options)
 }
 
-ResilientFactory.VERSION = '0.2.21'
+ResilientFactory.VERSION = '0.2.22'
 ResilientFactory.CLIENT_VERSION = http.VERSION
 ResilientFactory.defaults = defaults
 ResilientFactory.Options = Options
