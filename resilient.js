@@ -1141,12 +1141,8 @@ var EventBus = require('lil-event')
 module.exports = Resilient
 
 function Resilient(options) {
-  this._state = new State()
-  //this._updating = false
-  this._discovering = false
-  //this._queue = []
-  this._discoveryQueue = []
   this._httpClient = null
+  this._state = new State()
   this._client = new Client(this)
   this._cache = new Cache()
   this._options = Options.define(options)
