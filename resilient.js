@@ -919,8 +919,8 @@ function getServersList(resilient, servers, operation) {
   }
 }
 
-function handleMissingServers(resilient, servers, options, previousResponse, cb) {
-  var cachedPreviousResponse = previousResponse()
+function handleMissingServers(resilient, servers, options, getPreviousResponse, cb) {
+  var cachedPreviousResponse = getPreviousResponse()
   var responseObj = getFirstValue(cachedPreviousResponse)
   if (shouldOmitRetryCycle(options, responseObj)) {
     cb.apply(null, cachedPreviousResponse)
@@ -1343,7 +1343,7 @@ function Resolver(resilient, options, cb) {
 
   function onRefreshServers(options, next) {
     return function (err, res) {
-      unlockAndDispatchQueue(state, err, res)
+      unlockAndDispatchDiscoveryQueue(state, err, res)
       if (err) {
         next(new ResilientError(1001, err))
       } else if (res && res.data) {
@@ -1410,7 +1410,7 @@ function Resolver(resilient, options, cb) {
   }
 }
 
-function unlockAndDispatchQueue(state, err, res) {
+function unlockAndDispatchDiscoveryQueue(state, err, res) {
   state.unlock('discovering')
   state.dequeue('discovering').forEach(function (cb) { cb(err, res) })
 }
