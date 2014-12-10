@@ -228,7 +228,7 @@ describe('Refresh discovery servers', function () {
       resilient.get('/hello', function (err, res) {
         expect(err).to.be.an('object')
         expect(err.status).to.be.equal(1001)
-        expect(err.error.code).to.match(/ETIMEDOUT|ENOTFOUND/)
+        expect(err.error.code).to.match(/ESOCKETTIMEDOUT|ETIMEDOUT|ENOTFOUND/)
         done()
       })
     })
@@ -409,7 +409,7 @@ describe('Refresh discovery servers', function () {
       resilient.get('/hello', function (err, res) {
         expect(err).to.be.an('object')
         expect(err.status).to.be.equal(1001)
-        expect(err.error.code).to.match(/ETIMEDOUT|ENOTFOUND/)
+        expect(err.error.code).to.match(/ESOCKETTIMEDOUT|ETIMEDOUT|ENOTFOUND/)
         done()
       })
     })

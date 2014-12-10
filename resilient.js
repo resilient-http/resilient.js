@@ -976,9 +976,8 @@ function requestHandler(server, operation, options, resolve, nextServer) {
 }
 
 function sendRequest(resilient, options, handler, buf) {
-  var request = null
   try {
-    request = getHttpClient(resilient)(_.omit(options, resilientOptions), handler)
+    var request = getHttpClient(resilient)(_.omit(options, resilientOptions), handler)
     if (buf) buf.push(request)
   } catch (err) {
     handler(err)
