@@ -1,4 +1,4 @@
-/*! resilient - v0.2.22 - MIT License - https://github.com/resilient-http/resilient.js */
+/*! resilient - v0.2.23 - MIT License - https://github.com/resilient-http/resilient.js */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.resilient=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /*! lil-http - v0.1.15 - MIT License - https://github.com/lil-js/http */
 (function (root, factory) {
@@ -798,13 +798,18 @@ function ResilientFactory(options) {
   return new Resilient(options)
 }
 
-ResilientFactory.VERSION = '0.2.22'
+ResilientFactory.VERSION = '0.2.23'
 ResilientFactory.CLIENT_VERSION = http.VERSION
 ResilientFactory.defaults = defaults
 ResilientFactory.Options = Options
 ResilientFactory.Client = Client
 ResilientFactory.request = http
 http.LIBRARY_VERSION = ResilientFactory.VERSION
+
+// force globalization in browsers, avoid browserify encapsulation
+if (typeof window !== 'undefined' && typeof require === 'function') {
+  window.resilient = ResilientFactory
+}
 
 },{"./client":3,"./defaults":4,"./http":8,"./options":10,"./resilient":12}],10:[function(require,module,exports){
 var _ = require('./utils')
