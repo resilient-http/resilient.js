@@ -36,9 +36,14 @@ describe('Fallback', function () {
       nock.cleanAll()
     })
 
-    it('should perform a unique request with 404 status', function (done) {
+    it('should fallback until returns the 403 status', function (done) {
+      var fallbackTimes = 0
+      client.on('request:fallback', function (options, res) {
+        fallbackTimes += 1
+      })
       client.get('/hello', function (err, res) {
         expect(res.status).to.be.equal(403)
+        expect(fallbackTimes).to.be.equal(2)
         done()
       })
     })
@@ -74,8 +79,13 @@ describe('Fallback', function () {
     })
 
     it('should perform a unique request cycle with valid status', function (done) {
+      var fallbackTimes = 0
+      client.on('request:fallback', function (options, res) {
+        fallbackTimes += 1
+      })
       client.get('/hello', function (err, res) {
         expect(res.status).to.be.equal(204)
+        expect(fallbackTimes).to.be.equal(2)
         done()
       })
     })

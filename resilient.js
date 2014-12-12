@@ -900,7 +900,7 @@ function Requester(resilient) {
       var handler, server = serversList.shift()
       if (server) {
         options = defineRequestOptions(server, options)
-        handler = requestHandler(server, operation, options, resolveRequest(cb), requestNextServer)
+        handler = requestHandler(server, operation, options, resolveRequest(cb), requestNextServer, resilient)
         sendRequest(resilient, options, handler, buf)
       } else {
         handleMissingServers(resilient, servers, options, previousError, cb)
@@ -958,7 +958,7 @@ function retrier(resilient, servers, options, cb) {
   }
 }
 
-function requestHandler(server, operation, options, resolve, nextServer) {
+function requestHandler(server, operation, options, resolve, nextServer, resilient) {
   var start = _.now()
   return function requestReporter(err, res) {
     var latency = _.now() - start
@@ -967,11 +967,18 @@ function requestHandler(server, operation, options, resolve, nextServer) {
       resolve(err, res)
     } else if (isErrorResponse(options, err, res)) {
       server.reportError(operation, latency)
+      resilient.emit('request:fallback', options, err || res)
       nextServer(memoizeResponse(err, res))
     } else {
       server.report(operation, latency)
       resolve(err, res)
     }
+  }
+}
+
+function memoizeResponse(err, res) {
+  return function (cb) {
+    return [ err, res ]
   }
 }
 
@@ -1007,12 +1014,6 @@ function getTimeout(options) {
     timeout = timeouts[method] || timeouts[method.toLowerCase()] || timeout
   }
   return timeout
-}
-
-function memoizeResponse(err, res) {
-  return function (cb) {
-    return [ err, res ]
-  }
 }
 
 function getFirstValue(arr) {

@@ -11,6 +11,12 @@ var client = Resilient({
   }
 })
 
+client.on('request:fallback', function (options, res) {
+  console.log('Request fallback request cycle was dispached!')
+  console.log('Using the following options:', options)
+  console.log('With the failed response:', res)
+})
+
 client.on('request:retry', function (options, servers) {
   console.log('Retry request cycle was dispached!')
   console.log('Using the following options:', options)
