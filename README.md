@@ -4,7 +4,7 @@
 
 A **browser** and **[node.js](http://nodejs.org)** highly **configurable** and **full featured HTTP client** with **superpowers** such as **fault tolerant**, **dynamic servers discovery**, transparent server **fallback**, **request retry** cycles, built-in **balancer**, round-robin scheduling for better **load distribution** and [more](#features)...
 
-It was designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless resource-oriented services, redundant high available HTTP APIs, multicloud services... among others
+It was specially designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless REST-oriented services, redundant high available HTTP APIs, multicloud services...
 
 It provides an elegant [programmatic API](#api) and featured [command-line interface](#command-line-interface)
 
