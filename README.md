@@ -668,6 +668,10 @@ client.useHttpClient(function httpProxy(options, cb) {
 
 For more information, see the [API method documentation](#resilientusehttpclientfn)
 
+#### Can I use streams?
+
+Not yet. There are plans to support it in the future `0.3` version
+
 ## Contributing
 
 Wanna help? Cool! It will be appreciated :)
