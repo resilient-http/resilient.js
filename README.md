@@ -213,7 +213,7 @@ Resilient({
 There are specific config options for the servers of the client service.
 Resilient is a resource-oriented HTTP client, which could be ideal for RESTful Web services
 
-- **servers** `array` - A list of valid URIs of servers to reach for the given service. Default `null`. It's recommended you use discovery servers instead
+- **servers** `array<string>` - A list of valid URIs of servers to reach for the given service. Default `null`. It's recommended you use discovery servers instead
 - **retry** `number` - Number of times to retry if all requests failed. Use `Infinity` for infinitive attemps. Default `0`
 - **retryWait** `number` - Number of milisenconds to wait before start the request retry cycle. Default to `50`
 - **discoverBeforeRetry** `boolean` - Force to refresh service servers list from asking for discovery servers on each retry attempt. You must define the discovery servers in order to use this feature. Default `true`
@@ -260,7 +260,7 @@ See all HTTP options supported for `node.js` [here](https://github.com/mikeal/re
 
 Specific configuration for discovery servers requests, behavior and logic
 
-- **servers** `array` - A list of valid URIs of endpoints to use as discovery servers
+- **servers** `array<string>` - A list of valid URIs of endpoints to use as discovery servers
 - **cacheEnabled** `boolean` - Enable/disable discovery servers cache in case of global fallback. Default `true`
 - **cacheExpiration** `number` - Maximum cache time to live. Default to `10` minutes
 - **retry** `number` - Number of times to retry if all requests failed. Use `Infinity` for infinitive attemps. Default `3`
@@ -470,7 +470,7 @@ Return: `Servers`
 Return a `Servers` instance with the current used servers per type. Allowed types are: `service` and `discovery`
 
 ### resilient#serversURL([ type = 'service' ])
-Return: `array`
+Return: `array<string>`
 
 Return an `array` of server URLs for the given type. Allowed types are: `service` and `discovery`
 
