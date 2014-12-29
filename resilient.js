@@ -526,9 +526,7 @@ defaults.resilientOptions = [
 ]
 
 },{}],5:[function(require,module,exports){
-var _ = require('./utils')
 var ResilientError = require('./error')
-var Servers = require('./servers')
 var Requester = require('./requester')
 var DiscoveryServers = require('./discovery-servers')
 var ServersDiscovery = require('./servers-discovery')
@@ -588,7 +586,7 @@ function dispatcher(err, res) {
   }
 }
 
-},{"./discovery-servers":6,"./error":7,"./requester":11,"./servers":17,"./servers-discovery":16,"./utils":19}],6:[function(require,module,exports){
+},{"./discovery-servers":6,"./error":7,"./requester":11,"./servers-discovery":16}],6:[function(require,module,exports){
 var _ = require('./utils')
 var ResilientError = require('./error')
 
@@ -621,7 +619,6 @@ function DiscoveryServers(resilient) {
   }
 
   function hasValidCache(cache) {
-    var valid = false
     var expires = resilient.options('discovery').get('cacheExpiration')
     return cache && _.isArr(cache.data) && (_.now() - cache.time) > expires || false
   }
@@ -744,8 +741,8 @@ function requestWrapper(request) {
 
 function mapResponse(cb) {
   return function (err, res, body) {
-    if (res) {
-      if (res.statusCode) res.status = res.statusCode
+    if (res && res.statusCode) {
+      res.status = res.statusCode
     }
     if (body) {
       (err || res).data = isJSONContent(err || res) ? JSON.parse(body) : body
@@ -763,13 +760,14 @@ function mapOptions(options) {
 }
 
 function isJSONContent(res) {
-  return typeof res.body === 'string' && JSON_MIME.test(res.headers['content-type'])
+  return typeof res.body === 'string' 
+    && JSON_MIME.test(res.headers['content-type'])
 }
 
 function setUserAgent(options) {
   options = options || {}
   options.headers = options.headers || {}
-  options.headers['User-Agent'] = options.headers['User-Agent'] || getUserAgent()
+  options.headers['User-Agent'] = options.headers['User-Agent'] || getUserAgent()
   return options
 }
 
@@ -892,7 +890,6 @@ var _ = require('./utils')
 var http = require('./http')
 var resilientOptions = require('./defaults').resilientOptions
 var ResilientError = require('./error')
-var DiscoveryServers = require('./discovery-servers')
 
 module.exports = Requester
 
@@ -1135,7 +1132,7 @@ function getHttpClient(resilient) {
   return typeof resilient._httpClient === 'function' ? resilient._httpClient : http
 }
 
-},{"./defaults":4,"./discovery-servers":6,"./error":7,"./http":8,"./utils":19}],12:[function(require,module,exports){
+},{"./defaults":4,"./error":7,"./http":8,"./utils":19}],12:[function(require,module,exports){
 var _ = require('./utils')
 var Options = require('./options')
 var Client = require('./client')
