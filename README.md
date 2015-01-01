@@ -82,7 +82,7 @@ It runs in any [ES5 compliant](http://kangax.github.io/compat-table/es5/) engine
 
 See the [basic usage](#basic-usage) and [examples](https://github.com/resilient-http/resilient.js/tree/master/examples) for detailed use cases
 
-## How it works?
+## How does it works?
 
 An algorithm diagram worth more than words
 
