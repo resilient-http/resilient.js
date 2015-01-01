@@ -899,7 +899,7 @@ function Requester(resilient) {
     var serversList = getServersList(resilient, servers, operation)
     options = _.clone(options)
 
-    function requestNextServer(previousError) {
+    return function requestNextServer(previousError) {
       var handler, server = serversList.shift()
       if (server) {
         options = defineRequestOptions(server, options)
@@ -909,8 +909,6 @@ function Requester(resilient) {
         handleMissingServers(resilient, servers, options, previousError, cb)
       }
     }
-
-    requestNextServer()
   }
 }
 
@@ -954,7 +952,7 @@ function retrier(resilient, servers, options, cb) {
     if (servers.exists()) {
       options.retry -= 1
       resilient.emit('request:retry', options, servers)
-      Requester(resilient)(servers, options, cb)
+      Requester(resilient)(servers, options, cb)()
     } else {
       cb(new ResilientError(1005))
     }
@@ -1396,7 +1394,7 @@ function Resolver(resilient, options, cb) {
     } else if (!hasValidServiceServers()) {
       return cb(new ResilientError(1003))
     }
-    Requester(resilient)(servers, options, cb)
+    Requester(resilient)(servers, options, cb)(null)
   }
 
   function hasValidServiceServers() {
@@ -1583,7 +1581,7 @@ function ServersDiscovery(resilient, options, servers) {
     if (options.parallel) {
       updateServersInParallel(options, cb)
     } else {
-      Requester(resilient)(getServers(), options, onUpdateServers(cb))
+      Requester(resilient)(getServers(), options, onUpdateServers(cb))(null)
     }
   }
 
@@ -1597,7 +1595,7 @@ function ServersDiscovery(resilient, options, servers) {
       if (index === 2 && servers.length > 3) {
         server = server.concat(servers.slice(3))
       }
-      Requester(resilient)(new Servers(server), options, onUpdateInParallel(servers, pending, buf, cb), buf)
+      Requester(resilient)(new Servers(server), options, onUpdateInParallel(servers, pending, buf, cb), buf)(null)
     })
   }
 
