@@ -521,19 +521,6 @@ Options.prototype.get = function (key) {
   return key ? this.store[key] : _.clone(this.store)
 }
 
-Options.prototype.set = function (key, value) {
-  if (_.isObj(key)) {
-    _.each(key, _.bind(this, this.set))
-  } else if (value !== undefined) {
-    if (key === 'servers') {
-      this.setServers(value)
-    } else {
-      if (key === 'refreshServers') value = new Servers(value)
-      this.store[key] = value
-    }
-  }
-}
-
 Options.prototype.http = function () {
   return _.omit(this.store, defaults.resilientOptions)
 }
@@ -547,6 +534,19 @@ Options.prototype.setServers = function (servers) {
     this.store.servers.set(servers)
   } else {
     this.store.servers = new Servers(servers)
+  }
+}
+
+Options.prototype.set = function (key, value) {
+  if (_.isObj(key)) {
+    _.each(key, _.bind(this, this.set))
+  } else if (value !== undefined) {
+    if (key === 'servers') {
+      this.setServers(value)
+    } else {
+      if (key === 'refreshServers') value = new Servers(value)
+      this.store[key] = value
+    }
   }
 }
 
