@@ -2,18 +2,18 @@
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-A **browser** and **[node.js](http://nodejs.org)** highly **configurable** and **full featured HTTP client** with **superpowers** such as **fault tolerant**, **dynamic servers discovery**, transparent server **fallback**, **request retry** cycles, built-in **balancer**, round-robin scheduling for better **load distribution** and [more](#features)...
+A **browser** and **[node.js](http://nodejs.org)** highly **configurable** and **full featured HTTP client** with **superpowers** such as **fault tolerance**, **dynamic servers discovery**, transparent server **fallback**, **request retry** cycles, built-in **balancer**, round-robin scheduling for better **load distribution** and [more](#features)...
 
 It was specially designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless REST-oriented services, redundant high available HTTP APIs, multicloud services...
 
 It provides an elegant [programmatic API](#api) and featured [command-line interface](#command-line-interface)
 
-For more information, see the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-it-works), [compatible servers](http://resilient-http.github.io/#servers) or read the [FAQs](#faq)
+For more information, see the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-does-it-works), [compatible servers](http://resilient-http.github.io/#servers) or read the [FAQs](#faq)
 
 ## Features
 
 - Reliable failover and excellent error handling with transparent server fallback
-- Client-side based balancer using a simple best availability algorithm
+- Featured and smart network resiliency 
 - Smart balancer logic based on server score (network latency, errors and succesfull requests)
 - Transparent request retry cycle attempts on failure
 - Discern best servers based on scoring per read and write operations when balancing
