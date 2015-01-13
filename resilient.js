@@ -1287,7 +1287,8 @@ function ServersDiscovery(resilient, options, servers) {
     var buf = []
     var servers = getServers().sort('read', resilient.balancer())
     var pending = counter(servers.length)
-    var onUpdateInParallelFn = onUpdateInParallel(servers, pending, buf, cb)
+    var handleServersUpdate = function (err, res) { onUpdateServers(cb, buf)(err, res) }
+    var onUpdateInParallelFn = onUpdateInParallel(servers, pending, handleServersUpdate)
 
     servers.slice(0, MAX_PARALLEL).forEach(function (server, index) {
       server = [ server ]
@@ -1298,12 +1299,12 @@ function ServersDiscovery(resilient, options, servers) {
     })
   }
 
-  function onUpdateInParallel(servers, counter, buf, cb) {
-    return function (err, res) {
+  function onUpdateInParallel(servers, counter, next) {
+    return function handler(err, res) {
       var pending = counter()
-      if (!err || pending === 0) {
-        counter(true) // reset
-        onUpdateServers(cb, buf)(err, res)
+      if (err == null || pending === 0) {
+        counter(true)
+        next(err, res)
       }
     }
   }
