@@ -1273,16 +1273,6 @@ function ServersDiscovery(resilient, options, servers) {
     return servers && servers.exists() || false
   }
 
-  function fetchServers(cb) {
-    var options = getOptions()
-    options.params = addTimeStamp(options)
-    if (options.parallel) {
-      updateServersInParallel(options, cb)
-    } else {
-      Requester(resilient)(getServers(), options, onUpdateServers(cb))(null)
-    }
-  }
-
   function updateServersInParallel(options, cb) {
     var buf = []
     var servers = getServers().sort('read', resilient.balancer())
@@ -1299,13 +1289,13 @@ function ServersDiscovery(resilient, options, servers) {
     })
   }
 
-  function onUpdateInParallel(servers, counter, next) {
-    return function handler(err, res) {
-      var pending = counter()
-      if (err == null || pending === 0) {
-        counter(true)
-        next(err, res)
-      }
+  function fetchServers(cb) {
+    var options = getOptions()
+    options.params = addTimeStamp(options)
+    if (options.parallel) {
+      updateServersInParallel(options, cb)
+    } else {
+      Requester(resilient)(getServers(), options, onUpdateServers(cb))(null)
     }
   }
 
@@ -1322,6 +1312,16 @@ function ServersDiscovery(resilient, options, servers) {
       cb(new ResilientError(1002))
     } else {
       updateServers(cb)
+    }
+  }
+}
+
+function onUpdateInParallel(servers, counter, next) {
+  return function handler(err, res) {
+    var pending = counter()
+    if (err == null || pending === 0) {
+      counter(true)
+      next(err, res)
     }
   }
 }
