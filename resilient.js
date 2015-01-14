@@ -5,7 +5,7 @@ var _ = require('./utils')
 module.exports = Cache
 
 function Cache() {
-  this.store = _.emptyObject()
+  this.store = Object.create(null)
 }
 
 Cache.prototype.flush = function (key) {
@@ -408,8 +408,10 @@ ResilientError.MESSAGES = MESSAGES
 
 },{}],7:[function(require,module,exports){
 var _ = require('./utils')
-var http = resolveModule()
+
+var IS_BROWSER = typeof window === 'object' && window
 var JSON_MIME = /application\/json/
+var http = resolveModule()
 
 module.exports = HttpClient
 
@@ -419,20 +421,6 @@ function HttpClient() {
 
 HttpClient.VERSION = http.VERSION
 HttpClient.mapResponse = mapResponse
-
-function resolveModule() {
-  if (typeof window === 'object' && window) {
-    return require('lil-http')
-  } else {
-    return requestWrapper(require('request'))
-  }
-}
-
-function requestWrapper(request) {
-  return function requester(options, cb) {
-    return request(mapOptions(options), mapResponse(cb))
-  }
-}
 
 function mapResponse(cb) {
   return function (err, res, body) {
@@ -479,6 +467,20 @@ function mapRequestBody(options) {
   options.body = body
 }
 
+function resolveModule() {
+  if (IS_BROWSER) {
+    return require('lil-http')
+  } else {
+    return requestWrapper(require('request'))
+  }
+}
+
+function requestWrapper(request) {
+  return function requester(options, cb) {
+    return request(mapOptions(options), mapResponse(cb))
+  }
+}
+
 },{"./utils":18,"lil-http":21,"request":19}],8:[function(require,module,exports){
 var Resilient = require('./resilient')
 var Options = require('./options')
@@ -513,7 +515,7 @@ var Servers = require('./servers')
 module.exports = Options
 
 function Options(options, type) {
-  this.store = type ? _.clone(defaults[type]) : _.emptyObject()
+  this.store = type ? _.clone(defaults[type]) : Object.create(null)
   this.set(options)
 }
 
