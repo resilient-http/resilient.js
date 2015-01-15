@@ -1718,7 +1718,7 @@ function merger(target, key, value) {
 }))
 
 },{}],21:[function(require,module,exports){
-/*! lil-http - v0.1.15 - MIT License - https://github.com/lil-js/http */
+/*! lil-http - v0.1.16 - MIT License - https://github.com/lil-js/http */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
     define(['exports'], factory)
@@ -1733,7 +1733,7 @@ function merger(target, key, value) {
 }(this, function (exports) {
   'use strict'
 
-  var VERSION = '0.1.15'
+  var VERSION = '0.1.16'
   var toStr = Object.prototype.toString
   var slicer = Array.prototype.slice
   var hasOwn = Object.prototype.hasOwnProperty
@@ -1972,7 +1972,7 @@ function merger(target, key, value) {
     }
 
     try {
-      xhr.send(data ? data : null)
+      xhr.send(data || null)
     } catch (e) {
       errorHandler(e)
     }
@@ -2015,9 +2015,9 @@ function merger(target, key, value) {
   http.get = requestFactory('GET')
   http.post = requestFactory('POST')
   http.put = requestFactory('PUT')
-  http.del = requestFactory('DELETE')
   http.patch = requestFactory('PATCH')
   http.head = requestFactory('HEAD')
+  http.delete = http.del = requestFactory('DELETE')
 
   return exports.http = http
 }))
