@@ -4,7 +4,7 @@
 
 A **browser** and **[node.js](http://nodejs.org)** highly **configurable** and **full featured HTTP client** with **superpowers** such as **fault tolerance**, **dynamic servers discovery**, transparent server **fallback**, **request retry** cycles, built-in **balancer**, round-robin scheduling for better **load distribution** and [more](#features)...
 
-It was specially designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless REST-oriented services, redundant high available HTTP APIs, multicloud services...
+It was specially designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless REST-oriented services, redundant high available HTTP APIs, multicloud services, long-time running Web applications...
 
 It provides an elegant [programmatic API](#api) and featured [command-line interface](#command-line-interface)
 
@@ -13,7 +13,7 @@ For more information, see the [project site](http://resilient-http.github.io), t
 ## Features
 
 - Reliable failover and excellent error handling with transparent server fallback
-- Featured and smart network resiliency 
+- Featured and smart network resiliency
 - Smart balancer logic based on server score (network latency, errors and succesfull requests)
 - Transparent request retry cycle attempts on failure
 - Discern best servers based on scoring per read and write operations when balancing
@@ -99,7 +99,7 @@ var Resilient = require('resilient')
 
 #### Static servers
 
-Define your servers pool
+Define your service servers pool
 ```js
 var servers = [
   'http://api1.server.com',
@@ -114,7 +114,7 @@ var client = Resilient({ service: { basePath: '/api/1.0' }})
 client.setServers(servers)
 ```
 
-Perform the request (the best available server will be used automatically)
+Perform a request (the best available server will be used automatically)
 ```js
 client.get('/users', function (err, res) {
   if (res.status === 200) {
@@ -134,13 +134,13 @@ var servers = [
 ]
 ```
 
-Create a new client and set the discovering servers
+Create a new client and set define the discovering servers
 ```js
 var client = Resilient({ service: { basePath: '/api/1.0' }})
 client.discoveryServers(servers)
 ```
 
-Perform the request (and that's all, forget about anything else)
+Perform a request (and that's all, Resilient will take care about everything to reach the server)
 ```js
 client.get('/users', function (err, res) {
   if (res.status === 200) {
@@ -149,11 +149,11 @@ client.get('/users', function (err, res) {
 })
 ```
 
-For more usage cases, see the [examples](https://github.com/resilient-http/resilient.js/tree/master/examples) folder
+For more usage cases see some [examples](https://github.com/resilient-http/resilient.js/tree/master/examples)
 
 ## Command-line interface
 
-For better approach you could install `Resilient` as global package: `npm install -g resilient`
+For better approach you should install `Resilient` as global package: `npm install -g resilient`
 
 ```bash
 Resilient command-line HTTP client
@@ -213,11 +213,11 @@ Resilient({
 There are specific config options for the servers of the client service.
 Resilient is a resource-oriented HTTP client, which could be ideal for RESTful Web services
 
-- **servers** `array<string>` - A list of valid URIs of servers to reach for the given service. Default `null`. It's recommended you use discovery servers instead
+- **servers** `array<string>` - A list of valid servers URIs to reach for the given service. Default `null`. It's recommended to use discovery servers instead of static service servers
 - **retry** `number` - Number of times to retry if all requests failed. Use `Infinity` for infinitive attemps. Default `0`
 - **retryWait** `number` - Number of milisenconds to wait before start the request retry cycle. Default to `50`
 - **discoverBeforeRetry** `boolean` - Force to refresh service servers list from asking for discovery servers on each retry attempt. You must define the discovery servers in order to use this feature. Default `true`
-- **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be treated as failed request, retrying it until it has valid status (when `retry` is enabled). Default `false`
+- **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be treated as failed request, retrying it until it has a valid status (when `retry` option is enabled). Default `false`
 - **omitRetryWhen** `array<object>` - A collection of rules per method and status code to match in order to omit a request retry cycle. See the usage [example](https://github.com/resilient-http/resilient.js/blob/master/examples/omit-fallback-options.js). Default `null`
 - **omitFallbackWhen** `array<object>` - A collection of rules per method and status code to match in order to omit a request server fallback. See usage [example](https://github.com/resilient-http/resilient.js/blob/master/examples/omit-fallback-options.js). Default `null`
 - **omitRetryOnMethods** `array<string>` - Omit a retry cycle attempt if the request method is on the given array. Default `null`
@@ -249,7 +249,7 @@ See all HTTP options supported for `node.js` [here](https://github.com/mikeal/re
 ##### Balancer
 
 - **enable** `boolean` - Enable/disable the smart client balancer. Default `true`
-- **roundRobin** `boolean` - Enable RobinRobin scheudle algorithm (experimental)
+- **roundRobin** `boolean` - Enable RobinRobin schedule algorithm (experimental)
 - **roundRobinSize** `number` - Round robin round size. Useful to increase requests distribution across different servers. Default to `3` servers
 - **weight** `object` - Balacer point percentage weight for server scoring policy:
   - **success** `number` - Percentage weight for success request. Default to `15`
@@ -260,8 +260,8 @@ See all HTTP options supported for `node.js` [here](https://github.com/mikeal/re
 
 Specific configuration for discovery servers requests, behavior and logic
 
-- **servers** `array<string>` - A list of valid URIs of endpoints to use as discovery servers
-- **cacheEnabled** `boolean` - Enable/disable discovery servers cache in case of global fallback. Default `true`
+- **servers** `array<string>` - A list of valid server URIs to use as discovery servers
+- **cacheEnabled** `boolean` - Enable/disable discovery servers cache in case of global fallback. Useful to improve client reliability. Default `true`
 - **cacheExpiration** `number` - Maximum cache time to live. Default to `10` minutes
 - **retry** `number` - Number of times to retry if all requests failed. Use `Infinity` for infinitive attemps. Default `3`
 - **retryWait** `number` - Number of milisenconds to wait before start the request retry cycle. Default to `1000`
@@ -273,7 +273,7 @@ Specific configuration for discovery servers requests, behavior and logic
 - **useDiscoveryServersToRefresh** `boolean` - Enable/disable self-discovery using the discovery servers pools (useful for Hydra). This options requires the `refreshPath` option be defined. Default `false`
 - **refreshPath** `string` - Discovery refresh servers lookup path. Example: `/app/hydra` for Hydra. This options requires you define `useDiscoveryServersToRefresh` to `true`. Default `null`
 - **refreshOptions** `object` - Custom HTTP options for discovery servers refresh. By default inherits from discovery options
-- **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be treated as failed request, retrying it until it has valid status (when `retry` is enabled). Default `false`
+- **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be treated as failed request, retrying it until it has a valid status (when `retry` option is enabled). Default `false`
 - **omitRetryWhen** `array<object>` - A collection of rules per method and status code to match in order to omit a request retry cycle. See the usage [example](https://github.com/resilient-http/resilient.js/blob/master/examples/omit-fallback-options.js). Default `null`
 - **omitFallbackWhen** `array<object>` - A collection of rules per method and status code to match in order to omit a request server fallback. See usage [example](https://github.com/resilient-http/resilient.js/blob/master/examples/omit-fallback-options.js). Default `null`
 - **omitRetryOnMethods** `array<string>` - Omit a retry cycle attempt if the request method is on the given array. Default `null`
@@ -340,8 +340,8 @@ It could be an `Error` or plain `Object` instance with the following members
 
 Resilient client has a built-in support for internal states event dispacher and notifier to the public interface
 
-This could be useful really useful while using an interceptor pattern in order to detect states and data changes.
-You can intercept and change any request configuration and response subscribing to the pre/post process hooks.
+This could be really useful while using an interceptor pattern in order to detect different states and data changes.
+You can intercept and change any both request and response `objects` subscribing to the pre/post request hooks.
 Note that mutation is required, you should modify the `object` by reference and do not lose it
 
 ```js
@@ -400,6 +400,8 @@ Fired every time that servers cache is updated
 Arguments: `servers<Array>`, `resilient<Resilient>`
 
 Fired every time that discovery servers are updated form refresh servers
+
+## Methods
 
 ### resilient#send(path, options, callback)
 
@@ -620,13 +622,12 @@ Use the plain HTTP client ([request](https://github.com/request/request) in node
 
 #### It's required to have discovery servers in my infraestructure in order to use Resilient?
 
-Definitely not. Discovery servers only will be used in the case that you configure them in your Resilient client, therefore
-if in your project backend infrastructure does not have them, Resilient will simply not use them
+Definitely not. Discovery servers only will be used in the case that you configure them in your Resilient client.
+In that case Resilient will simply use the the static service servers to communicate with your backend
 
 #### Can I use Resilient as a simple HTTP client without balancing?
 
-Yes. If your perform a request with a full URI schema, Resilient will avoid to apply any internal balacing logic
-and it will treat the request directly
+Yes. If your perform a request with a full URI schema, Resilient will treat it as plain request without applying any internal logic:
 
 ```js
 var client = Resilient({
@@ -648,9 +649,9 @@ client.get('/hello', function (err, res) {
 
 #### Can I use a custom HTTP client instead of the embedded one?
 
-Of course you can do that. In browser environments this is a common premise, for example you need to use the custom HTTP client of the framework you are using in your application, or a custom library like zepto or jQuery that provides a well-know AJAX features
+Of course you can do it. In browser environments this is a common premise, for example you need to use the custom HTTP client of the framework you are using in your application, or a custom library like zepto or jQuery that provides a simple AJAX interface
 
-You could simple do that defining a function middleware with which all the HTTP communication will be handled
+You can do that defining a function middleware to act as proxy pattern to intercept and wrap all the HTTP traffic via the Resilient client
 
 ```js
 var client = Resilient({})
