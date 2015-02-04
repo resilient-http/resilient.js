@@ -4,7 +4,7 @@
 
 A **browser** and **[node.js](http://nodejs.org)** highly **configurable** and **full featured HTTP client** with **superpowers** such as **fault tolerance**, **dynamic servers discovery**, transparent server **fallback**, **request retry** cycles, built-in **balancer**, round-robin scheduling for better **load distribution** and [more](#features)...
 
-It was specially designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless REST-oriented services, redundant high available HTTP APIs, multicloud services, long-time running Web applications...
+It was specially designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless resource-oriented services, redundant high available HTTP APIs, multicloud services and balancers...
 
 It provides an elegant [programmatic API](#api) and featured [command-line interface](#command-line-interface)
 
@@ -132,7 +132,7 @@ var servers = [
 ]
 ```
 
-Create a new client and set define the discovering servers
+Create a new client and set the discovering servers
 ```js
 var client = Resilient({ service: { basePath: '/api/1.0' }})
 client.discoveryServers(servers)
