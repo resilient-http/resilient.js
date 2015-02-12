@@ -46,7 +46,7 @@ uglify:
 	$(UGLIFYJS) resilient.js --mangle --preamble $(BANNER) --source-map resilient.min.js.map --source-map-url http://cdn.rawgit.com/resilient-http/resilient.js/$(VERSION)/resilient.min.js.map > resilient.min.js
 
 mocha:
-	$(MOCHA) --reporter spec --ui tdd
+	$(MOCHA) --reporter spec --ui tdd --timeout 4000
 
 mocha-phantom:
 	$(MOCHA_PHANTOM) --reporter spec --ui bdd test/runner.html
