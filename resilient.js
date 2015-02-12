@@ -83,10 +83,11 @@ Client.prototype.send = function (path, options, cb, method) {
 }
 
 function requester(options, cb) {
-  this._resilient.emit('request:start', options, this._resilient)
-  return isFullUrlSchema(options)
-    ? plainHttpRequest(this._resilient, options, cb)
-    : resolver(this._resilient, options, cb)
+  if (isFullUrlSchema(options)) {
+    return plainHttpRequest(this._resilient, options, cb)
+  } else {
+    return resolver(this._resilient, options, cb)
+  }
 }
 
 function normalizeArgs(path, options, cb, method) {
@@ -978,7 +979,9 @@ module.exports = Resolver
 
 function Resolver(resilient, options, cb) {
   var state = resilient._state
-
+  
+  resilient.emit('request:start', options, resilient)
+  
   try {
     resolve(resolver)
   } catch (err) {
@@ -1037,6 +1040,7 @@ function Resolver(resilient, options, cb) {
     var outdated = false
     var options = resilient.options('discovery')
     var servers = options.get('servers')
+    
     if (canUpdateDiscoveryServers(options)) {
       if (servers && servers.exists()) {
         outdated = servers.lastUpdate() > options.get('refreshServersInterval')
@@ -1071,11 +1075,10 @@ function Resolver(resilient, options, cb) {
   }
 
   function serversAreUpdated(servers) {
-    var updated = true
     if (hasDiscoveryServers()) {
-      updated = servers.lastUpdate() < resilient.options('discovery').get('refreshInterval')
+      return servers.lastUpdate() < resilient.options('discovery').get('refreshInterval')
     }
-    return updated
+    return true
   }
 }
 
