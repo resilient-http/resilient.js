@@ -1,5 +1,9 @@
 var Resilient = require('../')
 
+// this is a sample Resilient client implementation
+// which is compatible with the Hydra balancing server
+// https://github.com/innotech/hydra
+
 var client = Resilient({
   discovery: {
     // define the hydra server base path and app name
