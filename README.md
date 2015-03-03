@@ -4,9 +4,9 @@
 
 A **browser** and **[node](http://nodejs.org)**/**[io.js](https://iojs.org)** highly **configurable** and **full featured HTTP client** with **superpowers** such as **fault tolerance**, **dynamic servers discovery**, transparent server **fallback**, **request retry** cycles, built-in **balancer**, round-robin scheduling for better **load distribution** and [more](#features)...
 
-It was specially designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless resource-oriented services, redundant high available HTTP APIs, multicloud services and balancers...
+It was specially designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless resource-oriented services, redundant high available HTTP APIs, multicloud services and balancers, among others
 
-It provides an elegant [programmatic API](#api) and featured [command-line interface](#command-line-interface)
+It provides an elegant [programmatic API](#api) and a featured [command-line interface](#command-line-interface)
 
 For more information, see the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-does-it-works), [compatible servers](http://resilient-http.github.io/#servers) or read the [FAQs](#faq)
 
@@ -64,7 +64,6 @@ Or loading the script remotely
 ## Environments
 
 It runs in any [ES5 compliant](http://kangax.github.io/compat-table/es5/) engine
-
 
 ![Node.js](http://www.dufeo.com/img/node-js-logo.jpeg) | ![Chrome](https://raw.github.com/alrra/browser-logos/master/chrome/chrome_48x48.png) | ![Firefox](https://raw.github.com/alrra/browser-logos/master/firefox/firefox_48x48.png) | ![IE](https://raw.github.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png) | ![Opera](https://raw.github.com/alrra/browser-logos/master/opera/opera_48x48.png) | ![Safari](https://raw.github.com/alrra/browser-logos/master/safari/safari_48x48.png)
 --- | --- | --- | --- | --- | --- |
