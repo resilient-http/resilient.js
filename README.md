@@ -38,7 +38,7 @@ For more information, see the [project site](http://resilient-http.github.io), t
 
 ## Installation
 
-#### Node.js
+#### Node.js / io.js
 
 ```bash
 npm install resilient
