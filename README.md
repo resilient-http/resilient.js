@@ -199,13 +199,13 @@ The options `object` has three different first-level properties of configuration
 
 ```js
 Resilient({
-  service: { ... }
+  service: { ... },
+  balancer: { ... },
   discovery: { ... }
-  balancer: { ... }
 })
 ```
 
-##### Service
+#### Service
 
 There are specific config options for the servers of the client service.
 Resilient is a resource-oriented HTTP client, which could be ideal for RESTful Web services
@@ -243,7 +243,7 @@ Specific shared configuration options for the HTTP client for final service requ
 
 See all HTTP options supported for `node.js` [here](https://github.com/mikeal/request#requestoptions-callback)
 
-##### Balancer
+#### Balancer
 
 - **enable** `boolean` - Enable/disable the smart client balancer. Default `true`
 - **roundRobin** `boolean` - Enable RobinRobin schedule algorithm (experimental)
@@ -253,7 +253,7 @@ See all HTTP options supported for `node.js` [here](https://github.com/mikeal/re
   - **error** `number` - Percentage weight for failed request. Default to `50`
   - **latency** `number` - Percentage weight for request average latency. Default to `35`
 
-##### Discovery
+#### Discovery
 
 Specific configuration for discovery servers requests, behavior and logic
 
