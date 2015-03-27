@@ -34,3 +34,8 @@ client.on('servers:cache', function (servers) {
 client.on('discovery:refresh', function (servers) {
   console.log('New up-to-date server list:', servers.join(', '))
 })
+
+// sample request
+client.get('/', function (err, res) {
+  console.log(err, res)
+})
