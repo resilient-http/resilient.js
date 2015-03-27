@@ -16,6 +16,12 @@ Local HTTP server for browser testing
 $ npm install -g http-server
 ```
 
+Start the server
 ```bash
-$ http-server ../
+$ http-server 
+```
+
+Open in your browser
+```
+http://localhost:8080/examples
 ```
