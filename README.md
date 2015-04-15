@@ -195,7 +195,7 @@ Creates a new `resilient` client with custom config
 
 ### Options
 
-The options `object` has three different first-level properties of configuration
+The options `object` supports three different configuration levels
 
 ```js
 Resilient({
@@ -207,8 +207,7 @@ Resilient({
 
 #### Service
 
-There are specific config options for the servers of the client service.
-Resilient is a resource-oriented HTTP client, which could be ideal for RESTful Web services
+Specific configuration options for the end service servers pool of the Resilient client.
 
 - **servers** `array<string>` - A list of valid servers URIs to reach for the given service. Default `null`. It's recommended to use discovery servers instead of static service servers
 - **retry** `number` - Number of times to retry if all requests failed. Use `Infinity` for infinitive attemps. Default `0`
