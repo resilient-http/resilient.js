@@ -17,6 +17,7 @@ For more information, see the [project site](http://resilient-http.github.io), t
 - Smart balancer logic based on server score (network latency, errors and succesfull requests)
 - Transparent request retry cycle attempts on failure (configurable)
 - Discern best servers based on scoring per read and write operations when balancing
+- Bidirectional middleware layer
 - Configurable balancer policy by weight
 - Highly configurable (timeouts, retry loop, cache, fallback behavior, wait before retry...)
 - Avoid fallback/retry cycles per custom HTTP responses codes or verbs
