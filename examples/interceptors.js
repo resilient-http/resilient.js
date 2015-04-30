@@ -6,7 +6,7 @@ var client = Resilient({
     servers: [
       'http://localhost:8882/discovery/unavailable',
       'http://localhost:8882/discovery/timeout',
-      'http://localhost:8882/discovery/unavailable'
+      'http://localhost:8882/discovery/valid'
     ]
   }
 })

@@ -1,44 +1,45 @@
-# resilient.js [![Build Status](https://api.travis-ci.org/resilient-http/resilient.js.svg?branch=master&style=flat)][travis] [![Stories in Ready](https://badge.waffle.io/resilient-http/resilient.js.png?label=ready&title=Ready)](https://waffle.io/resilient-http/resilient.js) [![Code Climate](https://codeclimate.com/github/resilient-http/resilient.js/badges/gpa.svg)](https://codeclimate.com/github/resilient-http/resilient.js) [![NPM](https://img.shields.io/npm/v/resilient.svg)](https://www.npmjs.org/package/resilient) ![Downloads](https://img.shields.io/npm/dm/resilient.svg)
+# resilient.js [![Build Status](https://api.travis-ci.org/resilient-http/resilient.js.svg?branch=master&style=flat)][travis] [![Codacy Badge](https://www.codacy.com/project/badge/7bf998c913284a279dca40ec01d78cef)](https://www.codacy.com/public/tomas/resilient.js) [![Code Climate](https://codeclimate.com/github/resilient-http/resilient.js/badges/gpa.svg)](https://codeclimate.com/github/resilient-http/resilient.js) [![NPM](https://img.shields.io/npm/v/resilient.svg)](https://www.npmjs.org/package/resilient) ![Downloads](https://img.shields.io/npm/dm/resilient.svg)
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-A **browser** and **[node](http://nodejs.org)**/**[io.js](https://iojs.org)** highly **configurable** and **full featured HTTP client** with **superpowers** such as **fault tolerance**, **dynamic servers discovery**, transparent server **fallback**, **request retry** cycles, built-in **balancer**, round-robin scheduling for better **load distribution** and [more](#features)...
+Highly **configurable** and **full featured HTTP client** for the **browser** and **[node](http://nodejs.org)**/**[io.js](https://iojs.org)** with **superpowers** such as **fault tolerance**, **dynamic servers discovery**, transparent server **fallback**, **request retry** cycles, built-in client-side **balancer**, round-robin **load distribution** and [more](#features)...
 
-It was specially designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless resource-oriented services, redundant high available HTTP APIs, multicloud services and balancers...
+Resilient was mainly designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless resource-oriented services, redundant HTTP APIs and multi datacenter/cloud services.
 
-It provides an elegant [programmatic API](#api) and featured [command-line interface](#command-line-interface)
+It provides an elegant and clean [programmatic API](#api) and a featured [command-line interface](#command-line-interface)
 
 For more information, see the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-does-it-works), [compatible servers](http://resilient-http.github.io/#servers) or read the [FAQs](#faq)
 
 ## Features
 
 - Reliable failover and excellent error handling with transparent server fallback
-- Featured and smart network resiliency
+- Smart network resiliency covering multiple failure types
 - Smart balancer logic based on server score (network latency, errors and succesfull requests)
-- Transparent request retry cycle attempts on failure
+- Transparent request retry cycle attempts on failure (configurable)
 - Discern best servers based on scoring per read and write operations when balancing
+- Bidirectional middleware layer
 - Configurable balancer policy by weight
 - Highly configurable (timeouts, retry loop, cache, fallback behavior, wait before retry...)
-- Avoid fallback/retry cycles per custom HTTP responses codes or methods
-- Define custom timeouts per HTTP method (permissive for POST/PUT/DELETE, aggressive for GET)
-- Configurable specific request timeouts per HTTP method (useful to differ get/post requests)
+- Avoid fallback/retry cycles per custom HTTP responses codes or verbs
+- Define custom timeouts per HTTP method (e.g permissive for POST/PUT/DELETE, aggressive for GET)
+- Configurable request timeouts per HTTP verb (useful to differ GET from POST/PUT/DELETE)
 - Parallel servers discovering for a faster availability
-- Built-in support for request/response interceptors
+- Built-in support for request/response interceptors (via middleware)
 - Built-in support for servers caching to improve reliability when fallback
-- Cross engine (node.js and browsers. ES5 compliant)
 - Configurable external HTTP client to use as forward request proxy (instead of using the embedded one)
-- Dynamic servers discovery (based on the resilient [specification](https://github.com/resilient-http/spec) protocol)
-- Support promiscuous errors (400-499 response status code)
+- Dynamic servers auto discovering (based on the resilient [specification](https://github.com/resilient-http/spec) protocol)
+- Support promiscuous errors (handle 400-499 response status as fallback errors)
 - Support mock/stub working mode via middleware (useful for testing)
-- Full HTTP features support (it uses internally [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http) for the browser)
+- Full HTTP client features (it uses internally [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http) for the browser)
 - Support round robin scheduling algorithm for traffic distribution (experimental)
-- Lightweight library (8KB gzipped)
 - Featured cURL-inspired command-line interface
+- Lightweight library (8KB gzipped)
+- Cross engine (node.js/io.js and browsers. ES5 compliant
 - Well tested in both node.js and browsers
 
 ## Installation
 
-#### Node.js
+#### Node.js / io.js
 
 ```bash
 npm install resilient
@@ -65,16 +66,15 @@ Or loading the script remotely
 
 It runs in any [ES5 compliant](http://kangax.github.io/compat-table/es5/) engine
 
-
 ![Node.js](http://www.dufeo.com/img/node-js-logo.jpeg) | ![Chrome](https://raw.github.com/alrra/browser-logos/master/chrome/chrome_48x48.png) | ![Firefox](https://raw.github.com/alrra/browser-logos/master/firefox/firefox_48x48.png) | ![IE](https://raw.github.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png) | ![Opera](https://raw.github.com/alrra/browser-logos/master/opera/opera_48x48.png) | ![Safari](https://raw.github.com/alrra/browser-logos/master/safari/safari_48x48.png)
 --- | --- | --- | --- | --- | --- |
 +0.8 | +5 | +3.5 | +9 | +10 | +5 |
 
 ## Related projects
 
-- [hydra](http://innotech.github.io/hydra) - Multicloud balancer and application discovery server
+- [hydra](http://innotech.github.io/hydra) - Multicloud-oriented application discovery server compatible with Resilient
 - [resilient-server](https://github.com/h2non/resilient-server) - node.js powered dummy HTTP discovery server for testing/development
-- [angular-resilient](https://github.com/h2non/angular-resilient) - Turn $http resilient and fault tolerant
+- [angular-resilient](https://github.com/h2non/angular-resilient) - Turn $http into a resilient and fault tolerant client
 
 ## How to use?
 
@@ -196,30 +196,29 @@ Creates a new `resilient` client with custom config
 
 ### Options
 
-The options `object` has three different first-level properties of configuration
+The options `object` supports three different configuration levels
 
 ```js
 Resilient({
-  service: { ... }
+  service: { ... },
+  balancer: { ... },
   discovery: { ... }
-  balancer: { ... }
 })
 ```
 
-##### Service
+#### Service
 
-There are specific config options for the servers of the client service.
-Resilient is a resource-oriented HTTP client, which could be ideal for RESTful Web services
+Specific configuration options for the end service servers pool of the Resilient client.
 
 - **servers** `array<string>` - A list of valid servers URIs to reach for the given service. Default `null`. It's recommended to use discovery servers instead of static service servers
 - **retry** `number` - Number of times to retry if all requests failed. Use `Infinity` for infinitive attemps. Default `0`
 - **retryWait** `number` - Number of milisenconds to wait before start the request retry cycle. Default to `50`
-- **discoverBeforeRetry** `boolean` - Force to refresh service servers list from asking for discovery servers on each retry attempt. You must define the discovery servers in order to use this feature. Default `true`
+- **discoverBeforeRetry** `boolean` - Force to refresh service servers list asking to the discovery servers on each retry attempt. You must define the discovery servers in order to use this feature. Default `true`
 - **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be treated as failed request, retrying it until it has a valid status (when `retry` option is enabled). Default `false`
 - **omitRetryWhen** `array<object>` - A collection of rules per method and status code to match in order to omit a request retry cycle. See the usage [example](https://github.com/resilient-http/resilient.js/blob/master/examples/omit-fallback-options.js). Default `null`
 - **omitFallbackWhen** `array<object>` - A collection of rules per method and status code to match in order to omit a request server fallback. See usage [example](https://github.com/resilient-http/resilient.js/blob/master/examples/omit-fallback-options.js). Default `null`
 - **omitRetryOnMethods** `array<string>` - Omit a retry cycle attempt if the request method is on the given array. Default `null`
-- **omitFallbackOnMethods** `array<string>` - Omit fallback to the next best available server if the method is on the given array. If you use this option, retry cycles will be disables too for the given methods. Default `null`
+- **omitFallbackOnMethods** `array<string>` - Omit fallback to the next best available server if current HTTP method is on the given array. If you use this option, retry cycles will be disabled as well for the given methods. Default `null`
 - **omitRetryOnErrorCodes** `array<number>` - Omit a retry cycle attempt if the latest request response status code is one of the given array. Default `null`
 - **omitFallbackOnErrorCodes** `array<number>` - Omit fallback to the next best available server if the latest request response status code is one of the given array. Default `null`
 - **timeouts** `object` - Define custom request timeout values in miliseconds per HTTP method, useful to differ read/write requests. This option has priority over the `timeout` option. Default: `null`
@@ -244,7 +243,7 @@ Specific shared configuration options for the HTTP client for final service requ
 
 See all HTTP options supported for `node.js` [here](https://github.com/mikeal/request#requestoptions-callback)
 
-##### Balancer
+#### Balancer
 
 - **enable** `boolean` - Enable/disable the smart client balancer. Default `true`
 - **roundRobin** `boolean` - Enable RobinRobin schedule algorithm (experimental)
@@ -254,7 +253,7 @@ See all HTTP options supported for `node.js` [here](https://github.com/mikeal/re
   - **error** `number` - Percentage weight for failed request. Default to `50`
   - **latency** `number` - Percentage weight for request average latency. Default to `35`
 
-##### Discovery
+#### Discovery
 
 Specific configuration for discovery servers requests, behavior and logic
 
@@ -274,8 +273,8 @@ Specific configuration for discovery servers requests, behavior and logic
 - **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be treated as failed request, retrying it until it has a valid status (when `retry` option is enabled). Default `false`
 - **omitRetryWhen** `array<object>` - A collection of rules per method and status code to match in order to omit a request retry cycle. See the usage [example](https://github.com/resilient-http/resilient.js/blob/master/examples/omit-fallback-options.js). Default `null`
 - **omitFallbackWhen** `array<object>` - A collection of rules per method and status code to match in order to omit a request server fallback. See usage [example](https://github.com/resilient-http/resilient.js/blob/master/examples/omit-fallback-options.js). Default `null`
-- **omitRetryOnMethods** `array<string>` - Omit a retry cycle attempt if the request method is on the given array. Default `null`
-- **omitFallbackOnMethods** `array<string>` - Omit fallback to the next best available server if the method is on the given array. If you use this option, retry cycles will be disables too for the given methods. Default `null`
+- **omitRetryOnMethods** `array<string>` - Omit a retry cycle attempt if the request HTTP method is on the given array. Default `null`
+- **omitFallbackOnMethods** `array<string>` - Omit fallback to the next best available server if the HTTP method is on the given array. If you use this option, retry cycles will be disabled as well for the given methods. Default `null`
 - **omitRetryOnErrorCodes** `array<number>` - Omit a retry cycle attempt if the latest request response status code is one of the given array. Default `null`
 - **omitFallbackOnErrorCodes** `array<number>` - Omit fallback to the next best available server if the latest request response status code is one of the given array. Default `null`
 - **timeouts** `object` - Define custom request timeout values in miliseconds per HTTP method, useful to differ read/write requests. This option has priority over the `timeout` option. Default: `null`
