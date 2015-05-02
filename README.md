@@ -59,14 +59,14 @@ component install resilient-http/resilient.js
 
 Or loading the script remotely
 ```html
-<script src="//cdn.rawgit.com/resilient-http/resilient.js/0.2.28/resilient.js"></script>
+<script src="//cdn.rawgit.com/resilient-http/resilient.js/0.3.0/resilient.js"></script>
 ```
 
 ## Environments
 
 It runs in any [ES5 compliant](http://kangax.github.io/compat-table/es5/) engine
 
-![Node.js](http://www.dufeo.com/img/node-js-logo.jpeg) | ![Chrome](https://raw.github.com/alrra/browser-logos/master/chrome/chrome_48x48.png) | ![Firefox](https://raw.github.com/alrra/browser-logos/master/firefox/firefox_48x48.png) | ![IE](https://raw.github.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png) | ![Opera](https://raw.github.com/alrra/browser-logos/master/opera/opera_48x48.png) | ![Safari](https://raw.github.com/alrra/browser-logos/master/safari/safari_48x48.png)
+![Node.js](http://www.h-online.com/imgs/43/9/5/6/2/2/1/nodejs_120-b09a243cafd8e949.png) | ![Chrome](https://raw.github.com/alrra/browser-logos/master/chrome/chrome_48x48.png) | ![Firefox](https://raw.github.com/alrra/browser-logos/master/firefox/firefox_48x48.png) | ![IE](https://raw.github.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png) | ![Opera](https://raw.github.com/alrra/browser-logos/master/opera/opera_48x48.png) | ![Safari](https://raw.github.com/alrra/browser-logos/master/safari/safari_48x48.png)
 --- | --- | --- | --- | --- | --- |
 +0.8 | +5 | +3.5 | +9 | +10 | +5 |
 
@@ -453,7 +453,7 @@ Return: `object`
 
 Getter/Setter accessor for [balancer-level config options](#balancer)
 
-### resilient#getHttpOptions(type)
+### resilient#httpOptions(type)
 Return: `object`
 
 Get a map of HTTP specific options
@@ -571,7 +571,7 @@ After fired, the handler will be removed
 
 See [supported events](#events)
 
-### resilient#flushCache()
+### resilient#cache.flush()
 
 Force to flush servers cache
 

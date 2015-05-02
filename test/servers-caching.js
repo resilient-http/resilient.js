@@ -80,7 +80,7 @@ describe('Servers caching', function () {
     })
 
     it('should have a valid server in cache', function () {
-      expect(resilient._cache.get('servers').data).to.be.deep.equal(['http://server'])
+      expect(resilient.cache.get('servers').data).to.be.deep.equal(['http://server'])
     })
 
     it('should still resolving with from cache', function (done) {
@@ -107,7 +107,7 @@ describe('Servers caching', function () {
     })
 
     it('should update the cache with valid servers', function () {
-      expect(resilient._cache.get('servers').data).to.be.deep.equal(['http://server'])
+      expect(resilient.cache.get('servers').data).to.be.deep.equal(['http://server'])
     })
   })
 })
