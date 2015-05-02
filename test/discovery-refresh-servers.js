@@ -9,7 +9,7 @@ describe('Refresh discovery servers', function () {
         timeout: 50,
         parallel: false,
         refreshServersInterval: 300,
-        useDiscoveryServersToRefresh: false,
+        enableSelfRefresh: false,
         servers: [
           'http://unavailable',
           'http://unavailable'
@@ -113,7 +113,7 @@ describe('Refresh discovery servers', function () {
         timeout: 50,
         parallel: false,
         refreshServersInterval: 300,
-        useDiscoveryServersToRefresh: false,
+        enableSelfRefresh: false,
         servers: null,
         refreshServers: [
           'http://refresh-unavailable',
@@ -185,7 +185,7 @@ describe('Refresh discovery servers', function () {
         retry: 1,
         retryWait: 10,
         parallel: false,
-        useDiscoveryServersToRefresh: false,
+        enableSelfRefresh: false,
         servers: null,
         refreshServers: [
           'http://refresh-unavailable',
@@ -240,7 +240,7 @@ describe('Refresh discovery servers', function () {
         timeout: 50,
         parallel: false,
         refreshServersInterval: 300,
-        useDiscoveryServersToRefresh: true,
+        enableSelfRefresh: true,
         refreshPath: '/app/hydra',
         servers: [
           'http://discovery-unavailable',
@@ -366,7 +366,7 @@ describe('Refresh discovery servers', function () {
         retry: 1,
         retryWait: 10,
         parallel: false,
-        useDiscoveryServersToRefresh: false,
+        enableSelfRefresh: false,
         servers: null,
         refreshServers: [
           'http://refresh-unavailable',
@@ -421,7 +421,7 @@ describe('Refresh discovery servers', function () {
         timeout: 500,
         parallel: false,
         refreshServersInterval: 300,
-        useDiscoveryServersToRefresh: false,
+        enableSelfRefresh: false,
         refreshPath: '/app/hydra',
         refreshServers: ['http://discovery-refresh']
       }

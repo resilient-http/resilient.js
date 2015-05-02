@@ -83,6 +83,8 @@ Client.prototype.send = function (path, options, cb, method) {
 }
 
 function requester(options, cb) {
+  this._resilient.emit('request:start', options, this._resilient)
+
   if (isFullUrlSchema(options)) {
     return plainHttpRequest(this._resilient, options, cb)
   } else {
@@ -182,6 +184,8 @@ defaults.discovery = {
   promiscuousErrors: true,
   refreshInterval: 60 * 2 * 1000,
   enableRefreshServers: true,
+  enableSelfRefresh: false,
+  forceRefreshFirst: true,
   refreshServersInterval: 60 * 5 * 1000,
   refreshServers: null,
   refreshOptions: null,
@@ -192,7 +196,6 @@ defaults.discovery = {
   omitFallbackOnMethods: null,
   omitRetryOnErrorCodes: null,
   omitFallbackOnErrorCodes: null,
-  useDiscoveryServersToRefresh: false
 }
 
 defaults.resilientOptions = [
@@ -218,22 +221,24 @@ defaults.resilientOptions = [
   'enableRefreshServers',
   'refreshServersInterval',
   'discoverBeforeRetry',
-  'useDiscoveryServersToRefresh'
+  'enableSelfRefresh',
+  'forceRefreshFirst'
 ]
 
 },{}],4:[function(require,module,exports){
 var _ = require('./utils')
-var ResilientError = require('./error')
 var Servers = require('./servers')
 var Requester = require('./requester')
+var ResilientError = require('./error')
 
-var MAX_PARALLEL = 3
+var CONCURRENCY = 3
 
 module.exports = ServersDiscovery
 
 function ServersDiscovery(resilient, options, servers) {
   var requester = Requester(resilient)
-  
+  var middleware = resilient._middleware
+
   function getOptions() {
     return _.merge(resilient.options('discovery').get(), options)
   }
@@ -251,43 +256,45 @@ function ServersDiscovery(resilient, options, servers) {
     var buf = []
     var servers = getServers().sort('read', resilient.balancer())
     var pending = counter(servers.length)
-  
-    var onServersUpdateFn = function (err, res) { onUpdateServers(cb, buf)(err, res) }
+
+    var onServersUpdateFn = onUpdateServers(cb, buf)
     var onUpdateInParallelFn = onUpdateInParallel(servers, pending, onServersUpdateFn)
-    
-    servers.slice(0, MAX_PARALLEL).forEach(function (server, index) {
-      server = [ server ]
-      if (index === 2 && servers.length > MAX_PARALLEL) {
-        server = server.concat(servers.slice(MAX_PARALLEL))
+
+    servers.slice(0, CONCURRENCY).forEach(function (server, index) {
+      var pool = [ server ]
+      if (index === 2 && servers.length > CONCURRENCY) {
+        pool = pool.concat(servers.slice(CONCURRENCY))
       }
-      requester(new Servers(server), options, onUpdateInParallelFn, buf)(null)
+      requester(new Servers(pool), options, onUpdateInParallelFn, buf)(null)
     })
   }
 
-  function fetchServers(cb) {
+  function updateServers(options, next) {
+    if (options.parallel) {
+      updateServersInParallel(options, next)
+    } else {
+      requester(getServers(), options, onUpdateServers(next))(null)
+    }
+  }
+
+  function fetchServers(next) {
     var options = getOptions()
     options.params = addTimeStamp(options)
 
-    if (options.parallel) {
-      updateServersInParallel(options, cb)
-    } else {
-      requester(getServers(), options, onUpdateServers(cb))(null)
-    }
+    middleware.run('discovery', 'out')(options, function (err) {
+      if (err) {
+        next(new ResilientError(1007, err))
+      } else {
+        updateServers(options, next)
+      }
+    })
   }
 
-  function updateServers(cb) {
-    try {
-      fetchServers(cb)
-    } catch (err) {
-      cb(new ResilientError(1006, err))
-    }
-  }
-
-  return function resolver(cb) {
+  return function resolver(next) {
     if (hasDiscoveryServers() === false) {
-      cb(new ResilientError(1002))
+      next(new ResilientError(1002))
     } else {
-      updateServers(cb)
+      fetchServers(next)
     }
   }
 }
@@ -303,7 +310,7 @@ function onUpdateInParallel(servers, counter, next) {
 }
 
 function counter(total) {
-  total = total > 2 ? MAX_PARALLEL : total
+  total = total > 2 ? CONCURRENCY : total
   return function decrement(reset) {
     return (total = reset ? -1 : (total - 1))
   }
@@ -322,7 +329,9 @@ function onUpdateServers(cb, buf) {
 
 function closeAndEmptyPendingRequests(buf) {
   if (buf) {
-    if (!isEmptyBuffer(buf)) buf.forEach(closePendingRequest)
+    if (!isEmptyBuffer(buf)) {
+      buf.forEach(closePendingRequest)
+    }
     buf.splice(0)
   }
 }
@@ -359,7 +368,8 @@ var MESSAGES = {
   1003: 'Cannot resolve servers. Missing data',
   1004: 'Discovery server response is invalid or empty',
   1005: 'Missing servers during retry process',
-  1006: 'Internal unexpected error'
+  1006: 'Internal unexpected error',
+  1007: 'Middleware error'
 }
 
 function ResilientError(status, error) {
@@ -373,6 +383,10 @@ function ResilientError(status, error) {
   }
   this.status = status
   this.message = MESSAGES[this.status]
+
+  if (status === 1007 && error) {
+    this.message += ': ' + (error.message || error)
+  }
 }
 
 ResilientError.prototype = Object.create(Error.prototype)
@@ -459,11 +473,11 @@ function requestWrapper(request) {
 }
 
 },{"./utils":19,"lil-http":22,"request":20}],7:[function(require,module,exports){
-var Resilient = require('./resilient')
-var Options = require('./options')
-var Client = require('./client')
 var http = require('./http')
+var Client = require('./client')
+var Options = require('./options')
 var defaults = require('./defaults')
+var Resilient = require('./resilient')
 
 module.exports = ResilientFactory
 
@@ -531,12 +545,12 @@ function passArgs(resilient) {
 
 function register(pool) {
   return function (mw) {
-    var hook = 'out'
+    var hook = 'in'
     var handler = mw.handler
 
     if (_.isFn(handler)) {
-      if (handler.hook === 'in') {
-        hook = 'in'
+      if (handler.hook === 'out') {
+        hook = 'out'
       }
       pool[mw.type][hook](handler)
     }
@@ -573,6 +587,10 @@ Options.prototype.http = function () {
   return _.omit(this.store, defaults.resilientOptions)
 }
 
+Options.prototype.clone = function () {
+  return Options.define(getRaw(this.store))
+}
+
 Options.prototype.servers = function (servers) {
   return servers ? this.setServers(servers) : this.store.servers
 }
@@ -592,34 +610,31 @@ Options.prototype.set = function (key, value) {
     if (key === 'servers') {
       this.setServers(value)
     } else {
-      if (key === 'refreshServers') value = new Servers(value)
+      if (key === 'refreshServers') {
+        value = new Servers(value)
+      }
       this.store[key] = value
     }
   }
 }
 
-Options.prototype.clone = function () {
-  return Options.define(getRaw(this.store))
-}
-
 Options.define = function (options, defaultOptions) {
   var store = new Options()
-  Object.keys( _.clone(defaultOptions || defaults))
-    .forEach(defineDefaults(options, store))
+  var opts = options || {}
+
+  Object.keys(defaultOptions || defaults)
+  .filter(function (key) {
+    return key !== 'resilientOptions'
+  })
+  .forEach(function (type) {
+    store.set(type, new Options(opts[type], type))
+  })
+
   return store
 }
 
-function defineDefaults(options, store) {
-  options = _.isObj(options) ? options : _.emptyObject()
-  return function (type) {
-    if (type !== 'resilientOptions') {
-      store.set(type, new Options(options[type], type))
-    }
-  }
-}
-
 function getRaw(options) {
-  var buf = Object.create(null)
+  var buf = {}
   _.each(options, function (key, value) {
     if (value instanceof Options) {
       buf[key] = value.get()
@@ -631,8 +646,8 @@ function getRaw(options) {
 },{"./defaults":3,"./servers":17,"./utils":19}],10:[function(require,module,exports){
 var _ = require('./utils')
 var http = require('./http')
-var resilientOptions = require('./defaults').resilientOptions
 var ResilientError = require('./error')
+var resilientOptions = require('./defaults').resilientOptions
 
 module.exports = Requester
 
@@ -644,6 +659,7 @@ function Requester(resilient) {
 
     return function requestNextServer(previousError) {
       var handler, server = serversList.shift()
+
       if (server) {
         options = defineRequestOptions(server, options)
         handler = requestHandler(server, operation, options, resolveRequest(cb), requestNextServer, resilient)
@@ -666,6 +682,7 @@ function getServersList(resilient, servers, operation) {
 function handleMissingServers(resilient, servers, options, getPreviousResponse, cb) {
   var cachedPreviousResponse = getPreviousResponse()
   var responseObj = getFirstValue(cachedPreviousResponse)
+
   if (shouldOmitRetryCycle(options, responseObj)) {
     cb.apply(null, cachedPreviousResponse)
   } else if (options.retry) {
@@ -676,7 +693,9 @@ function handleMissingServers(resilient, servers, options, getPreviousResponse, 
 }
 
 function retryRequest(resilient, servers, options, cb) {
-  var retry = waitBeforeRetry(retrier(resilient, servers, options, cb), options)
+  var onRetry = retrier(resilient, servers, options, cb)
+  var retry = waitBeforeRetry(onRetry, options)
+
   if (options.discoverBeforeRetry) {
     updateDiscoveryServersAndRetry(resilient, retry)
   } else {
@@ -706,6 +725,8 @@ function requestHandler(server, operation, options, resolve, nextServer, resilie
   var start = _.now()
   return function requestReporter(err, res) {
     var latency = _.now() - start
+    resilient.emit('request:incoming', err, res, options, resilient)
+
     if (shouldOmitFallback(options, err || res)) {
       server.reportError(operation, latency)
       resolve(err, res)
@@ -727,6 +748,8 @@ function memoizeResponse(err, res) {
 }
 
 function sendRequest(resilient, options, handler, buf) {
+  resilient.emit('request:outgoing', options, resilient)
+
   try {
     var request = getHttpClient(resilient)(_.omit(options, resilientOptions), handler)
     if (buf) buf.push(request)
@@ -754,9 +777,11 @@ function getTimeout(options) {
   var timeout = options.$timeout || options.timeout
   var timeouts = options.timeouts
   var method = options.method
+
   if (!options.$timeout && _.isObj(timeouts)) {
     timeout = timeouts[method] || timeouts[method.toLowerCase()] || timeout
   }
+
   return timeout
 }
 
@@ -766,7 +791,7 @@ function getFirstValue(arr) {
 
 function updateDiscoveryServersAndRetry(resilient, onRetry) {
   if (resilient.hasDiscoveryServers()) {
-    resilient._state.unlock('updating')
+    resilient._sync.unlock('updating')
     Requester.DiscoveryResolver.update(resilient, null, onRetry)
   } else {
     onRetry()
@@ -876,10 +901,10 @@ function getHttpClient(resilient) {
 },{"./defaults":3,"./error":5,"./http":6,"./utils":19}],11:[function(require,module,exports){
 var EventBus = require('lil-event')
 var _ = require('./utils')
-var Options = require('./options')
-var Client = require('./client')
+var Sync = require('./sync')
 var Cache = require('./cache')
-var State = require('./state')
+var Client = require('./client')
+var Options = require('./options')
 var Middleware = require('./middleware')
 var DiscoveryResolver = require('./resolvers/discovery')
 
@@ -887,7 +912,7 @@ module.exports = Resilient
 
 function Resilient(options) {
   this.cache       = new Cache
-  this._state      = new State
+  this._sync       = new Sync
   this._client     = new Client(this)
   this._middleware = new Middleware
   this._options    = Options.define(options)
@@ -897,13 +922,17 @@ Resilient.prototype = Object.create(EventBus.prototype)
 
 Resilient.prototype.servers = function (type) {
   var options = this.options(type || 'service')
-  if (options) return options.servers()
+  return options ? options.servers() : null
+}
+
+Resilient.prototype.setServers = function (list, type) {
+  this.options(type || 'service').servers(list)
+  return this
 }
 
 Resilient.prototype.serversURL = function (type) {
   var servers = this.servers(type)
-  if (servers) servers = servers.urls()
-  return servers
+  return servers ? servers.urls() : null
 }
 
 Resilient.prototype.discoveryServers = function (list) {
@@ -917,11 +946,6 @@ Resilient.prototype.discoveryServers = function (list) {
 Resilient.prototype.hasDiscoveryServers = function () {
   var servers = this.discoveryServers()
   return _.isObj(servers) && servers.exists() || false
-}
-
-Resilient.prototype.setServers = function (list) {
-  this.options('service').servers(list)
-  return this
 }
 
 Resilient.prototype.resetScore =
@@ -950,6 +974,12 @@ Resilient.prototype.discoverServers = function (options, cb) {
 
 Resilient.prototype.updateServers = function (options, cb) {
   return updateServers(this, 'update', options, cb)
+}
+
+function updateServers(resilient, method, options, cb) {
+  if (typeof options === 'function') { cb = options; options = null }
+  DiscoveryResolver[method](resilient, options, cb || _.noop)
+  return resilient
 }
 
 Resilient.prototype.options = function (type, options) {
@@ -1038,35 +1068,28 @@ Resilient.prototype.client = function () {
   return this._client
 }
 
-;['get', 'post', 'put', 'del', 'delete', 'head', 'patch'].forEach(defineMethodProxy)
-
-function defineMethodProxy(verb) {
+;['get', 'post', 'put', 'del', 'delete', 'head', 'patch']
+.forEach(function defineMethodProxy(verb) {
   Resilient.prototype[verb] = function (path, options, cb) {
     return this._client[verb](path, options, cb)
   }
-}
+})
 
-function updateServers(resilient, method, options, cb) {
-  if (typeof options === 'function') { cb = options; options = null }
-  DiscoveryResolver[method](resilient, options, cb || _.noop)
-  return resilient
-}
-
-},{"./cache":1,"./client":2,"./middleware":8,"./options":9,"./resolvers/discovery":14,"./state":18,"./utils":19,"lil-event":21}],12:[function(require,module,exports){
+},{"./cache":1,"./client":2,"./middleware":8,"./options":9,"./resolvers/discovery":13,"./sync":18,"./utils":19,"lil-event":21}],12:[function(require,module,exports){
 var _ = require('./utils')
-var ResilientError = require('./error')
-var Requester = require('./requester')
-var DiscoveryResolver = require('./resolvers/discovery')
-var ServersDiscovery = require('./discovery')
 var Servers = require('./servers')
+var Requester = require('./requester')
+var ResilientError = require('./error')
+var ServersDiscovery = require('./discovery')
+var DiscoveryResolver = require('./resolvers/discovery')
 
 module.exports = Resolver
 
 function Resolver(resilient, options, cb) {
-  var state = resilient._state
-  
-  resilient.emit('request:start', options, resilient)
-  
+  var sync = resilient._sync
+  var middleware = resilient._middleware
+  cb = wrapHandler(cb)
+
   try {
     resolve(resolver)
   } catch (err) {
@@ -1079,79 +1102,79 @@ function Resolver(resilient, options, cb) {
     } else if (hasValidServiceServers()) {
       next()
     } else if (hasDiscoveryServers()) {
-      updateServersFromDiscovery(next)
+      updateServiceServers(next)
     } else {
       next(new ResilientError(1002))
     }
   }
 
   function updateDiscoveryServers(next) {
-    var options = resilient.options('discovery')
+    var options = discoveryOptions()
     var servers = getRefreshServers(options)
     var refreshOptions = getRefreshOptions(options)
 
-    if (state.locked('discovering')) {
-      state.enqueue('discovering', onRefreshServers(options, next))
+    if (sync.locked('discovering')) {
+      sync.enqueue('discovering', onRefreshServers(options, next))
     } else {
-      state.lock('discovering')
+      sync.lock('discovering')
       ServersDiscovery(resilient, refreshOptions, servers)(onRefreshServers(options, next))
     }
   }
 
   function onRefreshServers(options, next) {
     return function (err, res) {
-      unlockAndDispatchDiscoveryQueue(state, err, res)
-      if (err) {
-        next(new ResilientError(1001, err))
-      } else if (res && res.data) {
-        refreshDiscoveryServers(res.data, options, next)
-      } else {
-        next(new ResilientError(1004, err))
-      }
+      sync.unlock('discovering')
+      sync.dequeue('discovering').forEach(function (cb) { cb(err, res) })
+
+      middleware.run('discovery', 'in')(err, res, function (mErr) {
+        if (err || mErr) {
+          next(new ResilientError(err ? 1001 : 1007, err || mErr))
+        } else if (res && res.data) {
+          refreshDiscoveryServers(res.data, options)
+          updateServiceServers(next)
+        } else {
+          next(new ResilientError(1004, err))
+        }
+      })
     }
   }
 
-  function refreshDiscoveryServers(data, options, next) {
-    resilient.emit('discovery:refresh', data, resilient)
-    options.servers(data)
-    updateServersFromDiscovery(next)
+  function discoveryOptions() {
+    return resilient.options('discovery')
   }
 
-  function updateServersFromDiscovery(next) {
+  function refreshDiscoveryServers(data, options) {
+    resilient.emit('discovery:refresh', data, resilient)
+    options.servers(data)
+  }
+
+  function updateServiceServers(next) {
     DiscoveryResolver.update(resilient, null, next)
   }
 
   function hasDiscoveryServersOutdated() {
     var outdated = false
-    var options = resilient.options('discovery')
+    var options = discoveryOptions()
     var servers = options.get('servers')
-    
+
     if (canUpdateDiscoveryServers(options)) {
       if (servers && servers.exists()) {
-        outdated = servers.lastUpdate() > options.get('refreshServersInterval')
+        if (options.get('forceRefreshFirst')) {
+          outdated = servers.updated === 0
+        }
+        if (!outdated) {
+          outdated = servers.lastUpdate() > options.get('refreshServersInterval')
+        }
       } else {
         outdated = true
       }
     }
+
     return outdated
   }
 
   function hasDiscoveryServers() {
     return resilient.hasDiscoveryServers()
-  }
-
-  function resolver(err, res) {
-    err ? cb(err) : handleResolution(res)
-  }
-
-  function handleResolution(res) {
-    var servers = resilient.servers()
-    if (res && res._cache) {
-      servers = new Servers(res.data)
-    } else if (!hasValidServiceServers()) {
-      return cb(new ResilientError(1003))
-    }
-    Requester(resilient)(servers, options, cb)(null)
   }
 
   function hasValidServiceServers() {
@@ -1160,26 +1183,58 @@ function Resolver(resilient, options, cb) {
   }
 
   function serversAreUpdated(servers) {
+    var interval = discoveryOptions().get('refreshInterval')
     if (hasDiscoveryServers()) {
-      return servers.lastUpdate() < resilient.options('discovery').get('refreshInterval')
+      return servers.lastUpdate() < interval
     }
     return true
   }
-}
 
-function unlockAndDispatchDiscoveryQueue(state, err, res) {
-  state.unlock('discovering')
-  state.dequeue('discovering').forEach(function (cb) { cb(err, res) })
+  function resolver(err, res) {
+    err ? cb(err) : handleResolution(res)
+  }
+
+  function handleResolution(res) {
+    var servers = resilient.servers()
+    var requester = Requester(resilient)
+
+    if (res && res._cache) {
+      servers = new Servers(res.data)
+    } else if (!hasValidServiceServers()) {
+      return cb(new ResilientError(1003))
+    }
+
+    middleware.run('service', 'out')(servers, options, function (err) {
+      if (err) {
+        cb(new ResilientError(1007, err))
+      } else {
+        requester(servers, options, cb)(null)
+      }
+    })
+  }
+
+  function wrapHandler(cb) {
+    return function (err, res) {
+      middleware.run('service', 'in')(err, res, function (mErr) {
+        if (err || mErr) {
+          cb(err ? err : new ResilientError(1007, mErr))
+        } else {
+          cb(null, res)
+        }
+      })
+    }
+  }
 }
 
 function canUpdateDiscoveryServers(options) {
   var refreshServers = options.get('refreshServers')
   return options.get('enableRefreshServers')
-    && (options.get('useDiscoveryServersToRefresh') || (refreshServers && refreshServers.exists()))
+    && (options.get('enableSelfRefresh')
+    || (refreshServers && refreshServers.exists()))
 }
 
 function getRefreshServers(options) {
-  return options.get('useDiscoveryServersToRefresh')
+  return options.get('enableSelfRefresh')
     ? options.get('servers') : options.get('refreshServers')
 }
 
@@ -1197,52 +1252,79 @@ function getRefreshBasePath(options) {
     || false
 }
 
-},{"./discovery":4,"./error":5,"./requester":10,"./resolvers/discovery":14,"./servers":17,"./utils":19}],13:[function(require,module,exports){
+},{"./discovery":4,"./error":5,"./requester":10,"./resolvers/discovery":13,"./servers":17,"./utils":19}],13:[function(require,module,exports){
+var ResilientError = require('../error')
+var Requester = require('../requester')
+var ServersDiscovery = require('../discovery')
+var ServiceResolve = require('./service')
+
+module.exports = DiscoveryResolver
+
+Requester.DiscoveryResolver = DiscoveryResolver
+
+function DiscoveryResolver(resilient, options, servers) {
+  var sync = resilient._sync
+
+  function resolver(resolve) {
+    return function (err, res) {
+      unlockAndDispatchQueue(sync, err, res)
+      resolve(err, res)
+    }
+  }
+
+  function updateServers(cb) {
+    sync.lock('updating')
+    ServersDiscovery(resilient, options, servers)(resolver(cb))
+  }
+
+  return function resolve(cb) {
+    if (sync.locked('updating')) {
+      sync.enqueue('updating', cb)
+    } else {
+      updateServers(cb)
+    }
+  }
+}
+
+DiscoveryResolver.update = function (resilient, options, cb) {
+  DiscoveryResolver(resilient, options)
+    (ServiceResolve(resilient)
+      (cb))
+}
+
+DiscoveryResolver.fetch = function (resilient, options, cb) {
+  DiscoveryResolver(resilient, options)(function handler(err, res) {
+    if (err) {
+      cb(err)
+    } else if (res && res.data) {
+      cb(null, res.data)
+    } else {
+      cb(new ResilientError(1001, res))
+    }
+  })
+}
+
+function unlockAndDispatchQueue(sync, err, res) {
+  sync.unlock('updating')
+  sync.dequeue('updating').forEach(dispatcher(err, res))
+}
+
+function dispatcher(err, res) {
+  return function (cb) { cb(err, res) }
+}
+
+},{"../discovery":4,"../error":5,"../requester":10,"./service":14}],14:[function(require,module,exports){
 var _ = require('../utils')
 var ResilientError = require('../error')
 
-module.exports = DiscoveryServersResolver
+module.exports = ServiceResolve
 
-function DiscoveryServersResolver(resilient) {
-  function saveServers(res, cb) {
-    var data = res.data
-    emit('refresh', data)
-    resilient.setServers(data)
-    refreshCache(data)
-    cb(null, res)
-  }
-
-  function handlerError(err, cb) {
-    if (isCacheEnabled()) {
-      resolveFromCache(err, cb)
-    } else {
-      resolveWithError(err, cb)
-    }
-  }
-
-  function resolveFromCache(err, cb) {
-    var cache = getCache()
-    if (hasValidCache(cache)) {
-      cb(null, { status: 200, _cache: true, data: cache.data })
-    } else {
-      resolveWithError(err, cb)
-    }
-  }
-
-  function hasValidCache(cache) {
-    var expires = resilient.options('discovery').get('cacheExpiration')
-    return cache && _.isArr(cache.data) && (_.now() - cache.time) > expires || false
-  }
-
-  function refreshCache(data) {
-    if (isCacheEnabled()) {
-      emit('cache', data)
-      resilient.cache.set('servers', data)
-    }
-  }
+function ServiceResolve(resilient) {
+  var middleware = resilient._middleware
+  var options = resilient.options('discovery')
 
   function isCacheEnabled() {
-    return resilient.options('discovery').get('cacheEnabled')
+    return options.get('cacheEnabled')
   }
 
   function getCache() {
@@ -1253,22 +1335,60 @@ function DiscoveryServersResolver(resilient) {
     resilient.emit('servers:' + name, data, resilient)
   }
 
-  return function defineServers(cb) {
-    return function handler(err, res) {
-      if (err) {
-        handlerError(err, cb)
-      } else if (isValidResponse(res)) {
-        saveServers(res, cb)
-      } else {
-        cb(new ResilientError(1004, res))
-      }
+  function saveServers(res, next) {
+    var data = res.data
+    emit('refresh', data)
+    resilient.setServers(data)
+    refreshCache(data)
+    next(null, res)
+  }
+
+  function errorHandler(err, next) {
+    if (isCacheEnabled()) {
+      resolveFromCache(err, next)
+    } else {
+      resolveWithError(err, next)
     }
   }
-}
 
-function resolveWithError(err, cb) {
-  err = err || { status: 1000 }
-  return cb(new ResilientError(err.status, err))
+  function resolveFromCache(err, next) {
+    var cache = getCache()
+    if (hasValidCache(cache)) {
+      next(null, { status: 200, _cache: true, data: cache.data })
+    } else {
+      resolveWithError(err, next)
+    }
+  }
+
+  function hasValidCache(cache) {
+    var expires = options.get('cacheExpiration')
+    return cache && _.isArr(cache.data) && (_.now() - cache.time) > expires || false
+  }
+
+  function refreshCache(data) {
+    if (isCacheEnabled()) {
+      emit('cache', data)
+      resilient.cache.set('servers', data)
+    }
+  }
+
+  function handleResponse(err, res, done) {
+    if (err) {
+      errorHandler(err, done)
+    } else if (isValidResponse(res)) {
+      saveServers(res, done)
+    } else {
+      done(new ResilientError(1004, res))
+    }
+  }
+
+  return function defineServers(done) {
+    return function handler(err, res) {
+      middleware.run('discovery', 'in')(err, res, function (mErr) {
+        handleResponse(err || mErr, res, done)
+      })
+    }
+  }
 }
 
 function isValidResponse(res) {
@@ -1292,73 +1412,15 @@ function parseAsJSON(res) {
   }
 }
 
-},{"../error":5,"../utils":19}],14:[function(require,module,exports){
-var ResilientError = require('../error')
-var Requester = require('../requester')
-var ServersDiscovery = require('../discovery')
-var DiscoveryServers = require('./discovery-servers')
-
-module.exports = DiscoveryResolver
-
-function DiscoveryResolver(resilient, options, servers) {
-  var state = resilient._state
-
-  function resolver(resolve) {
-    return function finish(err, res) {
-      resolve(err, res)
-      unlockAndDispatchQueue(resilient, err, res)
-    }
-  }
-
-  function updateServers(cb) {
-    state.lock('updating')
-    ServersDiscovery(resilient, options, servers)(resolver(cb))
-  }
-
-  return function resolve(cb) {
-    if (state.locked('updating')) {
-      state.enqueue('updating', cb)
-    } else {
-      updateServers(cb)
-    }
-  }
+function resolveWithError(err, next) {
+  err = err || { status: 1000 }
+  return next(new ResilientError(err.status, err))
 }
 
-Requester.DiscoveryResolver = DiscoveryResolver
+},{"../error":5,"../utils":19}],15:[function(require,module,exports){
+module.exports = roundRobinSerie
 
-DiscoveryResolver.update = function (resilient, options, cb) {
-  DiscoveryResolver(resilient, options)
-    (DiscoveryServers(resilient)
-      (cb))
-}
-
-DiscoveryResolver.fetch = function (resilient, options, cb) {
-  DiscoveryResolver(resilient, options)(function handler(err, res) {
-    if (err) {
-      cb(err)
-    } else if (res && res.data) {
-      cb(null, res.data)
-    } else {
-      cb(new ResilientError(1001, res))
-    }
-  })
-}
-
-function unlockAndDispatchQueue(resilient, err, res) {
-  var state = resilient._state
-  var queue = state.dequeue('updating')
-  state.unlock('updating')
-  queue.forEach(dispatcher(err, res))
-}
-
-function dispatcher(err, res) {
-  return function (cb) { cb(err, res) }
-}
-
-},{"../discovery":4,"../error":5,"../requester":10,"./discovery-servers":13}],15:[function(require,module,exports){
-module.exports = rrSerieGenerator
-
-function rrSerieGenerator(arr, size) {
+function roundRobinSerie(arr, size) {
   size = +size < 2 ? 2 : size
   return roundRobin(size, arr)[getRandom(size)].shift()
 }
@@ -1478,28 +1540,6 @@ function Servers(servers) {
   this.set(servers)
 }
 
-Servers.prototype.sort = function (operation, options) {
-  var servers = this.servers.slice(0)
-  if (servers.length > 1) {
-    servers = servers.sort(function (x, y) {
-      return x.balance(operation, options) - y.balance(operation, options)
-    })
-    servers = roundRobinSort(servers, options)
-  }
-  return servers
-}
-
-Servers.prototype.find = function (url) {
-  var i, l, server = null
-  for (i = 0, l = this.servers.length; i < l; i += 1) {
-    if (this.servers[i].url === url) {
-      server = this.servers[i]
-      break
-    }
-  }
-  return server
-}
-
 Servers.prototype.get = function () {
   return this.servers.slice(0)
 }
@@ -1539,6 +1579,28 @@ Servers.prototype.resetStats = function () {
   })
 }
 
+Servers.prototype.sort = function (operation, options) {
+  var servers = this.servers.slice(0)
+  if (servers.length > 1) {
+    servers.sort(function (x, y) {
+      return x.balance(operation, options) - y.balance(operation, options)
+    })
+    servers = roundRobinSort(servers, options)
+  }
+  return servers
+}
+
+Servers.prototype.find = function (url) {
+  var i, l, server = null
+  for (i = 0, l = this.servers.length; i < l; i += 1) {
+    if (this.servers[i].url === url) {
+      server = this.servers[i]
+      break
+    }
+  }
+  return server
+}
+
 function isValidURI(uri) {
   if (_.isObj(uri)) uri = uri.url || uri.uri
   return _.isURI(uri)
@@ -1571,42 +1633,42 @@ function roundRobinSort(servers, options) {
 }
 
 },{"./roundrobin":15,"./server":16,"./utils":19}],18:[function(require,module,exports){
-var isArray = require('./utils').isArr
+var isArr = require('./utils').isArr
 
-module.exports = State
+module.exports = Sync
 
-function State() {
+function Sync() {
   this.locks = {}
   this.queues = {}
 }
 
-State.prototype.locked = function (state) {
-  return getState(this.locks, state)
+Sync.prototype.locked = function (state) {
+  return getSync(this.locks, state)
 }
 
-State.prototype.lock = function (state) {
+Sync.prototype.lock = function (state) {
   return this.locks[state] = true
 }
 
-State.prototype.unlock = function (state) {
+Sync.prototype.unlock = function (state) {
   return this.locks[state] = false
 }
 
-State.prototype.enqueue = function (state, task) {
+Sync.prototype.enqueue = function (state, task) {
   var queue = this.queues[state]
-  if (getState(this.locks, state)) {
-    if (!isArray(queue)) {
+  if (getSync(this.locks, state)) {
+    if (!isArr(queue)) {
       queue = this.queues[state] = []
     }
     queue.push(task)
   }
 }
 
-State.prototype.dequeue = function (state) {
+Sync.prototype.dequeue = function (state) {
   return (this.queues[state] || []).splice(0)
 }
 
-function getState(locks, state) {
+function getSync(locks, state) {
   var lock = locks[state]
   if (lock === undefined) {
     lock = locks[state] = false
@@ -2147,9 +2209,8 @@ function merger(target, key, value) {
 
   function midware(ctx) {
     var calls = []
-
-    if (!ctx) { ctx = null }
-
+    ctx = ctx || null
+       
     function use() {
       var args = slice.call(arguments)
 

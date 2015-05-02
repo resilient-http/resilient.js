@@ -1,23 +1,23 @@
-# resilient.js [![Build Status](https://api.travis-ci.org/resilient-http/resilient.js.svg?branch=master&style=flat)][travis] [![Codacy Badge](https://www.codacy.com/project/badge/7bf998c913284a279dca40ec01d78cef)](https://www.codacy.com/public/tomas/resilient.js) [![Code Climate](https://codeclimate.com/github/resilient-http/resilient.js/badges/gpa.svg)](https://codeclimate.com/github/resilient-http/resilient.js) [![NPM](https://img.shields.io/npm/v/resilient.svg)](https://www.npmjs.org/package/resilient) ![Downloads](https://img.shields.io/npm/dm/resilient.svg)
+# resilient.js [![Build Status](https://api.travis-ci.org/resilient-http/resilient.js.svg?branch=master&style=flat)][travis] [![Code Climate](https://codeclimate.com/github/resilient-http/resilient.js/badges/gpa.svg)](https://codeclimate.com/github/resilient-http/resilient.js) [![NPM](https://img.shields.io/npm/v/resilient.svg)](https://www.npmjs.org/package/resilient) ![Downloads](https://img.shields.io/npm/dm/resilient.svg)
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-Highly **configurable** and **full featured HTTP client** for the **browser** and **[node](http://nodejs.org)**/**[io.js](https://iojs.org)** with **superpowers** such as **fault tolerance**, **dynamic servers discovery**, transparent server **fallback**, **request retry** cycles, built-in client-side **balancer**, round-robin **load distribution** and [more](#features)...
+Highly **configurable**, **middleware**-oriented, **evented** and **full featured HTTP client** for the **browser** and **[node](http://nodejs.org)**/**[io.js](https://iojs.org)** with **superpowers** such as **fault tolerance**, **dynamic servers discovery**, transparent server **fallback**, **request retry** cycles, built-in client-side **balancer**, round-robin **load distribution** and [more](#features)...
 
-Resilient was mainly designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless resource-oriented services, redundant HTTP APIs and multi datacenter/cloud services.
+Resilient was mainly designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless resource-oriented services, redundant HTTP APIs and multi datacenter replicated services.
 
-It provides an elegant and clean [programmatic API](#api) and a featured [command-line interface](#command-line-interface)
+It provides an elegant and clean [programmatic API](#api) and featured [command-line interface](#command-line-interface)
 
-For more information, see the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-does-it-works), [compatible servers](http://resilient-http.github.io/#servers) or read the [FAQs](#faq)
+For more information, see the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-does-it-works), [compatible servers](http://resilient-http.github.io/#servers), supported [middlewares](#middlewares) or read the [FAQs](#faq)
 
 ## Features
 
-- Reliable failover and excellent error handling with transparent server fallback
+- Reliable failover and error handling with transparent server fallback
 - Smart network resiliency covering multiple failure types
 - Smart balancer logic based on server score (network latency, errors and succesfull requests)
 - Transparent request retry cycle attempts on failure (configurable)
 - Discern best servers based on scoring per read and write operations when balancing
-- Bidirectional middleware layer
+- In/out traffic extensible middleware layer
 - Configurable balancer policy by weight
 - Highly configurable (timeouts, retry loop, cache, fallback behavior, wait before retry...)
 - Avoid fallback/retry cycles per custom HTTP responses codes or verbs
@@ -27,8 +27,9 @@ For more information, see the [project site](http://resilient-http.github.io), t
 - Built-in support for request/response interceptors (via middleware)
 - Built-in support for servers caching to improve reliability when fallback
 - Configurable external HTTP client to use as forward request proxy (instead of using the embedded one)
-- Dynamic servers auto discovering (based on the resilient [specification](https://github.com/resilient-http/spec) protocol)
+- Dynamic servers auto discovering (based on the resilient [specification](https://github.com/resilient-http/spec) or via middleware)
 - Support promiscuous errors (handle 400-499 response status as fallback errors)
+- Support pre/post request hooks via event bus API
 - Support mock/stub working mode via middleware (useful for testing)
 - Full HTTP client features (it uses internally [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http) for the browser)
 - Support round robin scheduling algorithm for traffic distribution (experimental)
@@ -70,11 +71,17 @@ It runs in any [ES5 compliant](http://kangax.github.io/compat-table/es5/) engine
 --- | --- | --- | --- | --- | --- |
 +0.8 | +5 | +3.5 | +9 | +10 | +5 |
 
+## Middlewares
+
+- [Consul](https://github.com/h2non/resilient-consul)
+
+## Framework-specific adapters
+
+- [angular-resilient](https://github.com/h2non/angular-resilient) - Turn $http into a resilient and fault tolerant client
+
 ## Related projects
 
-- [hydra](http://innotech.github.io/hydra) - Multicloud-oriented application discovery server compatible with Resilient
 - [resilient-server](https://github.com/h2non/resilient-server) - node.js powered dummy HTTP discovery server for testing/development
-- [angular-resilient](https://github.com/h2non/angular-resilient) - Turn $http into a resilient and fault tolerant client
 
 ## How to use?
 
@@ -264,11 +271,12 @@ Specific configuration for discovery servers requests, behavior and logic
 - **retryWait** `number` - Number of milisenconds to wait before start the request retry cycle. Default to `1000`
 - **parallel** `boolean` - Discover servers in parallel. This will improve service availability and decrement server lookup delays. Default `true`
 - **refreshInterval** `number` - Servers list time to live in miliseconds. Default to `2` minutes
-- **enableRefreshServers** `boolean` - Enable/disable discovery servers auto refresh. This option requires `refreshServers` or `useDiscoveryServersToRefresh` be defined. Default `true`
+- **enableRefreshServers** `boolean` - Enable/disable discovery servers auto refresh. This option requires `refreshServers` or `enableSelfRefresh` has been defined. Default `true`
 - **refreshServers** `array` - Servers list of refresh servers. This will enable automatically update discovery servers list asking for them selves to the following list of servers on each interval. Default `null`
 - **refreshServersInterval** `number` - Discovery servers list time to live in miliseconds. Default to `5` minutes
-- **useDiscoveryServersToRefresh** `boolean` - Enable/disable self-discovery using the discovery servers pools (useful for Hydra). This options requires the `refreshPath` option be defined. Default `false`
-- **refreshPath** `string` - Discovery refresh servers lookup path. Example: `/app/hydra` for Hydra. This options requires you define `useDiscoveryServersToRefresh` to `true`. Default `null`
+- **enableSelfRefresh** `boolean` - Enable/disable self-discovery using the discovery servers pools. This requires the `refreshPath` option has been defined. Default `false`
+- **forceRefreshFirst** `boolean` - Enable/disable forcing to refresh the server on the first request. This requires the `refreshPath` and `enableRefreshServers` options has been defined. Default `true`
+- **refreshPath** `string` - Discovery refresh servers lookup path. Example: `/app/name`. This options requires you define `enableSelfRefresh` to `true`. Default `null`
 - **refreshOptions** `object` - Custom HTTP options for discovery servers refresh. By default inherits from discovery options
 - **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be treated as failed request, retrying it until it has a valid status (when `retry` option is enabled). Default `false`
 - **omitRetryWhen** `array<object>` - A collection of rules per method and status code to match in order to omit a request retry cycle. See the usage [example](https://github.com/resilient-http/resilient.js/blob/master/examples/omit-fallback-options.js). Default `null`
@@ -332,6 +340,7 @@ It could be an `Error` or plain `Object` instance with the following members
 - **1004** - Discovery server response is invalid or empty
 - **1005** - Missing servers during retry process
 - **1006** - Internal state error (usually caused by an unexpected exception)
+- **1007** - Error injected via middleware
 
 #### Events
 
@@ -356,32 +365,36 @@ Arguments: `options<Object>`, `resilient<Resilient>`
 
 Fired before a request is created
 
-You can intercept and modify the request options on the fly,
-but you must mutate the options `object` and do not lose his reference
+You can intercept and modify the request options on the fly, but you must mutate the options `object`
+
+##### request:outgoing
+Arguments: `options<Object>`, `resilient<Resilient>`
+
+Fired every time before a HTTP request is sent via network
+
+You can intercept and modify the request options on the fly, but you must mutate the options `object`
+
+##### request:incoming
+Arguments: `error<Error>`, `response<Object|http.IncomingMessage>`, `options<Object>`, `resilient<Resilient>`
+
+Fired every time a HTTP response is received from a server
 
 ##### request:finish
 Arguments: `error<Error>`, `response<Object|http.IncomingMessage>`, `resilient<Resilient>`
 
 Fired after a request was completed
 
-You can intercept and modify the error/response on the fly,
-but you must mutate the options `object` and do not lose his reference
+You can intercept and modify the error/response on the fly, but you must mutate the `object`
 
 ##### request:retry
 Arguments: `options<Object>`, `servers<Servers>`
 
 Fired when a request performs a retry attempt cycle, that means all the previous requests has failed
 
-You can intercept and modify the `options` object on the fly,
-but you must mutate it and do not lose his reference
-
 ##### request:fallback
 Arguments: `options<Object>`, `response<Object>`
 
 Fired when any request (service or discovery) to a given server fails and therefore tries to perform the next server fallback
-
-You can intercept and modify the `options` object on the fly,
-but you must mutate it and do not lose his reference
 
 ##### servers:refresh
 Arguments: `servers<Array>`, `resilient<Resilient>`
@@ -668,7 +681,17 @@ For more information, see the [API method documentation](#resilientusehttpclient
 
 #### Can I use streams?
 
-Not yet. There are plans to support it in the future `0.3` version
+Not yet. There are plans to support it in future versions.
+
+#### Can I use Resilient in production projects?
+
+Resilient was used in both web and node.js production applications.
+
+The library is, indeed, relatively young and it will evolve with new features in future versions (in fact a full core and logic redesign is required), but the API consistency in not compromised between patch minor releases.
+
+#### How I can create custom middlewares?
+
+You can see the middleware documentation or see an [example](https://github.com/h2non/resilient-consul)
 
 ## Contributing
 
