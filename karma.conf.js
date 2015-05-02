@@ -44,7 +44,7 @@ module.exports = function(config) {
       'PhantomJS',
       'Safari',
       'Opera'
-    ], // Object.keys(customLaunchers)
+    ],
     reports: ['progress', 'saucelabs'],
     singleRun: true
   })

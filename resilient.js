@@ -185,7 +185,7 @@ defaults.discovery = {
   refreshInterval: 60 * 2 * 1000,
   enableRefreshServers: true,
   enableSelfRefresh: false,
-  forceRefreshFirst: true,
+  forceRefreshOnStart: true,
   refreshServersInterval: 60 * 5 * 1000,
   refreshServers: null,
   refreshOptions: null,
@@ -222,7 +222,7 @@ defaults.resilientOptions = [
   'refreshServersInterval',
   'discoverBeforeRetry',
   'enableSelfRefresh',
-  'forceRefreshFirst'
+  'forceRefreshOnStart'
 ]
 
 },{}],4:[function(require,module,exports){
@@ -485,7 +485,7 @@ function ResilientFactory(options) {
   return new Resilient(options)
 }
 
-ResilientFactory.VERSION = '0.3.0'
+ResilientFactory.VERSION = '0.3.0-rc.0'
 ResilientFactory.CLIENT_VERSION = http.VERSION
 ResilientFactory.defaults = defaults
 ResilientFactory.Options = Options
@@ -1159,7 +1159,7 @@ function Resolver(resilient, options, cb) {
 
     if (canUpdateDiscoveryServers(options)) {
       if (servers && servers.exists()) {
-        if (options.get('forceRefreshFirst')) {
+        if (options.get('forceRefreshOnStart')) {
           outdated = servers.updated === 0
         }
         if (!outdated) {
@@ -1234,8 +1234,11 @@ function canUpdateDiscoveryServers(options) {
 }
 
 function getRefreshServers(options) {
-  return options.get('enableSelfRefresh')
-    ? options.get('servers') : options.get('refreshServers')
+  var type = 'refreshServers'
+  if (options.get('enableSelfRefresh')) {
+    type = 'servers'
+  }
+  return options.get(type)
 }
 
 function getRefreshOptions(options) {
