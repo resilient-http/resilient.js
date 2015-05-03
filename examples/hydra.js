@@ -1,8 +1,8 @@
 var Resilient = require('../')
 
-// this is a sample Resilient configuration
+// This is a sample Resilient client configuration
 // which is compatible with the Hydra balancing server
-// https://github.com/innotech/hydra
+// See: https://github.com/innotech/hydra
 
 var client = Resilient({
   discovery: {

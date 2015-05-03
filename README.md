@@ -73,7 +73,7 @@ It runs in any [ES5 compliant](http://kangax.github.io/compat-table/es5/) engine
 
 ## Middlewares
 
-- [Consul](https://github.com/h2non/resilient-consul)
+- [Consul](https://github.com/h2non/resilient-consul) - [Example](https://github.com/resilient-http/resilient.js/blob/master/examples/consul.js)
 
 ## Framework-specific adapters
 

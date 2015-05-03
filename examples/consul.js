@@ -1,9 +1,9 @@
 var Resilient = require('../')
 var consul = require('resilient-consul')
 
-// this is a sample Resilient configuration
-// which using the Consul middleware
-// https://github.com/h2non/resilient-consul
+// This is a sample Resilient client configuration
+// which uses Consul as discovery server via middleware
+// See: https://github.com/h2non/resilient-consul
 
 var client = Resilient()
 
