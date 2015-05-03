@@ -186,6 +186,13 @@ Function([ params ])
     -> Object{ in: Function(err, res, next), out: Function(option, next) }
 ```
 
+For non-duplex middlewares you can use the following interface as well:
+```
+Function([ params ])
+  -> Function(options, resilient)
+    -> Function(err, res, next)
+```
+
 An example of a simple middleware implementation:
 ```js
 function testMiddleware(params) {
@@ -233,7 +240,9 @@ client.use(testMiddleware({
   timeout: 3000
 }))
 
-client.get('/')
+client.get('/', function (err, res) {
+  // mad science here
+})
 ```
 
 ## Command-line interface
