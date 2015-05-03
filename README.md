@@ -67,9 +67,9 @@ Or loading the script remotely
 
 It runs in any [ES5 compliant](http://kangax.github.io/compat-table/es5/) engine
 
-![Node.js](http://www.h-online.com/imgs/43/9/5/6/2/2/1/nodejs_120-b09a243cafd8e949.png) | ![Chrome](https://raw.github.com/alrra/browser-logos/master/chrome/chrome_48x48.png) | ![Firefox](https://raw.github.com/alrra/browser-logos/master/firefox/firefox_48x48.png) | ![IE](https://raw.github.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png) | ![Opera](https://raw.github.com/alrra/browser-logos/master/opera/opera_48x48.png) | ![Safari](https://raw.github.com/alrra/browser-logos/master/safari/safari_48x48.png)
---- | --- | --- | --- | --- | --- |
-+0.8 | +5 | +3.5 | +9 | +10 | +5 |
+![Node.js](https://cdn0.iconfinder.com/data/icons/long-shadow-web-icons/512/nodejs-48.png) | ![Chrome](https://raw.github.com/alrra/browser-logos/master/chrome/chrome_48x48.png) | ![Firefox](https://raw.github.com/alrra/browser-logos/master/firefox/firefox_48x48.png) | ![IE](https://raw.github.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png) | ![Opera](https://raw.github.com/alrra/browser-logos/master/opera/opera_48x48.png) | ![Safari](https://raw.github.com/alrra/browser-logos/master/safari/safari_48x48.png)
+---  | --- | --- | --- | --- | --- |
++0.10 | +5 | +3.5 | +9 | +10 | +5 |
 
 ## Middlewares
 
