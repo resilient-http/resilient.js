@@ -74,8 +74,10 @@ It runs in any [ES5 compliant](http://kangax.github.io/compat-table/es5/) engine
 ## Badges
 
 Become strong, become persistent, become resilient! Add Resilient in your life:
+
 [![Resilient](https://img.shields.io/badge/I'm-resilient-green.svg?style=flat-square)](http://resilient-http.github.io)
 
+Markdown code:
 ```
 [![Resilient](https://img.shields.io/badge/I'm-resilient-green.svg?style=flat-square)](http://resilient-http.github.io)
 ```
