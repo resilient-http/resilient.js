@@ -18,12 +18,15 @@ client.use(consul({
   enableSelfRefresh: true,
   // Consul servers pool
   servers: [
-    'http://demo.consul.net',
-    'http://demo.consul.net'
+    'http://demo.consul.io',
+    'http://demo.consul.io'
   ]
 }))
 
 // Test request
 client.get('/', function (err, res) {
-  console.log('->', err, res)
+  if (err) {
+    return console.error('Error:', err)
+  }
+  console.log('Response:', res.status)
 })

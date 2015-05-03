@@ -11,6 +11,14 @@ var client = Resilient({
   }
 })
 
+client.on('request:outgoing', function (options) {
+  console.log('Outgoing request:', options)
+})
+
+client.on('request:incoming', function (options) {
+  console.log('Incoming response:', options)
+})
+
 client.on('request:fallback', function (options, res) {
   console.log('Request fallback request cycle was dispached!')
   console.log('Using the following options:', options)
