@@ -179,7 +179,7 @@ Note: the middleware type should be defined a static member of the middleware re
 
 ### Middleware API
 
-Using a Haskell-like notation, this is the required interface for middlewares:
+Based on a Haskell-like notation, this is the required interface for middlewares:
 ```
 Function([ params ])
   -> Function(options, resilient)
@@ -210,12 +210,12 @@ function testMiddleware(params) {
       'in': function (err, res, next) {
         // Do something here with the err/response
 
-        next() // Don't forget to call this
+        next() // Don't forget to call next
       },
       'out': function (options, next) {
         // Do something here with the out HTTP request options
 
-        next()
+        next() // Don't forget to call next
       }
     }
   }
@@ -226,7 +226,7 @@ function testMiddleware(params) {
 }
 ```
 
-An example of a middleware usage:
+An example of middleware usage:
 ```js
 var client = Resilient({
   discovery: {
