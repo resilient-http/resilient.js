@@ -173,7 +173,7 @@ Since version `0.3.x`, Resilient introduces support for duplex middlewares.
 It essentially provides a interceptor-like layer to using external components like a sort of plugins with loose coupling.
 
 From a high-level point of view it's conceptually similar to events an evented API which is commonly used in a event-driven environment with JavaScript,
-but it's sightly different in terms of flow control and data mutation form an evented API.
+but it's slightly different in terms of flow control and data mutation form an evented API.
 
 The particular difference with the Resilient middleware layer is that it provides bidirectional control flow for both incoming and outgoing HTTP traffic.
 This allows you to perform multiple actions before and after a request of a specific type is made by Resilient. This could be considered also as hooks.
