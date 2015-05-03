@@ -184,7 +184,7 @@ Since Resilient is splited in two communication live cycles layers, one for the 
 middlewares can be created for both:
 
 - **service** - Default. Use this type in middleware which are oriented for final servers communication, such as request transformers, autorization...
-- **discovery** - Use this type in middleware which are oriented only for discovery communication, such an adapter for a discovery server.
+- **discovery** - Use this type in middleware which are oriented only for discovery communication, for instance used as adapter for a discovery server which is not compatible with the Resilient [discovery protocol](https://github.com/resilient-http/spectification).
 
 Note: the middleware type should be defined a static member of the middleware returned function, via the `type` property.
 
