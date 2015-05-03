@@ -180,13 +180,13 @@ This allows you to perform multiple actions before and after a request of a spec
 
 ### Types of middlewares
 
-Since Resilient is splited in two communication live cycles layers, one for the `discovery` servers and the other one for the `service` end servers,
-middlewares can be created for both:
+Since Resilient is splited in two communication live cycle layers, one for the `discovery` servers and the other one for the `service` end servers.
+Middlewares can be created for both:
 
 - **service** - Default. Use this type in middleware which are oriented for final servers communication, such as request transformers, autorization...
 - **discovery** - Use this type in middleware which are oriented only for discovery communication, for instance used as adapter for a discovery server which is not compatible with the Resilient [discovery protocol](https://github.com/resilient-http/spectification).
 
-Note: the middleware type should be defined a static member of the middleware returned function, via the `type` property.
+**Note**: the middleware type should be defined a static member of the middleware returned function, using the `type` property.
 
 ### Middleware API
 
