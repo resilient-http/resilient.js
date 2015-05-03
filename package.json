@@ -62,9 +62,9 @@
     "mocha": "^1.21.3",
     "mocha-phantomjs": "^3.4.1",
     "nock": "^0.48.0",
+    "resilient-consul": "^0.1.1",
     "sinon": "^1.10.3",
     "stubby": "^0.2.6",
-    "uglify-js": "^2.4.15",
-    "resilient-consul": "^0.1.1"
+    "uglify-js": "^2.4.15"
   }
 }
