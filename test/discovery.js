@@ -54,7 +54,7 @@ describe('Discovery', function () {
       discovery: {
         timeout: 50,
         retry: 2,
-        retryWait: 50,
+        waitBeforeRetry: 50,
         parallel: false,
         servers: [
           'http://timeout/1',
@@ -94,7 +94,7 @@ describe('Discovery', function () {
       discovery: {
         timeout: 50,
         retry: 3,
-        retryWait: 50,
+        waitBeforeRetry: 50,
         parallel: false,
         servers: [
           'http://unavailable/1',
@@ -133,7 +133,7 @@ describe('Discovery', function () {
       discovery: {
         timeout: 50,
         retry: Infinity,
-        retryWait: 50,
+        waitBeforeRetry: 50,
         parallel: false,
         servers: [
           'http://unavailable/1',
@@ -267,7 +267,7 @@ describe('Discovery', function () {
     var resilient = Resilient({
       discovery: {
         retry: 3,
-        retryWait: 50,
+        waitBeforeRetry: 50,
         servers: [
           'http://not-found',
           'http://bad-request',
@@ -311,7 +311,7 @@ describe('Discovery', function () {
     var resilient = Resilient({
       discovery: {
         retry: 3,
-        retryWait: 50,
+        waitBeforeRetry: 50,
         servers: [
           'http://127.0.0.1:8198',
           'http://127.0.0.1:8199',

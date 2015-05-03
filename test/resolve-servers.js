@@ -232,7 +232,7 @@ describe('Resolve servers', function () {
       service: {
         timeout: 50,
         retry: Infinity,
-        retryWait: 10,
+        waitBeforeRetry: 10,
         servers: [
           'http://unavailable',
           'http://unavailable',
@@ -275,7 +275,7 @@ describe('Resolve servers', function () {
     var resilient = Resilient({
       service: {
         timeout: 50,
-        retryWait: 10,
+        waitBeforeRetry: 10,
         servers: [
           'http://unavailable',
           'http://unavailable',

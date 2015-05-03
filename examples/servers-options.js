@@ -11,7 +11,7 @@ var client = Resilient({
     basePath: '/api',
     method: 'POST',
     retry: 3,
-    retryWait: 500,
+    waitBeforeRetry: 500,
     headers: {
       Authorization: 'Bearer 0b79bab50daca910b000d4f1a2b675d604257e42'
     }

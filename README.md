@@ -219,7 +219,7 @@ Specific configuration options for the end service servers pool of the Resilient
 
 - **servers** `array<string>` - A list of valid servers URIs to reach for the given service. Default `null`. It's recommended to use discovery servers instead of static service servers
 - **retry** `number` - Number of times to retry if all requests failed. Use `Infinity` for infinitive attemps. Default `0`
-- **retryWait** `number` - Number of milisenconds to wait before start the request retry cycle. Default to `50`
+- **waitBeforeRetry** `number` - Number of milisenconds to wait before start the request retry cycle. Default to `50`
 - **discoverBeforeRetry** `boolean` - Force to refresh service servers list asking to the discovery servers on each retry attempt. You must define the discovery servers in order to use this feature. Default `true`
 - **promiscuousErrors** `boolean` - Enable promiscuous error handling mode. Client HTTP status errors (400-499) will be treated as failed request, retrying it until it has a valid status (when `retry` option is enabled). Default `false`
 - **omitRetryWhen** `array<object>` - A collection of rules per method and status code to match in order to omit a request retry cycle. See the usage [example](https://github.com/resilient-http/resilient.js/blob/master/examples/omit-fallback-options.js). Default `null`
@@ -268,7 +268,7 @@ Specific configuration for discovery servers requests, behavior and logic
 - **cacheEnabled** `boolean` - Enable/disable discovery servers cache in case of global fallback. Useful to improve client reliability. Default `true`
 - **cacheExpiration** `number` - Maximum cache time to live. Default to `10` minutes
 - **retry** `number` - Number of times to retry if all requests failed. Use `Infinity` for infinitive attemps. Default `3`
-- **retryWait** `number` - Number of milisenconds to wait before start the request retry cycle. Default to `1000`
+- **waitBeforeRetry** `number` - Number of milisenconds to wait before start the request retry cycle. Default to `1000`
 - **parallel** `boolean` - Discover servers in parallel. This will improve service availability and decrement server lookup delays. Default `true`
 - **refreshInterval** `number` - Servers list time to live in miliseconds. Default to `2` minutes
 - **enableRefreshServers** `boolean` - Enable/disable discovery servers auto refresh. This option requires `refreshServers` or `enableSelfRefresh` has been defined. Default `true`

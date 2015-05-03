@@ -65,6 +65,6 @@
     "sinon": "^1.10.3",
     "stubby": "^0.2.6",
     "uglify-js": "^2.4.15",
-    "resilient-consul": "^0.1.1",
+    "resilient-consul": "^0.1.1"
   }
 }

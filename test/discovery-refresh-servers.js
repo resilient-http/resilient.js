@@ -183,7 +183,7 @@ describe('Refresh discovery servers', function () {
       discovery: {
         timeout: 50,
         retry: 1,
-        retryWait: 10,
+        waitBeforeRetry: 10,
         parallel: false,
         enableSelfRefresh: false,
         servers: null,
@@ -364,7 +364,7 @@ describe('Refresh discovery servers', function () {
       discovery: {
         timeout: 50,
         retry: 1,
-        retryWait: 10,
+        waitBeforeRetry: 10,
         parallel: false,
         enableSelfRefresh: false,
         servers: null,

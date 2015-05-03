@@ -4,7 +4,7 @@ var client = Resilient({
   service: {
     retry: Infinity,
     discoverBeforeRetry: true,
-    retryWait: 100,
+    waitBeforeRetry: 100,
     timeout: 1000,
     promiscuousErrors: true
   },
@@ -15,7 +15,7 @@ var client = Resilient({
       'http://localhost:8882/discovery/valid'
     ],
     retry: Infinity,
-    retryWait: 100,
+    waitBeforeRetry: 100,
     refreshInterval: 5 * 1000,
     basePath: '/api/1.0',
     headers: {
