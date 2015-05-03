@@ -2,7 +2,7 @@
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-Highly **configurable**, **middleware-oriented**, **evented** and **full featured HTTP client** for the **browser** and **[node](http://nodejs.org)**/**[io.js](https://iojs.org)** with **superpowers** such as **fault tolerance**, **dynamic servers discovery**, transparent server **fallback**, **request retry** cycles, built-in client-side **balancer**, round-robin **load distribution** and [more](#features)...
+Highly **configurable**, **[middleware](#middleware-layer)-oriented**, **evented** and **full featured HTTP client** for the **browser** and **[node](http://nodejs.org)**/**[io.js](https://iojs.org)** with **superpowers** such as **fault tolerance**, **dynamic servers discovery**, transparent server **fallback**, **request retry** cycles, built-in client-side **balancer**, round-robin **load distribution** and [more](#features)...
 
 Resilient was mainly designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless resource-oriented services, redundant HTTP APIs and multi datacenter replicated services.
 
@@ -155,6 +155,86 @@ client.get('/users', function (err, res) {
 ```
 
 For more usage cases see some [examples](https://github.com/resilient-http/resilient.js/tree/master/examples)
+
+## Middleware Layer
+
+From version `0.3.x` Resilient introduces support about a new concept of duplex middlewares.
+Essentially it provides a interceptor-like layer to using external  components like a sort of plugins with loose coupling.
+
+From a high-level point of view it's conceptually similar to events an evented API which is commonly used in a event-driven environment with JavaScript,
+but it's sightly different in terms of flow control and data mutation form an evented API.
+
+The particular difference with the Resilient middleware layer is that it provides bidirectional control flow for both incoming and outgoing HTTP traffic.
+This allows you to perform multiple requests
+
+### Types of middlewares
+
+Since Resilient is splited in two communication layers, one for the `discovery` servers and the other one for the `service` final servers,
+middleware can be created for both, but it's required to specify the type.
+
+- **service** - Default. Use this type in middleware which are oriented for final servers communication, such as request transformers, autorization...
+- **discovery** - Use this type in middleware which are oriented only for discovery communication, such an adapter for a discovery server.
+
+Note: the middleware type should be defined a static member of the middleware returned function, via the `type` property.
+
+### Middleware API
+
+Using a Haskell-like notation, this is the required interface for middlewares:
+```
+Function([ params ])
+  -> Function(options, resilient)
+    -> Object{ in: Function(err, res, next), out: Function(option, next) }
+```
+
+An example of a simple middleware implementation:
+```js
+function testMiddleware(params) {
+  // Middleware-specific params
+  params = params || {}
+
+  // Do whatever you need here with the params
+
+  // Resilient will pass the Options
+  function middleware(options, resilient) {
+    // Do whatever you need here with Resilient client options
+    // such as defining servers
+
+    return {
+      'in': function (err, res, next) {
+        // Do something here with the err/response
+
+        next() // Don't forget to call this
+      },
+      'out': function (options, next) {
+        // Do something here with the out HTTP request options
+
+        next()
+      }
+    }
+  }
+
+  middleware.type = 'discovery' // Default to: service
+
+  return middleware
+}
+```
+
+An example of a middleware usage:
+```js
+var client = Resilient({
+  discovery: {
+    servers: ['http://server1', 'http://server2']
+  }
+})
+
+client.use(testMiddleware({
+  custom: 'options',
+  key: 'api-key',
+  timeout: 3000
+}))
+
+client.get('/')
+```
 
 ## Command-line interface
 
@@ -528,6 +608,10 @@ optionally passing a callback to handle the result
 Passed arguments to the callback are:
 - **error** `object` - Error, if it happend
 - **servers** `array` - Array of `string` with the current service servers URL
+
+### resilient#use(middleware)
+
+Register a new middleware. See the middleware [documentation](#middleware-layer) or [examples](#middlewares) for more information
 
 ### resilient#useHttpClient(fn)
 

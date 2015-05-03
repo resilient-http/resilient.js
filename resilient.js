@@ -20,6 +20,12 @@ Cache.prototype.get = function (key) {
   return key ? this.store[key] : _.clone(this.store)
 }
 
+Cache.prototype.set = function (key, data) {
+  if (key) {
+    this.store[key] = { data: data, time: _.now() }
+  }
+}
+
 Cache.prototype.time = function (key) {
   var value = this.store[key]
   return value ? value.time : null
@@ -28,16 +34,10 @@ Cache.prototype.time = function (key) {
 Cache.prototype.exists = function (key) {
   var value = this.store[key]
   return _.isObj(value)
-    && ((_.isArr(value.data) 
+    && ((_.isArr(value.data)
     && value.data.length > 0)
     || _.isObj(value.data))
     || false
-}
-
-Cache.prototype.set = function (key, data) {
-  if (key) {
-    this.store[key] = { data: data, time: _.now() }
-  }
 }
 
 },{"./utils":19}],2:[function(require,module,exports){
@@ -97,6 +97,7 @@ function normalizeArgs(path, options, cb, method) {
     cb = options
     options = arguments[0]
   }
+
   options = mergeHttpOptions(this._resilient, _.isObj(options) ? options : _.emptyObject())
 
   if (typeof path === 'string') options.path = path
@@ -115,7 +116,11 @@ function wrapCallback(resilient, cb) {
 
 function mergeHttpOptions(resilient, options) {
   var defaults = resilient.options('service').get()
-  if (options.timeout) options.$timeout = options.timeout
+
+  if (options.timeout) {
+    options.$timeout = options.timeout
+  }
+
   return _.merge(defaults, options)
 }
 
@@ -128,6 +133,7 @@ function plainHttpRequest(resilient, options, cb) {
     options.url = options.path
     options.path = null
   }
+
   return (resilient._httpClient || http).call(null, options, cb)
 }
 
@@ -422,7 +428,7 @@ function mapResponse(cb) {
 }
 
 function isJSONContent(res) {
-  return typeof res.body === 'string' 
+  return typeof res.body === 'string'
     && JSON_MIME.test(res.headers['content-type'])
 }
 
@@ -432,17 +438,20 @@ function mapOptions(options) {
   } else {
     options = options || {}
   }
-  
+
   if (options.params) options.qs = options.params
   if (options.data) mapRequestBody(options)
   if (!IS_BROWSER) defineUserAgent(options)
-  
+
   return options
 }
 
 function defineUserAgent(options) {
   options.headers = options.headers || {}
-  options.headers['User-Agent'] = options.headers['User-Agent'] || getUserAgent()
+
+  if (!options.headers['User-Agent']) {
+    options.headers['User-Agent'] = getUserAgent()
+  }
 }
 
 function getUserAgent() {
@@ -451,10 +460,12 @@ function getUserAgent() {
 
 function mapRequestBody(options) {
   var body = options.data || options.body
+
   if (body && _.isObj(body) || _.isArr(body)) {
     options.json = true
     options.data = null
   }
+
   options.body = body
 }
 
@@ -951,13 +962,16 @@ Resilient.prototype.hasDiscoveryServers = function () {
 Resilient.prototype.resetScore =
 Resilient.prototype.resetStats = function (type) {
   var servers = this.options(type || 'service').servers()
-  if (servers) servers.resetStats()
+  if (servers) {
+    servers.resetStats()
+  }
   return this
 }
 
 Resilient.prototype.latestServers =
 Resilient.prototype.getUpdatedServers = function (options, cb) {
   cb = typeof options === 'function' ? options : cb
+
   if (this.discoveryServers()) {
     this.discoverServers(options, cb)
   } else if (this.servers('service')) {
@@ -965,6 +979,7 @@ Resilient.prototype.getUpdatedServers = function (options, cb) {
   } else {
     cb(new Error('Missing servers'))
   }
+
   return this
 }
 
@@ -983,15 +998,20 @@ function updateServers(resilient, method, options, cb) {
 }
 
 Resilient.prototype.options = function (type, options) {
-  var store = null
   if (type && _.isObj(options)) {
-    store = this._options.get(type)
-    if (store instanceof Options) store.set(options)
-  } else if (_.isObj(type)) {
-    this._options = Options.define(type)
-  } else {
-    return this._options.get(type)
+    var store = this._options.get(type)
+    if (store instanceof Options) {
+      store.set(options)
+    }
+    return
   }
+
+  if (_.isObj(type)) {
+    this._options = Options.define(type)
+    return
+  }
+
+  return this._options.get(type)
 }
 
 Resilient.prototype.discoveryOptions = function (options) {
