@@ -155,7 +155,7 @@ Create a new client and set the discovering servers
 var client = Resilient({ service: { basePath: '/api/1.0' }})
 client.discoveryServers(servers)
 ```
-
+s
 Perform a request (and that's all, Resilient will take care about everything to reach the server)
 ```js
 client.get('/users', function (err, res) {
@@ -170,12 +170,12 @@ For more usage cases see some [examples](https://github.com/resilient-http/resil
 ## Middleware Layer
 
 Since version `0.3.x`, Resilient introduces support for duplex middlewares.
-It essentially provides a interceptor-like layer to using external components like a sort of addons with loose coupling.
+It essentially provides a interceptor-like layer to use external components like a sort of addons with loose coupling.
 
-From a high-level point of view it's conceptually similar to an evented API, which is commonly used in a event-driven environment with JavaScript,
-but it's slightly different in terms of flow control and data mutation compared with events.
+From a high-level point of view it's conceptually similar to an evented API approach, which is commonly used in a event-driven environment with JavaScript,
+but in this case it's slightly different in terms of flow control nature and data mutation compared with events.
 
-The particular difference with the Resilient middleware layer is that it provides bidirectional control flow for both incoming and outgoing HTTP traffic.
+The particular feature with the Resilient middleware layer is that it provides bidirectional control flow for both incoming and outgoing HTTP traffic.
 This allows you to perform multiple actions before and after a request of a specific type is made by Resilient. This could be considered also as hooks.
 
 ### Types of middlewares
