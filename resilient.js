@@ -869,10 +869,11 @@ function shouldOmitOnErrorCode(codes, status) {
 }
 
 function matchHttpMethod(methods, method) {
+  method = (method || 'GET').toUpperCase()
   return methods
     .filter(function (m) { return typeof m === 'string' })
     .map(function (m) { return m.toUpperCase().trim() })
-    .filter(function (m) { return typeof method === 'string' && m === method.toUpperCase() })
+    .filter(function (m) { return m === method })
     .length > 0
 }
 
@@ -1290,7 +1291,8 @@ function DiscoveryResolver(resilient, options, servers) {
 
   function resolver(resolve) {
     return function (err, res) {
-      unlockAndDispatchQueue(sync, err, res)
+      sync.unlock('updating')
+      sync.dequeue('updating').forEach(function (cb) { cb(err, res) })
       resolve(err, res)
     }
   }
@@ -1316,7 +1318,11 @@ DiscoveryResolver.update = function (resilient, options, cb) {
 }
 
 DiscoveryResolver.fetch = function (resilient, options, cb) {
-  DiscoveryResolver(resilient, options)(function handler(err, res) {
+  DiscoveryResolver(resilient, options)(fetchHandler(cb))
+}
+
+function fetchHandler(cb) {
+  return function (err, res) {
     if (err) {
       cb(err)
     } else if (res && res.data) {
@@ -1324,16 +1330,7 @@ DiscoveryResolver.fetch = function (resilient, options, cb) {
     } else {
       cb(new ResilientError(1001, res))
     }
-  })
-}
-
-function unlockAndDispatchQueue(sync, err, res) {
-  sync.unlock('updating')
-  sync.dequeue('updating').forEach(dispatcher(err, res))
-}
-
-function dispatcher(err, res) {
-  return function (cb) { cb(err, res) }
+  }
 }
 
 },{"../discovery":4,"../error":5,"../requester":10,"./service":14}],14:[function(require,module,exports){
@@ -1547,7 +1544,7 @@ function calculateAvgLatency(latency, stats) {
 }
 
 function round(number) {
-  return Math.round(number * 100) / 100
+  return +((number * 100) / 100).toFixed(2)
 }
 
 },{"./defaults":3}],17:[function(require,module,exports){
