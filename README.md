@@ -65,7 +65,7 @@ Or loading the script remotely
 
 ## Environments
 
-It runs in any [ES5 compliant](http://kangax.github.io/compat-table/es5/) engine
+It runs in any [ES5 compliant](http://kangax.github.io/mcompat-table/es5/) engine
 
 ![Node.js](https://cdn0.iconfinder.com/data/icons/long-shadow-web-icons/512/nodejs-48.png) | ![Chrome](https://raw.github.com/alrra/browser-logos/master/chrome/chrome_48x48.png) | ![Firefox](https://raw.github.com/alrra/browser-logos/master/firefox/firefox_48x48.png) | ![IE](https://raw.github.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png) | ![Opera](https://raw.github.com/alrra/browser-logos/master/opera/opera_48x48.png) | ![Safari](https://raw.github.com/alrra/browser-logos/master/safari/safari_48x48.png)
 ---  | --- | --- | --- | --- | --- |
@@ -170,7 +170,7 @@ For more usage cases see some [examples](https://github.com/resilient-http/resil
 ## Middleware Layer
 
 Since version `0.3.x`, Resilient introduces support for duplex middlewares.
-It essentially provides a interceptor-like layer to use external components like a sort of addons with loose coupling.
+It essentially provides an interceptor like layer to use external components to augment a specific functionality.
 
 From a high-level point of view it's conceptually similar to an evented API approach, which is commonly used in a event-driven environment with JavaScript,
 but in this case it's slightly different in terms of flow control nature and data mutation compared with events.
