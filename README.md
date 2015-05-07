@@ -155,8 +155,8 @@ Create a new client and set the discovering servers
 var client = Resilient({ service: { basePath: '/api/1.0' }})
 client.discoveryServers(servers)
 ```
-s
-Perform a request (and that's all, Resilient will take care about everything to reach the server)
+
+Finally perform the request (and that's all, Resilient will take care about everything to reach the server)
 ```js
 client.get('/users', function (err, res) {
   if (res.status === 200) {
@@ -165,7 +165,7 @@ client.get('/users', function (err, res) {
 })
 ```
 
-For more usage cases see some [examples](https://github.com/resilient-http/resilient.js/tree/master/examples)
+For more usage cases you can see some [examples](https://github.com/resilient-http/resilient.js/tree/master/examples)
 
 ## Middleware Layer
 
