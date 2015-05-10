@@ -2,7 +2,7 @@
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-Highly **configurable**, **[middleware](#middleware-layer)-oriented**, **evented** and **full featured HTTP client** for the **browser** and **[node](http://nodejs.org)**/**[io.js](https://iojs.org)** with **superpowers** like **fault tolerance** with transparent server **fallback**, **dynamic servers discovery**, **request retry** cycles, built-in client-side **balancer**, round-robin **load distribution** and [more](#features)...
+Highly **configurable**, **[middleware](#middleware-layer)-oriented**, **evented** and **full featured HTTP client** for the **browser** and **[node](http://nodejs.org)**/**[io.js](https://iojs.org)** with **superpowers** like **fault tolerance** with transparent server **fallback**, **dynamic servers lookup**, **request retry** cycles, built-in client-side **balancer**, round-robin **load distribution** and [more](#features)...
 
 Resilient was mainly designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless resource-oriented services, redundant HTTP APIs and multi datacenter replicated services.
 
@@ -92,7 +92,7 @@ Markdown code:
 
 ## Related projects
 
-- [resilient-server](https://github.com/h2non/resilient-server) - node.js powered dummy HTTP discovery server for testing/development
+- [resilient-server](https://github.com/h2non/resilient-server) - node.js powered dummy HTTP lookup server for testing/development
 
 ## How to use?
 
@@ -139,9 +139,9 @@ client.get('/users', function (err, res) {
 })
 ```
 
-#### Dynamic servers discovery
+#### Dynamic servers lookup
 
-Define the discovery servers pool
+Define the lookup servers pool
 ```js
 var servers = [
   'http://discover1.server.com',
@@ -184,7 +184,7 @@ Since Resilient is splited in two communication live cycle layers, one for the `
 Middlewares can be created for both:
 
 - **service** - Default. Use this type in middleware which are oriented for final servers communication, such as request transformers, autorization...
-- **discovery** - Use this type in middleware which are oriented only for discovery communication, for instance used as adapter for a discovery server which is not compatible with the Resilient [discovery protocol](https://github.com/resilient-http/spectification).
+- **discovery** - Use this type in middleware which are oriented only for lookup communication, for instance used as adapter for a lookup server which is not compatible with the Resilient [lookup protocol](https://github.com/resilient-http/spectification).
 
 **Note**: the middleware type should be defined a static member of the middleware returned function, using the `type` property.
 
