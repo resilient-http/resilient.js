@@ -19,11 +19,10 @@ For more information, see the [project site](http://resilient-http.github.io), t
 - Discern best servers based on scoring per read and write operations when balancing
 - In/out traffic extensible middleware layer
 - Configurable balancer policy by weight
-- Highly configurable (timeouts, retry loop, cache, fallback behavior, wait before retry...)
+- Configurable timeouts, retry loop, cache TTL, fallback behavior...)
 - Avoid fallback/retry cycles per custom HTTP responses codes or verbs
 - Define custom timeouts per HTTP method (e.g permissive for POST/PUT/DELETE, aggressive for GET)
-- Configurable request timeouts per HTTP verb (useful to differ GET from POST/PUT/DELETE)
-- Parallel servers discovering for a faster availability
+- Parallel servers discovering for faster availability
 - Built-in support for request/response interceptors (via middleware)
 - Built-in support for servers caching to improve reliability when fallback
 - Configurable external HTTP client to use as forward request proxy (instead of using the embedded one)
@@ -31,12 +30,11 @@ For more information, see the [project site](http://resilient-http.github.io), t
 - Support promiscuous errors (handle 400-499 response status as fallback errors)
 - Support pre/post request hooks via event bus API
 - Support mock/stub working mode via middleware (useful for testing)
-- Full HTTP client features (it uses internally [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http) for the browser)
+- Reliable HTTP client (it uses internally [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http) for the browser)
 - Support round robin scheduling algorithm for traffic distribution (experimental)
 - Featured cURL-inspired command-line interface
-- Lightweight library (8KB gzipped)
-- Cross engine (node.js/io.js and browsers. ES5 compliant
-- Well tested in both node.js and browsers
+- Lightweight library (9KB gzipped)
+- Cross engine. ES5 compliant
 
 ## Installation
 
