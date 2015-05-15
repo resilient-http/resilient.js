@@ -2,7 +2,7 @@
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-Highly **configurable**, **[middleware](#middleware-layer)-oriented**, **evented** and **full featured HTTP client** for the **browser** and **[node](http://nodejs.org)**/**[io.js](https://iojs.org)** with **superpowers** like **fault tolerance** with transparent server **fallback**, **dynamic servers lookup**, **request retry** cycles, built-in client-side **balancer**, round-robin **load distribution** and [more](#features)...
+Highly **configurable**, **[middleware](#middleware-layer)-oriented**, **evented** and **full featured HTTP client** for **[node](http://nodejs.org)**/**[io.js](https://iojs.org)** and **browsers** with **superpowers** like **fault tolerance** with transparent server **fallback**, **dynamic servers lookup**, **request retry** cycles, built-in client-side **balancer**, round-robin **load distribution** and [more](#features)...
 
 Resilient was mainly designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless resource-oriented services, redundant HTTP APIs and multi datacenter replicated services.
 
@@ -14,7 +14,7 @@ For more information, see the [project site](http://resilient-http.github.io), t
 
 - Reliable failover and error handling with transparent server fallback
 - Smart network resiliency covering multiple failure types
-- Smart balancer logic based on server score (network latency, errors and succesfull requests)
+- Smart balancer logic based on empirical server score (network latency, errors and succesfull requests)
 - Transparent request retry cycle attempts on failure (configurable)
 - Discern best servers based on scoring per read and write operations when balancing
 - In/out traffic extensible middleware layer
@@ -97,8 +97,6 @@ Markdown code:
 See the [basic usage](#basic-usage) and [examples](https://github.com/resilient-http/resilient.js/tree/master/examples) for detailed use cases
 
 ## How does it works?
-
-An algorithm diagram worth more than words
 
 <img src="http://rawgit.com/resilient-http/resilient-http.github.io/master/images/algorithm.svg" />
 
