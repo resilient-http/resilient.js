@@ -161,7 +161,9 @@ client.get('/users', function (err, res) {
 })
 ```
 
-For more usage cases you can see some [examples](https://github.com/resilient-http/resilient.js/tree/master/examples)
+**Note**: you could use [Consul](https://github.com/h2non/resilient-consul) or other [HTTP server](https://github.com/h2non/resilient-server) using a custom middleware as discovery server. For more information about the Resilient discovery interface, take a look at the [documentation](https://github.com/resilient-http/specification#discovery-server-api)
+
+For more usage cases take a look to the [examples](https://github.com/resilient-http/resilient.js/tree/master/examples)
 
 ## Middleware Layer
 
