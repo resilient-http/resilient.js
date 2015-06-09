@@ -2,13 +2,13 @@
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-Highly **configurable**, **[middleware](#middleware-layer)-oriented**, **evented** and **full featured HTTP client** for **[node](http://nodejs.org)**/**[io.js](https://iojs.org)** and **browsers** with **superpowers** like **fault tolerance** with transparent server **fallback**, **dynamic servers lookup**, **request retry** cycles, built-in client-side **balancer**, round-robin **load distribution** and [more](#features)...
+Highly **configurable**, **[middleware](#middleware-layer)-oriented**, **evented** and **full featured HTTP client** for **[node](http://nodejs.org)** and **browsers** with **superpowers** like **fault tolerance** with transparent server **fallback**, **dynamic servers lookup**, **request retry** cycles, built-in client-side **balancer**, round-robin **load distribution** and [more](#features)...
 
 Resilient was mainly designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless resource-oriented services, redundant HTTP APIs and multi datacenter replicated services.
 
 It provides an elegant and clean [programmatic API](#api) and featured [command-line interface](#command-line-interface)
 
-For more information, see the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-does-it-works), [compatible servers](http://resilient-http.github.io/#servers), supported [middlewares](#middlewares) or read the [FAQs](#faq)
+For more information, take a look to the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-does-it-works), [compatible servers](http://resilient-http.github.io/#servers), supported [middlewares](#middlewares) or read the [FAQs](#faq)
 
 ## Features
 
@@ -27,7 +27,7 @@ For more information, see the [project site](http://resilient-http.github.io), t
 - Built-in support for servers caching to improve reliability when fallback
 - Configurable external HTTP client to use as forward request proxy (instead of using the embedded one)
 - Dynamic servers auto discovering (based on the resilient [specification](https://github.com/resilient-http/spec) or via middleware)
-- Support promiscuous errors (handle 400-499 response status as fallback errors)
+- Support promiscuous errors (handles 400-499 response status as fallback errors)
 - Support pre/post request hooks via event bus API
 - Support mock/stub working mode via middleware (useful for testing)
 - Reliable HTTP client (it uses internally [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http) for the browser)
@@ -38,13 +38,10 @@ For more information, see the [project site](http://resilient-http.github.io), t
 
 ## Installation
 
-#### Node.js / io.js
-
+Via [npm](https://npmjs.org)
 ```bash
 npm install resilient
 ```
-
-#### Browser
 
 Via [Bower](http://bower.io)
 ```bash
@@ -83,6 +80,7 @@ Markdown code:
 ## Middlewares
 
 - [Consul](https://github.com/h2non/resilient-consul) - [Example](https://github.com/resilient-http/resilient.js/blob/master/examples/consul.js)
+
 
 ## Framework-specific adapters
 
