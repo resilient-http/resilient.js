@@ -1528,10 +1528,6 @@ function createStats() {
   }
 }
 
-function getWeightAvg() {
-  return (stats.request * 100 / total) * weight.success
-}
-
 function calculateStatsBalance(stats, weight, total) {
   return round(
    ((((stats.request * 100 / total) * weight.success) +
@@ -1675,17 +1671,21 @@ Sync.prototype.unlock = function (state) {
 }
 
 Sync.prototype.enqueue = function (state, task) {
-  var queue = this.queues[state]
   if (getSync(this.locks, state)) {
-    if (!isArr(queue)) {
-      queue = this.queues[state] = []
-    }
-    queue.push(task)
+    this.push(state, task)
   }
 }
 
 Sync.prototype.dequeue = function (state) {
   return (this.queues[state] || []).splice(0)
+}
+
+Sync.prototype.push = function (state, task) {
+  var queue = this.queues[state]
+  if (!isArr(queue)) {
+    queue = this.queues[state] = []
+  }
+  queue.push(task)
 }
 
 function getSync(locks, state) {
