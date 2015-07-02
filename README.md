@@ -2,13 +2,11 @@
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-Highly **configurable**, **[middleware](#middleware-layer)-oriented**, **evented** and **full featured HTTP client** for **[node](http://nodejs.org)** and **browsers** with **superpowers** like **fault tolerance** with transparent server **fallback**, **dynamic servers lookup**, **request retry** cycles, built-in client-side **balancer**, round-robin **load distribution** and [more](#features)...
+**[Middleware](#middleware-layer)-oriented**, **evented** and **full featured HTTP client** for **[node.js](http://nodejs.org)** and **browsers** with **superpowers** such as **fault tolerance** with transparent server **fallback**, **dynamic servers lookup**, **request retry** cycles, built-in client-side **balancer**, built-in **balancer** and [more](#features)...
 
-Resilient was mainly designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, stateless resource-oriented services, redundant HTTP APIs and multi datacenter replicated services.
+Resilient was mainly designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, and provides a simple [programmatic API](#api) and featured [command-line interface](#command-line-interface)
 
-It provides an elegant and clean [programmatic API](#api) and featured [command-line interface](#command-line-interface)
-
-For more information, take a look to the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-does-it-works), [compatible servers](http://resilient-http.github.io/#servers), supported [middlewares](#middlewares) or read the [FAQs](#faq)
+To get started, take a look to the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-does-it-works), [compatible servers](http://resilient-http.github.io/#servers), supported [middleware](#middleware) or read the [FAQs](#faq)
 
 ## Features
 
@@ -77,10 +75,9 @@ Markdown code:
 [![Resilient](https://img.shields.io/badge/I'm-resilient-green.svg?style=flat-square)](http://resilient-http.github.io)
 ```
 
-## Middlewares
+## Middleware
 
 - [Consul](https://github.com/h2non/resilient-consul) - [Example](https://github.com/resilient-http/resilient.js/blob/master/examples/consul.js)
-
 
 ## Framework-specific adapters
 
