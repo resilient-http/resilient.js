@@ -162,7 +162,7 @@ For more usage cases take a look to the [examples](https://github.com/resilient-
 
 ## Middleware Layer
 
-Since version `0.3.x`, Resilient introduces support for duplex middlewares.
+Since version `0.3.x`, Resilient introduces support for duplex middleware.
 It essentially provides an interceptor like layer to use external components to augment a specific functionality.
 
 From a high-level point of view it's conceptually similar to an evented API approach, which is commonly used in a event-driven environment with JavaScript,
@@ -171,10 +171,10 @@ but in this case it's slightly different in terms of flow control nature and dat
 The particular feature with the Resilient middleware layer is that it provides bidirectional control flow for both incoming and outgoing HTTP traffic.
 This allows you to perform multiple actions before and after a request of a specific type is made by Resilient. This could be considered also as hooks.
 
-### Types of middlewares
+### Types of middleware
 
 Since Resilient is splited in two communication live cycle layers, one for the `discovery` servers and the other one for the `service` end servers.
-Middlewares can be created for both:
+Middleware can be created for both:
 
 - **service** - Default. Use this type in middleware which are oriented for final servers communication, such as request transformers, autorization...
 - **discovery** - Use this type in middleware which are oriented only for lookup communication, for instance used as adapter for a lookup server which is not compatible with the Resilient [lookup protocol](https://github.com/resilient-http/spectification).
@@ -183,14 +183,14 @@ Middlewares can be created for both:
 
 ### Middleware API
 
-Based on a Haskell-like notation, this is the required interface for middlewares:
+Based on a Haskell-like notation, this is the required interface for middleware:
 ```
 Function([ params ])
   -> Function(options, resilient)
     -> Object{ in: Function(err, res, next), out: Function(option, next) }
 ```
 
-For non-duplex middlewares you can use the following interface as well:
+For non-duplex middleware you can use the following interface as well:
 ```
 Function([ params ])
   -> Function(options, resilient)
@@ -624,7 +624,7 @@ Passed arguments to the callback are:
 
 ### resilient#use(middleware)
 
-Register a new middleware. See the middleware [documentation](#middleware-layer) or [examples](#middlewares) for more information
+Register a new middleware. See the middleware [documentation](#middleware-layer) or [examples](#middleware) for more information
 
 ### resilient#useHttpClient(fn)
 
@@ -786,7 +786,7 @@ Resilient was used in both web and node.js production applications.
 
 The library is, indeed, relatively young and it will evolve with new features in future versions (in fact a full core and logic redesign is required), but the API consistency in not compromised between patch minor releases.
 
-#### How I can create custom middlewares?
+#### How I can create custom middleware?
 
 You can see the middleware documentation or see an [example](https://github.com/h2non/resilient-consul)
 
