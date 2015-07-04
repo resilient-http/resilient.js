@@ -25,7 +25,7 @@ To get started, take a look to the [project site](http://resilient-http.github.i
 - Built-in support for servers caching to improve reliability when fallback
 - Configurable external HTTP client to use as forward request proxy (instead of using the embedded one)
 - Dynamic servers auto discovering (based on the resilient [specification](https://github.com/resilient-http/spec) or via middleware)
-- Support promiscuous errors (handles 400-499 response status as fallback errors)
+- Support promiscuous errors (handles 400-499 codes as fallback errors)
 - Support pre/post request hooks via event bus API
 - Support mock/stub working mode via middleware (useful for testing)
 - Reliable HTTP client (it uses internally [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http) for the browser)
