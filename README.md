@@ -2,14 +2,12 @@
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-**[middleware](#middleware-layer)-oriented**, **evented** and **full featured HTTP client** for **[node](http://nodejs.org)** and **browsers** with **superpowers** like **fault tolerance** with transparent server **fallback**, **dynamic servers lookup**, **request retry** cycles, built-in client-side **balancer**, round-robin **load distribution** and [more](#features)...
+**[Middleware](#middleware-layer)-oriented**, **evented** and **full featured HTTP client** for **[node.js](http://nodejs.org)** and **browsers** with **superpowers** such as **fault tolerance** with transparent server **fallback**, **dynamic servers lookup**, **request retry** and **backoff**, built-in client-side **balancer** and [more](#features)...
 
-Resilient was mainly designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems. 
-It's similar
+Resilient was mainly designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, and provides a simple [programmatic API](#api) and featured [command-line interface](#command-line-interface).
+It's conceptually similar to [Ribbon](https://github.com/Netflix/ribbon), a Netflix's project.
 
-It provides an elegant and clean [programmatic API](#api) and featured [command-line interface](#command-line-interface)
-
-For more information, take a look to the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-does-it-works), [compatible servers](http://resilient-http.github.io/#servers), supported [middlewares](#middlewares) or read the [FAQs](#faq)
+To get started, take a look to the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-does-it-works), [compatible servers](http://resilient-http.github.io/#servers), supported [middleware](#middleware) or read the [FAQs](#faq)
 
 ## Features
 
@@ -28,7 +26,7 @@ For more information, take a look to the [project site](http://resilient-http.gi
 - Built-in support for servers caching to improve reliability when fallback
 - Configurable external HTTP client to use as forward request proxy (instead of using the embedded one)
 - Dynamic servers auto discovering (based on the resilient [specification](https://github.com/resilient-http/spec) or via middleware)
-- Support promiscuous errors (handles 400-499 response status as fallback errors)
+- Support promiscuous errors (handles 400-499 codes as fallback errors)
 - Support pre/post request hooks via event bus API
 - Support mock/stub working mode via middleware (useful for testing)
 - Reliable HTTP client (it uses internally [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http) for the browser)
@@ -78,10 +76,9 @@ Markdown code:
 [![Resilient](https://img.shields.io/badge/I'm-resilient-green.svg?style=flat-square)](http://resilient-http.github.io)
 ```
 
-## Middlewares
+## Middleware
 
 - [Consul](https://github.com/h2non/resilient-consul) - [Example](https://github.com/resilient-http/resilient.js/blob/master/examples/consul.js)
-
 
 ## Framework-specific adapters
 
@@ -166,7 +163,7 @@ For more usage cases take a look to the [examples](https://github.com/resilient-
 
 ## Middleware Layer
 
-Since version `0.3.x`, Resilient introduces support for duplex middlewares.
+Since version `0.3.x`, Resilient introduces support for duplex middleware.
 It essentially provides an interceptor like layer to use external components to augment a specific functionality.
 
 From a high-level point of view it's conceptually similar to an evented API approach, which is commonly used in a event-driven environment with JavaScript,
@@ -175,10 +172,10 @@ but in this case it's slightly different in terms of flow control nature and dat
 The particular feature with the Resilient middleware layer is that it provides bidirectional control flow for both incoming and outgoing HTTP traffic.
 This allows you to perform multiple actions before and after a request of a specific type is made by Resilient. This could be considered also as hooks.
 
-### Types of middlewares
+### Types of middleware
 
 Since Resilient is splited in two communication live cycle layers, one for the `discovery` servers and the other one for the `service` end servers.
-Middlewares can be created for both:
+Middleware can be created for both:
 
 - **service** - Default. Use this type in middleware which are oriented for final servers communication, such as request transformers, autorization...
 - **discovery** - Use this type in middleware which are oriented only for lookup communication, for instance used as adapter for a lookup server which is not compatible with the Resilient [lookup protocol](https://github.com/resilient-http/spectification).
@@ -187,14 +184,14 @@ Middlewares can be created for both:
 
 ### Middleware API
 
-Based on a Haskell-like notation, this is the required interface for middlewares:
+Based on a Haskell-like notation, this is the required interface for middleware:
 ```
 Function([ params ])
   -> Function(options, resilient)
     -> Object{ in: Function(err, res, next), out: Function(option, next) }
 ```
 
-For non-duplex middlewares you can use the following interface as well:
+For non-duplex middleware you can use the following interface as well:
 ```
 Function([ params ])
   -> Function(options, resilient)
@@ -628,7 +625,7 @@ Passed arguments to the callback are:
 
 ### resilient#use(middleware)
 
-Register a new middleware. See the middleware [documentation](#middleware-layer) or [examples](#middlewares) for more information
+Register a new middleware. See the middleware [documentation](#middleware-layer) or [examples](#middleware) for more information
 
 ### resilient#useHttpClient(fn)
 
@@ -790,7 +787,7 @@ Resilient was used in both web and node.js production applications.
 
 The library is, indeed, relatively young and it will evolve with new features in future versions (in fact a full core and logic redesign is required), but the API consistency in not compromised between patch minor releases.
 
-#### How I can create custom middlewares?
+#### How I can create custom middleware?
 
 You can see the middleware documentation or see an [example](https://github.com/h2non/resilient-consul)
 
