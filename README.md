@@ -8,7 +8,7 @@ Resilient was mainly designed for distributed and [reactive](http://www.reactive
 It provides a simple [programmatic API](#api) and featured [command-line interface](#command-line-interface).
 It's conceptually similar to [Ribbon](https://github.com/Netflix/ribbon), a Netflix's project.
 
-To get started, take a look to the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-does-it-works), [compatible servers](http://resilient-http.github.io/#servers), supported [middleware](#middleware) or read the [FAQs](#faq)
+To get started, take a look to the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-does-it-work), [compatible servers](http://resilient-http.github.io/#servers), supported [middleware](#middleware) or read the [FAQs](#faq)
 
 ## Features
 
@@ -93,7 +93,9 @@ Markdown code:
 
 See the [basic usage](#basic-usage) and [examples](https://github.com/resilient-http/resilient.js/tree/master/examples) for detailed use cases
 
-## How does it works?
+## How does it work?
+
+The following graph represents from a high-level point of view the internal logic encapsulated in Resilient HTTP client.
 
 <img src="http://rawgit.com/resilient-http/resilient-http.github.io/master/images/algorithm.svg" />
 
