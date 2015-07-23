@@ -68,7 +68,7 @@ It runs in any [ES5 compliant](http://kangax.github.io/mcompat-table/es5/) engin
 
 ## Badges
 
-Become strong, become reliable, become resilient! Add Resilient in your life:
+Become strong, become reliable! Add Resilient in your life:
 
 [![Resilient](https://img.shields.io/badge/I'm-resilient-green.svg?style=flat-square)](http://resilient-http.github.io)
 
