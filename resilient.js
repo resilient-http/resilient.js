@@ -797,7 +797,7 @@ function getTimeout(options) {
 }
 
 function getFirstValue(arr) {
-  return arr.filter(function (v) { return v != null }).slice(0).shift()
+  return arr.filter(function (v) { return v != null }).pop()
 }
 
 function updateDiscoveryServersAndRetry(resilient, onRetry) {
@@ -1682,7 +1682,7 @@ Sync.prototype.dequeue = function (state) {
 
 Sync.prototype.push = function (state, task) {
   var queue = this.queues[state]
-  if (!isArr(queue)) {
+  if (isArr(queue) === false) {
     queue = this.queues[state] = []
   }
   queue.push(task)

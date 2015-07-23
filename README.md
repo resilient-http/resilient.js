@@ -2,9 +2,10 @@
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-**[Middleware](#middleware-layer)-oriented**, **evented** and **full featured HTTP client** for **[node.js](http://nodejs.org)** and **browsers** with **superpowers** such as **fault tolerance** with transparent server **fallback**, **dynamic servers lookup**, **request retry** and **backoff**, built-in client-side **balancer** and [more](#features)...
+**[Middleware](#middleware-layer)-oriented**, **evented** and **full featured HTTP client** for **[node.js](http://nodejs.org)** and **browsers** with **superpowers** such as **fault tolerance** with transparent server **fallback**, **dynamic servers lookup**, **request retry**/**backoff**, built-in **balancer** and [more](#features)...
 
-Resilient was mainly designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems, and provides a simple [programmatic API](#api) and featured [command-line interface](#command-line-interface).
+Resilient was mainly designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems.
+It provides a simple [programmatic API](#api) and featured [command-line interface](#command-line-interface).
 It's conceptually similar to [Ribbon](https://github.com/Netflix/ribbon), a Netflix's project.
 
 To get started, take a look to the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-does-it-works), [compatible servers](http://resilient-http.github.io/#servers), supported [middleware](#middleware) or read the [FAQs](#faq)
@@ -167,15 +168,14 @@ Since version `0.3.x`, Resilient introduces support for duplex middleware.
 It essentially provides an interceptor like layer to use external components to augment a specific functionality.
 
 From a high-level point of view it's conceptually similar to an evented API approach, which is commonly used in a event-driven environment with JavaScript,
-but in this case it's slightly different in terms of flow control nature and data mutation compared with events.
+but in this case it's slightly different in terms of flow control nature and relies more in data mutation compared to events.
 
-The particular feature with the Resilient middleware layer is that it provides bidirectional control flow for both incoming and outgoing HTTP traffic.
-This allows you to perform multiple actions before and after a request of a specific type is made by Resilient. This could be considered also as hooks.
+The significant feature in Resilient middleware layer is that it provides bidirectional control flow for both incoming and outgoing HTTP traffic.
+This allows you to perform multiple actions before and after a request of a specific type is made by Resilient. This might be considered also as a sort hooks in aspect-oriented programming.
 
 ### Types of middleware
 
-Since Resilient is splited in two communication live cycle layers, one for the `discovery` servers and the other one for the `service` end servers.
-Middleware can be created for both:
+Since Resilient is divided in two communication live cycle layers, one for the `discovery` servers and the other one for the `service` end servers, middleware can be created for both layers:
 
 - **service** - Default. Use this type in middleware which are oriented for final servers communication, such as request transformers, autorization...
 - **discovery** - Use this type in middleware which are oriented only for lookup communication, for instance used as adapter for a lookup server which is not compatible with the Resilient [lookup protocol](https://github.com/resilient-http/spectification).
