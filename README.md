@@ -2,7 +2,7 @@
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-**[Middleware](#middleware-layer)-oriented**, **evented** and **full featured HTTP client** for **[node.js](http://nodejs.org)** and **browsers** with **superpowers** such as **fault tolerance** with transparent server **fallback**, **dynamic servers lookup**, **request retry**/**backoff**, built-in **balancer** and [more](#features)...
+**[Middleware](#middleware-layer)-oriented**, **full-featured HTTP client** for **[node.js](http://nodejs.org)** and **browsers** with **superpowers** such as **fault tolerance** with transparent server **fallback**, **dynamic servers discovery**, **request retry**/**backoff** support, built-in **balancer** and [more](#features)...
 
 Resilient was mainly designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems.
 It provides a simple [programmatic API](#api) and featured [command-line interface](#command-line-interface).
@@ -69,7 +69,7 @@ It runs in any [ES5 compliant](http://kangax.github.io/mcompat-table/es5/) engin
 
 ## Badges
 
-Become strong, become reliable! Add Resilient in your life:
+Become reliable! Add Resilient in your life:
 
 [![Resilient](https://img.shields.io/badge/I'm-resilient-green.svg?style=flat-square)](http://resilient-http.github.io)
 
