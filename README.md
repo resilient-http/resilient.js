@@ -13,7 +13,7 @@ To get started, take a look to the [project site](http://resilient-http.github.i
 ## Features
 
 - Reliable failover and error handling with transparent server fallback
-- Smart network resiliency covering multiple failure types
+- Smart network error handling covering multiple failure scenarios
 - Smart balancer logic based on empirical server score (network latency, errors and succesfull requests)
 - Transparent request retry cycle attempts on failure (configurable)
 - Discern best servers based on scoring per read and write operations when balancing
@@ -27,11 +27,12 @@ To get started, take a look to the [project site](http://resilient-http.github.i
 - Built-in support for servers caching to improve reliability when fallback
 - Configurable external HTTP client to use as forward request proxy (instead of using the embedded one)
 - Dynamic servers auto discovering (based on the resilient [specification](https://github.com/resilient-http/spec) or via middleware)
-- Support promiscuous errors (handles 400-499 codes as fallback errors)
-- Support pre/post request hooks via event bus API
-- Support mock/stub working mode via middleware (useful for testing)
+- Able to plug in custom failure strategies
+- Supports promiscuous errors (handles 400-499 codes as fallback errors)
+- Supports pre/post request hooks via event bus API
+- Supports mock/stub working mode via middleware (useful for testing)
 - Reliable HTTP client (it uses internally [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http) for the browser)
-- Support round robin scheduling algorithm for traffic distribution (experimental)
+- Round robin scheduling algorithm for traffic distribution (experimental)
 - Featured cURL-inspired command-line interface
 - Lightweight library (9KB gzipped)
 - Cross engine. ES5 compliant
@@ -566,6 +567,25 @@ Getter/Setter accessor for [balancer-level config options](#balancer)
 Return: `object`
 
 Get a map of HTTP specific options
+
+### resilient#addFailStrategy(strategy)
+Alias: `failStrategy`
+
+Add a custom failure evaluator `function` strategy in order to determine if Resilient should handle the request as failed or success status, retrying it accordingly if required.
+
+Strategies should return a `boolean` value indicating if the request failed (`true`) or not (`false`).
+
+Use example:
+```js
+var resilient = require('resilient')
+
+var client = resilient()
+
+client.addFailStrategy(function limitReached(err, res) {
+  return !err
+    && +res.headers['x-ratelimit-remaining'] === 0
+})
+```
 
 ### resilient#areServersUpdated()
 Return: `boolean`

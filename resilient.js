@@ -40,7 +40,7 @@ Cache.prototype.exists = function (key) {
     || false
 }
 
-},{"./utils":19}],2:[function(require,module,exports){
+},{"./utils":20}],2:[function(require,module,exports){
 var _ = require('./utils')
 var resolver = require('./resolver')
 var http = require('./http')
@@ -147,7 +147,7 @@ function once(fn) {
   }
 }
 
-},{"./http":6,"./resolver":12,"./utils":19}],3:[function(require,module,exports){
+},{"./http":7,"./resolver":13,"./utils":20}],3:[function(require,module,exports){
 var defaults = module.exports = Object.create(null)
 
 defaults.service = {
@@ -364,7 +364,7 @@ function isEmptyBuffer(buf) {
   return buf.filter(function (request) { return _.isObj(request) }).length === 0
 }
 
-},{"./error":5,"./requester":10,"./servers":17,"./utils":19}],5:[function(require,module,exports){
+},{"./error":5,"./requester":11,"./servers":18,"./utils":20}],5:[function(require,module,exports){
 module.exports = ResilientError
 
 var MESSAGES = {
@@ -400,6 +400,25 @@ ResilientError.prototype = Object.create(Error.prototype)
 ResilientError.MESSAGES = MESSAGES
 
 },{}],6:[function(require,module,exports){
+module.exports = Evaluator
+
+function Evaluator() {
+  this.strategies = []
+}
+
+Evaluator.prototype.add = function (strategy) {
+  if (typeof strategy === 'function') {
+    this.strategies.push(strategy)
+  }
+}
+
+Evaluator.prototype.eval = function (err, res) {
+  return this.strategies.some(function (strategy) {
+    return strategy(err, res)
+  })
+}
+
+},{}],7:[function(require,module,exports){
 var _ = require('./utils')
 
 var IS_BROWSER = typeof window === 'object' && window
@@ -483,7 +502,7 @@ function requestWrapper(request) {
   }
 }
 
-},{"./utils":19,"lil-http":22,"request":20}],7:[function(require,module,exports){
+},{"./utils":20,"lil-http":23,"request":21}],8:[function(require,module,exports){
 var http = require('./http')
 var Client = require('./client')
 var Options = require('./options')
@@ -509,7 +528,7 @@ if (typeof window !== 'undefined' && typeof require === 'function') {
   window.resilient = ResilientFactory
 }
 
-},{"./client":2,"./defaults":3,"./http":6,"./options":9,"./resilient":11}],8:[function(require,module,exports){
+},{"./client":2,"./defaults":3,"./http":7,"./options":10,"./resilient":12}],9:[function(require,module,exports){
 var _ = require('./utils')
 var midware = require('midware')
 
@@ -578,7 +597,7 @@ function register(pool) {
   }
 }
 
-},{"./utils":19,"midware":23}],9:[function(require,module,exports){
+},{"./utils":20,"midware":24}],10:[function(require,module,exports){
 var _ = require('./utils')
 var defaults = require('./defaults')
 var Servers = require('./servers')
@@ -654,7 +673,7 @@ function getRaw(options) {
   return buf
 }
 
-},{"./defaults":3,"./servers":17,"./utils":19}],10:[function(require,module,exports){
+},{"./defaults":3,"./servers":18,"./utils":20}],11:[function(require,module,exports){
 var _ = require('./utils')
 var http = require('./http')
 var ResilientError = require('./error')
@@ -741,7 +760,7 @@ function requestHandler(server, operation, options, resolve, nextServer, resilie
     if (shouldOmitFallback(options, err || res)) {
       server.reportError(operation, latency)
       resolve(err, res)
-    } else if (isErrorResponse(options, err, res)) {
+    } else if (isErrorResponse(resilient, options, err, res)) {
       server.reportError(operation, latency)
       resilient.emit('request:fallback', options, err || res)
       nextServer(memoizeResponse(err, res))
@@ -876,9 +895,11 @@ function matchHttpMethod(methods, method) {
     .some(function (m) { return m === method })
 }
 
-function isErrorResponse(options, err, res) {
-  return (options.promiscuousErrors && (isErrorStatus(err || res)))
-    || isUnavailableStatus(err, res)
+function isErrorResponse(resilient, options, err, res) {
+  return isUnavailableStatus(err, res)
+    || resilient._failStrategies.eval(err, res)
+    || (options.promiscuousErrors
+    && (isErrorStatus(err || res)))
 }
 
 function isUnavailableStatus(err, res) {
@@ -909,7 +930,7 @@ function getHttpClient(resilient) {
   return typeof resilient._httpClient === 'function' ? resilient._httpClient : http
 }
 
-},{"./defaults":3,"./error":5,"./http":6,"./utils":19}],11:[function(require,module,exports){
+},{"./defaults":3,"./error":5,"./http":7,"./utils":20}],12:[function(require,module,exports){
 var EventBus = require('lil-event')
 var _ = require('./utils')
 var Sync = require('./sync')
@@ -917,16 +938,18 @@ var Cache = require('./cache')
 var Client = require('./client')
 var Options = require('./options')
 var Middleware = require('./middleware')
+var Evaluator = require('./evaluator')
 var DiscoveryResolver = require('./resolvers/discovery')
 
 module.exports = Resilient
 
 function Resilient(options) {
-  this.cache       = new Cache
-  this._sync       = new Sync
-  this._client     = new Client(this)
+  this.cache = new Cache
+  this._sync  = new Sync
+  this._client = new Client(this)
   this._middleware = new Middleware
-  this._options    = Options.define(options)
+  this._failStrategies = new Evaluator
+  this._options = Options.define(options)
 }
 
 Resilient.prototype = Object.create(EventBus.prototype)
@@ -1088,6 +1111,12 @@ Resilient.prototype.client = function () {
   return this._client
 }
 
+Resilient.prototype.failStrategy =
+Resilient.prototype.addFailStrategy = function (strategy) {
+  this._failStrategies.add(strategy)
+  return this
+}
+
 ;['get', 'post', 'put', 'del', 'delete', 'head', 'patch']
 .forEach(function defineMethodProxy(verb) {
   Resilient.prototype[verb] = function (path, options, cb) {
@@ -1095,7 +1124,7 @@ Resilient.prototype.client = function () {
   }
 })
 
-},{"./cache":1,"./client":2,"./middleware":8,"./options":9,"./resolvers/discovery":13,"./sync":18,"./utils":19,"lil-event":21}],12:[function(require,module,exports){
+},{"./cache":1,"./client":2,"./evaluator":6,"./middleware":9,"./options":10,"./resolvers/discovery":14,"./sync":19,"./utils":20,"lil-event":22}],13:[function(require,module,exports){
 var _ = require('./utils')
 var Servers = require('./servers')
 var Requester = require('./requester')
@@ -1275,7 +1304,7 @@ function getRefreshBasePath(options) {
     || false
 }
 
-},{"./discovery":4,"./error":5,"./requester":10,"./resolvers/discovery":13,"./servers":17,"./utils":19}],13:[function(require,module,exports){
+},{"./discovery":4,"./error":5,"./requester":11,"./resolvers/discovery":14,"./servers":18,"./utils":20}],14:[function(require,module,exports){
 var ResilientError = require('../error')
 var Requester = require('../requester')
 var ServersDiscovery = require('../discovery')
@@ -1332,7 +1361,7 @@ function fetchHandler(cb) {
   }
 }
 
-},{"../discovery":4,"../error":5,"../requester":10,"./service":14}],14:[function(require,module,exports){
+},{"../discovery":4,"../error":5,"../requester":11,"./service":15}],15:[function(require,module,exports){
 var _ = require('../utils')
 var ResilientError = require('../error')
 
@@ -1436,7 +1465,7 @@ function resolveWithError(err, next) {
   return next(new ResilientError(err.status, err))
 }
 
-},{"../error":5,"../utils":19}],15:[function(require,module,exports){
+},{"../error":5,"../utils":20}],16:[function(require,module,exports){
 module.exports = roundRobinSerie
 
 function roundRobinSerie(arr, size) {
@@ -1473,7 +1502,7 @@ function getRandom(max) {
   return Math.round(Math.random() * (max - 0) + 0)
 }
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 var balancerOptions = require('./defaults').balancer
 
 module.exports = Server
@@ -1542,7 +1571,7 @@ function round(number) {
   return +((number * 100) / 100).toFixed(2)
 }
 
-},{"./defaults":3}],17:[function(require,module,exports){
+},{"./defaults":3}],18:[function(require,module,exports){
 var _ = require('./utils')
 var Server = require('./server')
 var RoundRobin = require('./roundrobin')
@@ -1647,7 +1676,7 @@ function roundRobinSort(servers, options) {
   return servers
 }
 
-},{"./roundrobin":15,"./server":16,"./utils":19}],18:[function(require,module,exports){
+},{"./roundrobin":16,"./server":17,"./utils":20}],19:[function(require,module,exports){
 var isArr = require('./utils').isArr
 
 module.exports = Sync
@@ -1695,7 +1724,7 @@ function getSync(locks, state) {
   return lock
 }
 
-},{"./utils":19}],19:[function(require,module,exports){
+},{"./utils":20}],20:[function(require,module,exports){
 var _ = exports
 var toStr = Object.prototype.toString
 var slice = Array.prototype.slice
@@ -1814,9 +1843,9 @@ function merger(target, key, value) {
   }
 }
 
-},{}],20:[function(require,module,exports){
-
 },{}],21:[function(require,module,exports){
+
+},{}],22:[function(require,module,exports){
 /*! lil-event - v0.1 - MIT License - https://github.com/lil-js/event */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -1905,7 +1934,7 @@ function merger(target, key, value) {
   exports.Event = Event
 }))
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 /*! lil-http - v0.1.16 - MIT License - https://github.com/lil-js/http */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -2210,7 +2239,7 @@ function merger(target, key, value) {
   return exports.http = http
 }))
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
     define(['exports'], factory)
@@ -2281,5 +2310,5 @@ function merger(target, key, value) {
   exports.midware = midware
 }))
 
-},{}]},{},[7])(7)
+},{}]},{},[8])(8)
 });
