@@ -809,7 +809,7 @@ Resilient was used in both web and node.js production applications.
 
 The library is, indeed, relatively young and it will evolve with new features in future versions (in fact a full core and logic redesign is required), but the API consistency in not compromised between patch minor releases.
 
-#### How I can create custom middleware?
+#### How can I create custom middleware?
 
 You can see the middleware documentation or see an [example](https://github.com/h2non/resilient-consul)
 
