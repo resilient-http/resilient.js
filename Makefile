@@ -1,4 +1,4 @@
-VERSION = 0.3.0
+VERSION = 0.3.1
 BROWSERIFY = node ./node_modules/.bin/browserify
 MOCHA = ./node_modules/.bin/mocha
 UGLIFYJS = ./node_modules/.bin/uglifyjs
