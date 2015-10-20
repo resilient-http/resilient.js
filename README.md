@@ -39,7 +39,6 @@ To get started, take a look to [how does it work](#how-does-it-work), [basic usa
   - [Events](#events)
 - [FAQ](#faq)
 - [Contributing](#contributing)
-  - [Development](#development)
 - [License](#license)
 
 ## Features
