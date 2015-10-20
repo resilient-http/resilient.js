@@ -1,3 +1,5 @@
+- [resilient.js [![Build Status](https://api.travis-ci.org/resilient-http/resilient.js.svg?branch=master&style=flat)][travis] [![Code Climate](https://codeclimate.com/github/resilient-http/resilient.js/badges/gpa.svg)](https://codeclimate.com/github/resilient-http/resilient.js) [![NPM](https://img.shields.io/npm/v/resilient.svg)](https://www.npmjs.org/package/resilient) ![Downloads](https://img.shields.io/npm/dm/resilient.svg)](#resilientjs-build-statushttpsapitravis-ciorgresilient-httpresilientjssvgbranchmaster&styleflattravis-code-climatehttpscodeclimatecomgithubresilient-httpresilientjsbadgesgpasvghttpscodeclimatecomgithubresilient-httpresilientjs-npmhttpsimgshieldsionpmvresilientsvghttpswwwnpmjsorgpackageresilient-downloadshttpsimgshieldsionpmdmresilientsvg)
+
 # resilient.js [![Build Status](https://api.travis-ci.org/resilient-http/resilient.js.svg?branch=master&style=flat)][travis] [![Code Climate](https://codeclimate.com/github/resilient-http/resilient.js/badges/gpa.svg)](https://codeclimate.com/github/resilient-http/resilient.js) [![NPM](https://img.shields.io/npm/v/resilient.svg)](https://www.npmjs.org/package/resilient) ![Downloads](https://img.shields.io/npm/dm/resilient.svg)
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
@@ -9,6 +11,49 @@ It provides a simple [programmatic API](#api) and featured [command-line interfa
 It's conceptually similar to [Ribbon](https://github.com/Netflix/ribbon), a Netflix's project.
 
 To get started, take a look to the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-does-it-work), [compatible servers](http://resilient-http.github.io/#servers), supported [middleware](#middleware) or read the [FAQs](#faq)
+
+## Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Environments](#environments)
+- [Middleware](#middleware)
+- [Framework-specific adapters](#framework-specific-adapters)
+- [Related projects](#related-projects)
+- [How does it work?](#how-does-it-work)
+- [Basic usage](#basic-usage)
+  - [Static servers](#static-servers)
+  - [Dynamic servers lookup](#dynamic-servers-lookup)
+- [Middleware Layer](#middleware-layer)
+  - [Types of middleware](#types-of-middleware)
+  - [Middleware API](#middleware-api)
+- [Command-line interface](#command-line-interface)
+- [API](#api)
+  - [resilient([ options ])](#resilient-options-)
+  - [Options](#options)
+    - [Service](#service)
+    - [Balancer](#balancer)
+    - [Discovery](#discovery)
+  - [Request callback arguments](#request-callback-arguments)
+    - [Response](#response)
+      - [Browser](#browser)
+      - [Node.js](#nodejs)
+    - [Error](#error)
+      - [Built-in error codes](#built-in-error-codes)
+    - [Events](#events)
+      - [request:start](#requeststart)
+      - [request:outgoing](#requestoutgoing)
+      - [request:incoming](#requestincoming)
+      - [request:finish](#requestfinish)
+      - [request:retry](#requestretry)
+      - [request:fallback](#requestfallback)
+      - [servers:refresh](#serversrefresh)
+      - [servers:cache](#serverscache)
+      - [discovery:refresh](#discoveryrefresh)
+- [FAQ](#faq)
+- [Contributing](#contributing)
+  - [Development](#development)
+- [License](#license)
 
 ## Features
 
@@ -66,17 +111,6 @@ It runs in any [ES5 compliant](http://kangax.github.io/mcompat-table/es5/) engin
 ![Node.js](https://cdn0.iconfinder.com/data/icons/long-shadow-web-icons/512/nodejs-48.png) | ![Chrome](https://raw.github.com/alrra/browser-logos/master/chrome/chrome_48x48.png) | ![Firefox](https://raw.github.com/alrra/browser-logos/master/firefox/firefox_48x48.png) | ![IE](https://raw.github.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png) | ![Opera](https://raw.github.com/alrra/browser-logos/master/opera/opera_48x48.png) | ![Safari](https://raw.github.com/alrra/browser-logos/master/safari/safari_48x48.png)
 ---  | --- | --- | --- | --- | --- |
 +0.10 | +5 | +3.5 | +9 | +10 | +5 |
-
-## Badges
-
-Become reliable! Add Resilient in your life:
-
-[![Resilient](https://img.shields.io/badge/I'm-resilient-green.svg?style=flat-square)](http://resilient-http.github.io)
-
-Markdown code:
-```
-[![Resilient](https://img.shields.io/badge/I'm-resilient-green.svg?style=flat-square)](http://resilient-http.github.io)
-```
 
 ## Middleware
 
