@@ -2,7 +2,7 @@
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-A [reactive](http://www.reactivemanifesto.org/) **HTTP client** for **[node.js](http://nodejs.org)** and **browsers** designed for **distributed systems**, providing **fault tolerance** with transparent **server fallback**, dynamic **server discovery** (e.g: using Consul), **request retry**/**backoff** logic, optional **client-side balancing** based on empirical server latency and [more](#features)...
+A [reactive](http://www.reactivemanifesto.org/) **HTTP client** for **[node.js](http://nodejs.org)** and **browsers** designed for **distributed systems**, providing **fault tolerance** capabilities with transparent **server fallback**, dynamic **server discovery** (e.g: using Consul), **request retry**/**backoff** logic, optional **client-side balancing** based on empirical server latency and [more](#features)...
 
 It provides a simple, [middleware-oriented](#middleware-layer) [programmatic API](#api) and featured [command-line interface](#command-line-interface).
 
@@ -169,7 +169,7 @@ var client = Resilient({ service: { basePath: '/api/1.0' }})
 client.discoveryServers(servers)
 ```
 
-Finally perform the request (and that's all, Resilient will take care about everything to reach the server)
+Finally, perform the request (and that's all, Resilient will take care about everything to reach the server)
 ```js
 client.get('/users', function (err, res) {
   if (res.status === 200) {
@@ -184,7 +184,7 @@ For more usage cases take a look to the [examples](https://github.com/resilient-
 
 ## Middleware Layer
 
-Since version `0.3.x`, Resilient introduces support for duplex middleware.
+From version `0.3.x` Resilient introduces support for duplex middleware.
 It essentially provides an interceptor like layer to use external components to augment a specific functionality.
 
 From a high-level point of view it's conceptually similar to an evented API approach, which is commonly used in a event-driven environment with JavaScript,
@@ -204,7 +204,7 @@ Since Resilient is divided in two communication live cycle layers, one for the `
 
 ### Middleware API
 
-Based on a Haskell-like notation, this is the required interface for middleware:
+Required interface for middleware:
 ```
 Function([ params ])
   -> Function(options, resilient)
