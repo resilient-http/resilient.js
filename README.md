@@ -2,14 +2,13 @@
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-A fault-tolerant and reactive **HTTP client** for **[node.js](http://nodejs.org)** and **browsers**, supporting **fault tolerance** with transparent **server fallback**, dynamic **server discovery** (e.g: using Consul), **request retry**/**backoff** logic, optional **client-side balancing** based on empirical server latency and [more](#features)...
+A [reactive](http://www.reactivemanifesto.org/) **HTTP client** for **[node.js](http://nodejs.org)** and **browsers** designed for *distributed systems**, providing **fault tolerance** with transparent **server fallback**, dynamic **server discovery** (e.g: using Consul), **request retry**/**backoff** logic, optional **client-side balancing** based on empirical server latency and [more](#features)...
 
-Resilient was mostly created for distributed and [reactive](http://www.reactivemanifesto.org/) systems.
-It provides a simple and [middleware-oriented](#middleware-layer) [programmatic API](#api) and a featured [command-line interface](#command-line-interface).
-
-Resilient is conceptually similar to [Ribbon](https://github.com/Netflix/ribbon), a Netflix's project.
+It provides a simple, [middleware-oriented](#middleware-layer) [programmatic API](#api) and featured [command-line interface](#command-line-interface).
 
 To get started, take a look to [how does it work](#how-does-it-work), [basic usage](#basic-usage), [examples](https://github.com/resilient-http/resilient.js/tree/master/examples) and [API](#api) docs.
+
+Resilient is conceptually similar to [Ribbon](https://github.com/Netflix/ribbon), a Netflix's project.
 
 ## Contents
 
@@ -28,7 +27,7 @@ To get started, take a look to [how does it work](#how-does-it-work), [basic usa
   - [Middleware API](#middleware-api)
 - [Command-line interface](#command-line-interface)
 - [API](#api)
-  - [resilient([ options ])](#resilient-options-)
+  - [resilient()](#resilient-options-)
   - [Options](#options)
     - [Service](#service)
     - [Balancer](#balancer)
@@ -90,7 +89,7 @@ Or loading the script remotely
 
 ## Environments
 
-It runs in any [ES5 compliant](http://kangax.github.io/mcompat-table/es5/) engine
+Runs in any [ES5 compliant](http://kangax.github.io/mcompat-table/es5/) engine.
 
 ![Node.js](https://cdn0.iconfinder.com/data/icons/long-shadow-web-icons/512/nodejs-48.png) | ![Chrome](https://raw.github.com/alrra/browser-logos/master/chrome/chrome_48x48.png) | ![Firefox](https://raw.github.com/alrra/browser-logos/master/firefox/firefox_48x48.png) | ![IE](https://raw.github.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png) | ![Opera](https://raw.github.com/alrra/browser-logos/master/opera/opera_48x48.png) | ![Safari](https://raw.github.com/alrra/browser-logos/master/safari/safari_48x48.png)
 ---  | --- | --- | --- | --- | --- |
