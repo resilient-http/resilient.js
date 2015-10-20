@@ -2,7 +2,7 @@
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-A fault-tolerant and reactive **HTTP client** for **[node.js](http://nodejs.org)** and **browsers**, supporting **fault tolerance** with transparent **server fallback**, dynamic **server discovery** (e.g: using Consul), **request retry**/**backoff** logic, smart **client-side balancing** based on emphirical server latencies and [more](#features)...
+A fault-tolerant and reactive **HTTP client** for **[node.js](http://nodejs.org)** and **browsers**, supporting **fault tolerance** with transparent **server fallback**, dynamic **server discovery** (e.g: using Consul), **request retry**/**backoff** logic, optional **client-side balancing** based on empirical server latency and [more](#features)...
 
 Resilient was mostly created for distributed and [reactive](http://www.reactivemanifesto.org/) systems.
 It provides a simple and [middleware-oriented](#middleware-layer) [programmatic API](#api) and a featured [command-line interface](#command-line-interface).
