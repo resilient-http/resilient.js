@@ -1,16 +1,17 @@
-- [resilient.js [![Build Status](https://api.travis-ci.org/resilient-http/resilient.js.svg?branch=master&style=flat)][travis] [![Code Climate](https://codeclimate.com/github/resilient-http/resilient.js/badges/gpa.svg)](https://codeclimate.com/github/resilient-http/resilient.js) [![NPM](https://img.shields.io/npm/v/resilient.svg)](https://www.npmjs.org/package/resilient) ![Downloads](https://img.shields.io/npm/dm/resilient.svg)](#resilientjs-build-statushttpsapitravis-ciorgresilient-httpresilientjssvgbranchmaster&styleflattravis-code-climatehttpscodeclimatecomgithubresilient-httpresilientjsbadgesgpasvghttpscodeclimatecomgithubresilient-httpresilientjs-npmhttpsimgshieldsionpmvresilientsvghttpswwwnpmjsorgpackageresilient-downloadshttpsimgshieldsionpmdmresilientsvg)
+# resilient.js [![Build Status](https://api.travis-ci.org/resilient-http/resilient.js.svg?branch=master&style=flat)][travis] [![Code Climate](https://codeclimate.com/github/resilient-http/resilient.js/badges/gpa.svg)](https://codeclimate.com/github/resilient-http/resilient.js) [![NPM](https://img.shields.io/npm/v/resilient.svg)](https://www.npmjs.org/package/resilient) ![Downloads](https://img.shields.io/npm/dm/resilient.svg)
 
 # resilient.js [![Build Status](https://api.travis-ci.org/resilient-http/resilient.js.svg?branch=master&style=flat)][travis] [![Code Climate](https://codeclimate.com/github/resilient-http/resilient.js/badges/gpa.svg)](https://codeclimate.com/github/resilient-http/resilient.js) [![NPM](https://img.shields.io/npm/v/resilient.svg)](https://www.npmjs.org/package/resilient) ![Downloads](https://img.shields.io/npm/dm/resilient.svg)
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-**[Middleware](#middleware-layer)-oriented**, **full-featured HTTP client** for **[node.js](http://nodejs.org)** and **browsers** with **superpowers** such as **fault tolerance** with transparent server **fallback**, **dynamic servers discovery**, **request retry**/**backoff** support, built-in **balancer** and [more](#features)...
+A fault-tolerant and reactive **HTTP client** for **[node.js](http://nodejs.org)** and **browsers**, supporting **fault tolerance** with transparent **server fallback**, dynamic **server discovery** (e.g: using Consul), **request retry**/**backoff** logic, optional **client-side balancing** based on empirical server latency and [more](#features)...
 
-Resilient was mainly designed for distributed and [reactive](http://www.reactivemanifesto.org/) systems.
-It provides a simple [programmatic API](#api) and featured [command-line interface](#command-line-interface).
-It's conceptually similar to [Ribbon](https://github.com/Netflix/ribbon), a Netflix's project.
+Resilient was mostly created for distributed and [reactive](http://www.reactivemanifesto.org/) systems.
+It provides a simple and [middleware-oriented](#middleware-layer) [programmatic API](#api) and a featured [command-line interface](#command-line-interface).
 
-To get started, take a look to the [project site](http://resilient-http.github.io), the [request flow algorithm](#how-does-it-work), [compatible servers](http://resilient-http.github.io/#servers), supported [middleware](#middleware) or read the [FAQs](#faq)
+Resilient is conceptually similar to [Ribbon](https://github.com/Netflix/ribbon), a Netflix's project.
+
+To get started, take a look to [how does it work](#how-does-it-work), [basic usage](#basic-usage), [examples](https://github.com/resilient-http/resilient.js/tree/master/examples) and [API](#api) docs.
 
 ## Contents
 
@@ -34,22 +35,8 @@ To get started, take a look to the [project site](http://resilient-http.github.i
     - [Service](#service)
     - [Balancer](#balancer)
     - [Discovery](#discovery)
-  - [Request callback arguments](#request-callback-arguments)
-    - [Response](#response)
-      - [Browser](#browser)
-      - [Node.js](#nodejs)
-    - [Error](#error)
-      - [Built-in error codes](#built-in-error-codes)
-    - [Events](#events)
-      - [request:start](#requeststart)
-      - [request:outgoing](#requestoutgoing)
-      - [request:incoming](#requestincoming)
-      - [request:finish](#requestfinish)
-      - [request:retry](#requestretry)
-      - [request:fallback](#requestfallback)
-      - [servers:refresh](#serversrefresh)
-      - [servers:cache](#serverscache)
-      - [discovery:refresh](#discoveryrefresh)
+  - [Built-in errors](#built-in-error-codes)
+  - [Events](#events)
 - [FAQ](#faq)
 - [Contributing](#contributing)
   - [Development](#development)
@@ -72,7 +59,7 @@ To get started, take a look to the [project site](http://resilient-http.github.i
 - Built-in support for servers caching to improve reliability when fallback
 - Configurable external HTTP client to use as forward request proxy (instead of using the embedded one)
 - Dynamic servers auto discovering (based on the resilient [specification](https://github.com/resilient-http/spec) or via middleware)
-- Able to plug in custom failure strategies
+- Able to plug in custom failure strategies to determine if a request was failed or not.
 - Supports promiscuous errors (handles 400-499 codes as fallback errors)
 - Supports pre/post request hooks via event bus API
 - Supports mock/stub working mode via middleware (useful for testing)
