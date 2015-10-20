@@ -2,7 +2,7 @@
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
-A [reactive](http://www.reactivemanifesto.org/) **HTTP client** for **[node.js](http://nodejs.org)** and **browsers** designed for *distributed systems**, providing **fault tolerance** with transparent **server fallback**, dynamic **server discovery** (e.g: using Consul), **request retry**/**backoff** logic, optional **client-side balancing** based on empirical server latency and [more](#features)...
+A [reactive](http://www.reactivemanifesto.org/) **HTTP client** for **[node.js](http://nodejs.org)** and **browsers** designed for **distributed systems**, providing **fault tolerance** with transparent **server fallback**, dynamic **server discovery** (e.g: using Consul), **request retry**/**backoff** logic, optional **client-side balancing** based on empirical server latency and [more](#features)...
 
 It provides a simple, [middleware-oriented](#middleware-layer) [programmatic API](#api) and featured [command-line interface](#command-line-interface).
 
