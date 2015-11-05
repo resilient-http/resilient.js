@@ -62,7 +62,8 @@ Resilient is conceptually similar to [Ribbon](https://github.com/Netflix/ribbon)
 - Reliable HTTP client (it uses internally [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http) for the browser)
 - Round robin scheduling algorithm for traffic distribution (experimental)
 - Featured cURL-inspired command-line interface
-- Lightweight library (9KB gzipped)
+- Lightweight library ((just ~2K SLOC, 9KB gzipped)
+- Dependency free in browser environments
 - Cross engine. ES5 compliant
 
 ## Installation
