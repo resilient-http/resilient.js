@@ -4,7 +4,7 @@
 
 A [reactive](http://www.reactivemanifesto.org/) **HTTP client** for **[node.js](http://nodejs.org)** and **browsers** designed for **distributed systems**, providing **fault tolerance** capabilities with transparent **server fallback**, dynamic **server discovery** (e.g: using Consul), **request retry**/**backoff** logic, optional **client-side balancing** based on empirical server latency and [more](#features)...
 
-It provides a simple, [middleware-oriented](#middleware-layer) [programmatic API](#api) and featured [command-line interface](#command-line-interface).
+Provides a simple [middleware-oriented](#middleware-layer) [programmatic API](#api) and featured [command-line interface](#command-line-interface). It has been designed to be lightweight (just ~2K SLOC, 9KB gzipped) and dependency free.
 
 To get started, take a look to [how does it work](#how-does-it-work), [basic usage](#basic-usage), [examples](https://github.com/resilient-http/resilient.js/tree/master/examples) and [API](#api) docs.
 
@@ -62,7 +62,7 @@ Resilient is conceptually similar to [Ribbon](https://github.com/Netflix/ribbon)
 - Reliable HTTP client (it uses internally [request](https://github.com/mikeal/request) and [lil-http](https://github.com/lil-js/http) for the browser)
 - Round robin scheduling algorithm for traffic distribution (experimental)
 - Featured cURL-inspired command-line interface
-- Lightweight library ((just ~2K SLOC, 9KB gzipped)
+- Lightweight library (just ~2K SLOC, 9KB gzipped)
 - Dependency free in browser environments
 - Cross engine. ES5 compliant
 
