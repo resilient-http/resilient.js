@@ -169,7 +169,7 @@ var client = Resilient({ service: { basePath: '/api/1.0' }})
 client.discoveryServers(servers)
 ```
 
-Finally, perform the request (and that's all, Resilient will take care about everything to reach the server)
+Finally, perform the request (and that's all, Resilient will take care about everything to reach the best server)
 ```js
 client.get('/users', function (err, res) {
   if (res.status === 200) {

@@ -2253,60 +2253,80 @@ function merger(target, key, value) {
   }
 }(this, function (exports) {
   'use strict'
-  var slice = Array.prototype.slice
 
   function midware(ctx) {
-    var calls = []
+    var calls = use.stack = []
     ctx = ctx || null
        
     function use() {
-      var args = slice.call(arguments)
-
-      args.filter(function (fn) {
+      toArray(arguments)
+      .filter(function (fn) {
         return typeof fn === 'function'
       })
       .forEach(function (fn) {
         calls.push(fn)
       })
-
       return ctx
     }
 
     use.run = function run() {
-      var done
-      var args = slice.call(arguments)
-      var stack = calls.slice()
-
+      var done, args = toArray(arguments)
+      
       if (typeof args[args.length - 1] === 'function') {
         done = args.pop()
       }
-
-      if (!stack.length) {
+      
+      if (!calls.length) {
         if (done) done.call(ctx)
         return
       }
-
+      
+      var stack = calls.slice()
       args.push(next)
-
-      function exec() {
-        stack.shift().apply(ctx, args)
+      
+      function runNext() {
+        var fn = stack.shift()
+        fn.apply(ctx, args)
       }
 
       function next(err, end) {
         if (err || end || !stack.length) {
           stack = null
-          if (done) { done.call(ctx, err) }
-          return
+          if (done) done.call(ctx, err, end)
+        } else {
+          runNext()
         }
-        exec()
       }
 
-      exec()
+      runNext()
+    }
+
+    use.remove = function (name) {
+      for (var i = 0, l = calls.length; i < l; i += 1) {
+        var fn = calls[i]
+        if (fn === name || fn.name === name) {
+          calls.splice(i, 1)
+          break
+        }
+      }
+    }
+
+    use.flush = function () {
+      calls.splice(0)
     }
 
     return use
   }
 
+  function toArray(nargs) {
+    var args = new Array(nargs.length)
+    for (var i = 0, l = args.length; i < l; i += 1) {
+      args[i] = nargs[i]
+    }
+    return args
+  }
+  
+  midware.VERSION = '0.1.7'
   exports.midware = midware
 }))
 
