@@ -1,10 +1,10 @@
-# resilient.js [![Build Status](https://api.travis-ci.org/resilient-http/resilient.js.svg?branch=master&style=flat)][travis] [![Code Climate](https://codeclimate.com/github/resilient-http/resilient.js/badges/gpa.svg)](https://codeclimate.com/github/resilient-http/resilient.js) [![NPM](https://img.shields.io/npm/v/resilient.svg)](https://www.npmjs.org/package/resilient)
+# resilient.js [![Build Status](https://api.travis-ci.org/resilient-http/resilient.js.svg?branch=master&style=flat)][travis] [![Code Climate](https://codeclimate.com/github/resilient-http/resilient.js/badges/gpa.svg)](https://codeclimate.com/github/resilient-http/resilient.js) [![NPM](https://img.shields.io/npm/v/resilient.svg)](https://www.npmjs.org/package/resilient) [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com)
 
 <img align="right" height="150" src="https://raw.githubusercontent.com/resilient-http/resilient-http.github.io/master/images/logo.png" />
 
 A [reactive](http://www.reactivemanifesto.org/) **HTTP client** for **[node.js](http://nodejs.org)** and **browsers** designed for **distributed systems**, providing **fault tolerance** capabilities with transparent **server fallback**, dynamic **server discovery** (e.g: using Consul), **request retry**/**backoff** logic, optional **client-side balancing** based on empirical server latency and [more](#features)...
 
-Provides a simple [middleware-oriented](#middleware-layer) [programmatic API](#api) and featured [command-line interface](#command-line-interface). It has been designed to be lightweight (just ~2K SLOC, 9KB gzipped) and dependency free.
+Provides a simple [middleware-oriented](#middleware-layer) [programmatic API](#api) and featured [command-line interface](#command-line-interface). It has been designed to be lightweight (just ~2K SLOC. 9KB gzipped) and dependency free.
 
 To get started, take a look to [how does it work](#how-does-it-work), [basic usage](#basic-usage), [examples](https://github.com/resilient-http/resilient.js/tree/master/examples) and [API](#api) docs.
 
@@ -15,7 +15,7 @@ Resilient is conceptually similar to [Ribbon](https://github.com/Netflix/ribbon)
 - [Features](#features)
 - [Installation](#installation)
 - [Environments](#environments)
-- [Middleware](#middleware)
+- [Middleware layer](#middleware)
 - [Framework-specific adapters](#framework-specific-adapters)
 - [Related projects](#related-projects)
 - [How does it work?](#how-does-it-work)
@@ -27,7 +27,7 @@ Resilient is conceptually similar to [Ribbon](https://github.com/Netflix/ribbon)
   - [Middleware API](#middleware-api)
 - [Command-line interface](#command-line-interface)
 - [API](#api)
-  - [resilient()](#resilient-options-)
+  - [Client](#resilient-options-)
   - [Options](#options)
     - [Service](#service)
     - [Balancer](#balancer)
