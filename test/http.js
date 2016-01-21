@@ -139,6 +139,8 @@ describe('HTTP', function () {
       nock('http://server')
         .post('/hello', '{"ping":"pong"}')
         .reply(202, { hello: 'world' })
+        .get('/bad-json')
+        .reply(200, '{"a":5', {'Content-Type': 'application/json'})
     })
 
     it('should perform a valid request', function (done) {
@@ -150,6 +152,18 @@ describe('HTTP', function () {
         expect(err).to.be.null
         expect(res.status).to.be.equal(202)
         expect(res.data).to.be.deep.equal({ hello: 'world' })
+        done()
+      })
+    })
+
+    it('should handle unparsable response', function (done) {
+      http({
+        url: 'http://server/bad-json',
+        method: 'GET'
+      }, function (err, res) {
+        expect(err).to.be.notNull
+        expect(res.status).to.be.equal(200)
+        expect(res.data).to.be.undefined
         done()
       })
     })
