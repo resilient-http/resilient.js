@@ -1,4 +1,4 @@
-/*! resilient - v0.3.2 - MIT License - https://github.com/resilient-http/resilient.js */
+/*! resilient - v0.3.3 - MIT License - https://github.com/resilient-http/resilient.js */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.resilient=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var _ = require('./utils')
 
@@ -439,7 +439,11 @@ function mapResponse (cb) {
       res.status = res.statusCode
     }
     if (body) {
-      (err || res).data = isJSONContent(err || res) ? JSON.parse(body) : body
+      try {
+        (err || res).data = isJSONContent(err || res) ? JSON.parse(body) : body
+      } catch (e) {
+        err = e
+      }
     }
     cb(err, res)
   }
@@ -510,7 +514,7 @@ var Resilient = require('./resilient')
 
 module.exports = Resilient
 
-Resilient.VERSION = '0.3.2'
+Resilient.VERSION = '0.3.3'
 Resilient.CLIENT_VERSION = http.VERSION
 Resilient.defaults = defaults
 Resilient.Options = Options
@@ -731,7 +735,7 @@ function retryRequest (resilient, servers, options, cb) {
 
 function waitBeforeRetry (retrier, options) {
   return function () {
-    _.delay(retrier, options.retryWait)
+    _.delay(retrier, options.waitBeforeRetry)
   }
 }
 
