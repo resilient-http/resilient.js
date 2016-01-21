@@ -312,7 +312,7 @@ describe('Discovery', function () {
       discovery: {
         retry: 3,
         waitBeforeRetry: 50,
-		timeout: 100,
+        timeout: 100,
         servers: [
           'http://127.0.0.1:8198',
           'http://127.0.0.1:8199',
