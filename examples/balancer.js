@@ -2,7 +2,6 @@ var Resilient = require('../')
 
 var client = Resilient({
   balancer: {
-    balance: true,
     random: true,
     roundRobin: false
   },
