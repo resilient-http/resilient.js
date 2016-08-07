@@ -1,4 +1,4 @@
-## Resilient examples
+## Resilient HTTP examples
 
 Setup the mock server
 ```bash
@@ -18,7 +18,7 @@ $ npm install -g http-server
 
 Start the server
 ```bash
-$ http-server 
+$ http-server
 ```
 
 Open in your browser

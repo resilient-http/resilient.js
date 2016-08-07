@@ -12,7 +12,7 @@ BANNER = "/*! resilient - v$(VERSION) - MIT License - https://github.com/resilie
 default: all
 all: test
 browser: banner browserify uglify
-test: lint browser mocha test-phantom cucumber
+test: lint browser mocha cucumber
 test-phantom: mock-server-stop mock-server mocha-phantom mock-server-stop
 test-browser: mock-server-stop mock-server karma mock-server-stop
 

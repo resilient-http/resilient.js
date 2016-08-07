@@ -15,6 +15,9 @@ describe('Resolve servers', function () {
 
   describe('multiple fallback servers', function () {
     var resilient = Resilient({
+      balancer: {
+        roundRobin: false
+      },
       service: {
         timeout: 100,
         servers: [
@@ -30,7 +33,7 @@ describe('Resolve servers', function () {
     before(function () {
       nock('http://timeout')
         .get('/hello')
-        .delayConnection(200)
+        .delayConnection(500)
         .reply(204)
       nock('http://valid')
         .get('/hello')

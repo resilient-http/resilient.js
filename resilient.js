@@ -168,8 +168,11 @@ defaults.service = {
 
 defaults.balancer = {
   enable: true,
-  roundRobin: true,
+  random: false,
+  roundRobin: false,
   roundRobinSize: 3,
+  balanceStrategy: null,
+  disableWeight: false,
   weight: {
     success: 15,
     error: 50,
@@ -1464,8 +1467,9 @@ function resolveWithError (err, next) {
 module.exports = roundRobinSerie
 
 function roundRobinSerie (arr, size) {
-  size = +size < 2 ? 2 : size
-  return roundRobin(size, arr)[getRandom(size)].shift()
+  var max = +size < 2 ? 2 : size
+  var rounds = roundRobin(max, arr).shift()
+  return [].concat.apply([], rounds)
 }
 
 function roundRobin (n, ps) {
@@ -1494,11 +1498,6 @@ function roundRobin (n, ps) {
     ps.splice(1, 0, ps.pop()) // permutate for next round
   }
   return rs
-}
-
-function getRandom (max) {
-  max = +max > 0 ? max - 1 : max
-  return Math.round(Math.random() * (max - 0) + 0)
 }
 
 },{}],17:[function(require,module,exports){
@@ -1624,11 +1623,19 @@ Servers.prototype.resetStats = function () {
 
 Servers.prototype.sort = function (operation, options) {
   var servers = this.servers.slice(0)
-  if (servers.length > 1) {
-    servers.sort(function (x, y) {
-      return x.balance(operation, options) - y.balance(operation, options)
-    })
-    servers = roundRobinSort(servers, options)
+  if (servers.length) {
+    if (!options.get('disableWeight')) {
+      servers.sort(function (x, y) {
+        return x.balance(operation, options) - y.balance(operation, options)
+      })
+    }
+    if (typeof options.get('balanceStrategy') === 'function') {
+      servers = options.get('balanceStrategy')(servers)
+    } else if (options.get('random')) {
+      servers = shuffle(servers)
+    } else if (options.get('roundRobin')) {
+      servers = roundRobinSort(servers, options)
+    }
   }
   return servers
 }
@@ -1666,11 +1673,25 @@ function mapServer (data) {
   return server
 }
 
+function shuffle (arr) {
+  var array = arr.slice(0)
+  for (var i = array.length - 1; i > 0; i -= 1) {
+    var j = Math.random() * (i + 1) | 0
+    var temp = array[i]
+    array[i] = array[j]
+    array[j] = temp
+  }
+  return array
+}
+
 function roundRobinSort (servers, options) {
   var size = 0
-  if (options && options.roundRobin) {
-    size = options.roundRobinSize > servers.length ? servers.length : options.roundRobinSize
-    if (size > 1) servers = RoundRobin(servers, size)
+  if (options && options.get('roundRobin')) {
+    var configSize = +options.get('roundRobinSize')
+    size = configSize > servers.length ? servers.length : configSize
+    if (size > 1) {
+      return RoundRobin(servers, size)
+    }
   }
   return servers
 }

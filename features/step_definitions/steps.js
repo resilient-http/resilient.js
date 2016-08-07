@@ -6,14 +6,14 @@ module.exports = function () {
   Given = When = Then = this.defineStep
   this.World = require('../support/world').World
 
-  function getOptions(type) {
+  function getOptions (type) {
     var options = this.options = this.options || {}
     return options[type] = options[type] || {}
   }
 
-  function parseValue(str) {
+  function parseValue (str) {
     if (/[0-9]+/.test(str)) {
-      return parseInt(str, 10)
+      return +str
     } else if (str === 'true') {
       return true
     } else if (str === 'false') {
@@ -23,17 +23,18 @@ module.exports = function () {
     }
   }
 
-  function setOptionsTable(options, table, field) {
+  function setOptionsTable (options, table, field) {
     options[field] = options[field] || {}
     table.rows().forEach(function () {})
   }
 
-  function defineMock(row) {
+  function defineMock (row) {
     var url = row[0]
     var status = parseInt(row[1], 10)
     var method = row[2].toLowerCase()
     var delay = parseInt(row[3], 3)
     var body = row[4] === 'none' ? null : JSON.parse(row[4])
+
     this.mock(url)
       .persist()
       .filteringPath(function () { return '/' })

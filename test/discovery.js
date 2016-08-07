@@ -79,7 +79,7 @@ describe('Discovery', function () {
 
     it('should resolve with error timeout status', function (done) {
       var start = Date.now()
-      var end = 50 * 3 * 3
+      var end = 50 * 3 * 2
       resilient.get('/hello', function (err, res) {
         expect(err.status).to.be.equal(1000)
         if (err.code) expect(err.code).to.be.equal('ETIMEDOUT')
@@ -199,7 +199,7 @@ describe('Discovery', function () {
       nock('http://valid')
         .filteringPath(function () { return '/' })
         .get('/')
-        .delayConnection(10)
+        .delayConnection(30)
         .reply(200, ['http://server'])
       nock('http://server')
         .get('/hello')
@@ -216,7 +216,7 @@ describe('Discovery', function () {
         expect(err).to.be.null
         expect(res.status).to.be.equal(200)
         expect(res.data).to.be.deep.equal({ hello: 'world' })
-        expect((Date.now() - start) > 59).to.be.true
+        expect((Date.now() - start) < 100).to.be.true
         done()
       })
     })

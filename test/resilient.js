@@ -51,7 +51,10 @@ describe('Resilient', function () {
 
     it('should fetch the default balancer params', function () {
       var balancer = resilient.balancer()
-      expect(balancer.get('roundRobin')).to.be.true
+      expect(balancer.get('balanceStrategy')).to.be.null
+      expect(balancer.get('disableWeight')).to.be.false
+      expect(balancer.get('random')).to.be.false
+      expect(balancer.get('roundRobin')).to.be.false
       expect(balancer.get('roundRobinSize')).to.be.equal(3)
       expect(balancer.get('enable')).to.be.true
       expect(balancer.get('weight').error).to.be.equal(50)

@@ -18,6 +18,24 @@
         ]
 
 - request:
+    url: ^/discovery/balancer?
+    method:
+      - GET
+      - POST
+  response:
+    - status: 200
+      headers:
+        content-type: application/json
+      body: >
+        [
+          "http://localhost:8882/server/1",
+          "http://localhost:8882/server/2",
+          "http://localhost:8882/server/3",
+          "http://localhost:8882/server/4",
+          "http://localhost:8882/server/5"
+        ]
+
+- request:
     url: ^/discovery/fail
     method:
       - GET

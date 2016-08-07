@@ -5,6 +5,9 @@ var Resilient = require('../')
 describe('Fallback', function () {
   describe('invalid servers with invalid status', function () {
     var client = Resilient({
+      balancer: {
+        enable: false
+      },
       service: {
         timeout: 50,
         servers: [
@@ -51,6 +54,9 @@ describe('Fallback', function () {
 
   describe('valid server', function () {
     var client = Resilient({
+      balancer: {
+        enable: false
+      },
       service: {
         timeout: 50,
         servers: [

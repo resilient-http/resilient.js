@@ -1,4 +1,5 @@
 var expect = require('chai').expect
+var Options = require('../lib/options')
 var Servers = require('../lib/servers')
 
 describe('Servers', function () {
@@ -42,16 +43,20 @@ describe('Servers', function () {
   })
 
   describe('sort', function () {
+    before(function () {
+      this.opts = new Options()
+    })
+
     it('should sort by best availability', function () {
-      expect(servers.sort()).to.have.length(3)
+      expect(servers.sort('read', this.opts)).to.have.length(3)
     })
 
     it('should have a valid first server', function () {
-      expect(servers.sort()[0].url).to.be.equal(list[2])
+      expect(servers.sort('read', this.opts).shift().url).to.be.equal(list[2])
     })
 
     it('should have a valid last server', function () {
-      expect(servers.sort()[2].url).to.be.equal(list[0])
+      expect(servers.sort('read', this.opts)[2].url).to.be.equal(list[0])
     })
   })
 
