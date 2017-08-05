@@ -7,7 +7,7 @@ var util = require('util')
 var path = require('path')
 var fs = require('fs')
 var yargs = require('yargs')
-var buffer = require('buffer')
+
 
 var argv = yargs
   .usage('Resilient command-line HTTP client\nUsage: $0')
@@ -108,7 +108,7 @@ function printToStdout(res) {
   } else if (res.data && !argv.infoHeaders) {
     if (typeof res.data === 'string') {
       echo(res.data)
-    } else if (buffer.isBuffer(res.data)) {
+    } else if (Buffer.isBuffer(res.data)) {
       echo(res.data.toString('utf8'))
     } else {
       echo(util.inspect(res.data, { depth: null }))
