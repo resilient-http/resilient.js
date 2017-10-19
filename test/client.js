@@ -54,6 +54,15 @@ describe('Client', function () {
         done()
       })
     })
+
+    it('should perform a valid request using a promise', function (done) {
+      client.send('/hello', { method: 'POST' }).then(function (err, res) {
+        expect(err).to.be.null
+        expect(res.status).to.be.equal(200)
+        expect(res.data).to.be.deep.equal({ hello: 'world' })
+        done()
+      }, done)
+    })
   })
 
   describe('GET', function () {
