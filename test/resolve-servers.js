@@ -45,7 +45,7 @@ describe('Resolve servers', function () {
     })
 
     it('should resolve with a valid status', function (done) {
-      if (process.env.CI) return this.skip()
+      if (process.env.CI) return done()
 
       resilient.get('/hello', function (err, res) {
         expect(err).to.be.null
@@ -82,6 +82,7 @@ describe('Resolve servers', function () {
     })
 
     it('should resolve with a error timeout status', function (done) {
+      if (process.env.CI) return done()
       resilient.get('/hello', function (err, res) {
         expect(err.status).to.be.equal(1000)
         expect(err.code).to.be.equal('ETIMEDOUT')

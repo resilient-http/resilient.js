@@ -78,7 +78,7 @@ describe('Discovery', function () {
     })
 
     it('should resolve with error timeout status', function (done) {
-      if (process.env.CI) return this.skip()
+      if (process.env.CI) return done()
 
       var start = Date.now()
       var end = 50 * 3 * 2

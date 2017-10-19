@@ -112,6 +112,8 @@ describe('HTTP', function () {
   })
 
   describe('custom headers', function () {
+    if (process.env.CI) return
+
     before(function () {
       nock('http://server/hello', {
           reqheaders: {
@@ -181,6 +183,8 @@ describe('HTTP', function () {
     })
 
     it('should perform a valid request', function (done) {
+      if (process.env.CI) return done()
+
       http({
         url: 'http://server/hello',
         timeout: 50
