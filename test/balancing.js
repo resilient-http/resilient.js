@@ -3,7 +3,7 @@ var nock = require('nock')
 var Resilient = require('../')
 
 describe('Servers sorting', function () {
-  if (process.env.CI) return this.skip()
+  if (process.env.CI) return
 
   describe('balance by best available server', function () {
 
