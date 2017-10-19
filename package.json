@@ -61,7 +61,7 @@
     "lodash": "^2.4.1",
     "mocha": "^1.21.3",
     "mocha-phantomjs": "^3.4.1",
-    "nock": "^0.48.0",
+    "nock": "^9.0",
     "resilient-consul": "^0.1.1",
     "sinon": "^1.10.3",
     "standard": "^5.4.1",

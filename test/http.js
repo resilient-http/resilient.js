@@ -113,8 +113,11 @@ describe('HTTP', function () {
 
   describe('custom headers', function () {
     before(function () {
-      nock('http://server')
-        .matchHeader('version', '1.0')
+      nock('http://server/hello', {
+          reqheaders: {
+            version: '1'
+          }
+        })
         .get('/hello')
         .reply(202, { hello: 'world' })
     })
@@ -123,7 +126,7 @@ describe('HTTP', function () {
       http({
         url: 'http://server/hello',
         headers: {
-          version: '1.0'
+          version: '1'
         }
       }, function (err, res) {
         expect(err).to.be.null

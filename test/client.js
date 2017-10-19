@@ -40,7 +40,7 @@ describe('Client', function () {
   })
 
   describe('send', function () {
-    before(function () {
+    beforeEach(function () {
       nock('http://server')
         .post('/hello')
         .reply(200, { hello: 'world' })
@@ -56,17 +56,16 @@ describe('Client', function () {
     })
 
     it('should perform a valid request using a promise', function (done) {
-      client.send('/hello', { method: 'POST' }).then(function (err, res) {
-        expect(err).to.be.null
+      client.send('/hello', { method: 'POST' }).then(function (res) {
         expect(res.status).to.be.equal(200)
         expect(res.data).to.be.deep.equal({ hello: 'world' })
         done()
-      }, done)
+      }).catch(done)
     })
   })
 
   describe('GET', function () {
-    before(function () {
+    beforeEach(function () {
       nock('http://server')
         .get('/hello')
         .reply(200, { hello: 'world' })
@@ -79,6 +78,14 @@ describe('Client', function () {
         expect(res.data).to.be.deep.equal({ hello: 'world' })
         done()
       })
+    })
+
+    it('should perform a valid request as promise', function (done) {
+      client.get('/hello').then(function (res) {
+        expect(res.status).to.be.equal(200)
+        expect(res.data).to.be.deep.equal({ hello: 'world' })
+        done()
+      }).catch(done)
     })
   })
 

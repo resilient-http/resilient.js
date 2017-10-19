@@ -1,4 +1,4 @@
-/*! resilient - v0.3.4 - MIT License - https://github.com/resilient-http/resilient.js */
+/*! resilient - v0.4.0 - MIT License - https://github.com/resilient-http/resilient.js */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.resilient=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var _ = require('./utils')
 
@@ -80,8 +80,8 @@ Client.prototype.send = function (path, options, cb, method) {
   var opts = args[0]
   var callback = args[1]
 
-  return new Promise(function (resolve, reject) {
-    this._resilient.emit('request:start', options, this._resilient)
+  var promise = new Promise(function (resolve, reject) {
+    this._resilient.emit('request:start', opts, this._resilient)
 
     requester.apply(this, [opts, function (err, res) {
       if (err) {
@@ -93,6 +93,13 @@ Client.prototype.send = function (path, options, cb, method) {
       callback(err, res)
     }])
   }.bind(this))
+
+  // If a callback is passed, subscribe to then/catch to avoid node +6.6 stdout warnings
+  if (callback !== _.noop) {
+    promise.then(callback).catch(callback)
+  }
+
+  return promise
 }
 
 function requester (options, cb) {
@@ -529,7 +536,7 @@ var Resilient = require('./resilient')
 
 module.exports = Resilient
 
-Resilient.VERSION = '0.3.4'
+Resilient.VERSION = '0.4.0'
 Resilient.CLIENT_VERSION = http.VERSION
 Resilient.defaults = defaults
 Resilient.Options = Options

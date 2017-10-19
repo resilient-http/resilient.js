@@ -365,12 +365,13 @@ describe('Resilient', function () {
     before(function () {
       nock('http://server')
         .filteringPath(/\?(.*)/g, '')
-        .matchHeader('accept', 'application/json')
         .get('/')
         .reply(200, ['http://api'])
-      nock('http://api')
-        .matchHeader('accept', 'application/json')
-        .matchHeader('client', 'resilient')
+      nock('http://api', {
+          reqheaders: {
+            client: 'resilient'
+          }
+        })
         .get('/hello')
         .reply(200, { hello: 'world' })
     })
