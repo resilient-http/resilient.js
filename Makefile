@@ -1,4 +1,4 @@
-VERSION = 0.3.4
+VERSION = 0.4.0
 BROWSERIFY = node ./node_modules/.bin/browserify
 MOCHA = ./node_modules/.bin/mocha
 LINTER = ./node_modules/.bin/standard
