@@ -42,6 +42,7 @@ Resilient is conceptually similar to [Ribbon](https://github.com/Netflix/ribbon)
 
 ## Features
 
+- Supports callback and promise based async requests.
 - Reliable failover and error handling with transparent server fallback
 - Smart network error handling covering multiple failure scenarios
 - Smart balancer logic based on empirical server score (network latency, errors and succesfull requests)
@@ -65,8 +66,8 @@ Resilient is conceptually similar to [Ribbon](https://github.com/Netflix/ribbon)
 - Round robin scheduling algorithm for traffic distribution (experimental)
 - Featured cURL-inspired command-line interface
 - Lightweight library (just ~2K SLOC, 9KB gzipped)
-- Dependency free in browser environments
-- Cross engine. ES5 compliant
+- Dependency free in browser environments (in node.js it only depends on `request` package)
+- Cross JS engine. ES5/6 compliant (requires `Promise` global to be available)
 
 ## Installation
 
@@ -96,7 +97,7 @@ Runs in any [ES5 compliant](http://kangax.github.io/mcompat-table/es5/) engine.
 
 ![Node.js](https://cdn0.iconfinder.com/data/icons/long-shadow-web-icons/512/nodejs-48.png) | ![Chrome](https://raw.github.com/alrra/browser-logos/master/chrome/chrome_48x48.png) | ![Firefox](https://raw.github.com/alrra/browser-logos/master/firefox/firefox_48x48.png) | ![IE](https://raw.github.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png) | ![Opera](https://raw.github.com/alrra/browser-logos/master/opera/opera_48x48.png) | ![Safari](https://raw.github.com/alrra/browser-logos/master/safari/safari_48x48.png)
 ---  | --- | --- | --- | --- | --- |
-+0.10 | +5 | +3.5 | +9 | +10 | +5 |
++4 | +33 | +29 | +10 | +19 | +7.1 |
 
 ## Middleware
 
@@ -148,7 +149,7 @@ client.setServers(servers)
 
 Perform a request (the best available server will be used automatically)
 ```js
-client.get('/users', function (err, res) {
+client.get('/users').then(function (res) {
   if (res.status === 200) {
     console.log('Success:', res.data)
   }
@@ -174,7 +175,7 @@ client.discoveryServers(servers)
 
 Finally, perform the request (and that's all, Resilient will take care about everything to reach the best server)
 ```js
-client.get('/users', function (err, res) {
+client.get('/users').then(function (res) {
   if (res.status === 200) {
     console.log('Success:', res.data)
   }
@@ -268,8 +269,10 @@ client.use(testMiddleware({
   timeout: 3000
 }))
 
-client.get('/', function (err, res) {
-  // mad science here
+client.get('/').then(function (res) {
+  console.log(res)
+}).catch(function (err) {
+  console.error(err)
 })
 ```
 

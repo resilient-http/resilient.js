@@ -3,6 +3,8 @@ var nock = require('nock')
 var Resilient = require('../')
 
 describe('Timeouts', function () {
+  if (process.env.CI) return this.skip()
+
   describe('per method timeouts', function () {
     var client = Resilient({
       service: {

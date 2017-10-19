@@ -45,6 +45,8 @@ describe('Resolve servers', function () {
     })
 
     it('should resolve with a valid status', function (done) {
+      if (process.env.CI) return this.skip()
+
       resilient.get('/hello', function (err, res) {
         expect(err).to.be.null
         expect(res.status).to.be.equal(200)

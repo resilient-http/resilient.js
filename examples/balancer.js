@@ -19,9 +19,10 @@ client.on('request:outgoing', function (opts) {
 })
 
 for (let i = 1; i < 10; i += 1) {
-  client.get('/hello', function (err, res) {
-    console.log('Error:', err)
+  client.get('/hello').then(function (res) {
     console.log('Response:', res.status, res.request.method)
     console.log('Body:', res.data)
+  }).catch(function (err) {
+    console.error('Error:', err)
   })
 }
