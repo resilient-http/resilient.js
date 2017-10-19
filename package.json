@@ -1,7 +1,7 @@
 {
   "name": "resilient",
   "description": "Fault-tolerant, reactive, middleware-oriented, full featured HTTP client for node.js and browsers",
-  "version": "0.3.5",
+  "version": "0.4.5",
   "license": "MIT",
   "repository": "resilient-http/resilient.js",
   "author": "Tomas Aparicio",
