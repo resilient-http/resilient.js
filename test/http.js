@@ -197,6 +197,8 @@ describe('HTTP', function () {
   })
 
   describe('unavailable', function () {
+    if (process.env.CI) return
+
     before(function () {
       nock('http://server')
         .get('/hello')

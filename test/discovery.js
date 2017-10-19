@@ -178,6 +178,8 @@ describe('Discovery', function () {
   })
 
   describe('timeout discovery servers parallel', function () {
+    if (process.env.CI) return
+
     var resilient = Resilient({
       discovery: {
         timeout: 50,
