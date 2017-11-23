@@ -5,7 +5,7 @@ var Resilient = require('../')
 describe('Servers sorting', function () {
   if (process.env.CI) return
 
-  describe('balance by best available server', function () {
+  describe.only('balance by best available server', function () {
 
     var resilient = Resilient({
       service: {
@@ -18,7 +18,7 @@ describe('Servers sorting', function () {
           'http://valid1',
           'http://unavailable',
           'http://valid2',
-          'http://valid3',
+          'http://valid3'
         ]
       },
       balancer: {
@@ -30,26 +30,27 @@ describe('Servers sorting', function () {
       nock('http://timeout')
         .filteringPath(function () { return '/' })
         .get('/')
-        .times(1)
-        .delayConnection(150)
+        .times(2)
+        .socketDelay(150)
         .reply(200)
       nock('http://unavailable')
         .filteringPath(function () { return '/' })
         .get('/')
-        .times(1)
+        .times(3)
         .reply(503)
+
       nock('http://valid1')
         .get('/hello')
         .times(2)
         .reply(200, { name: 'Chuck' })
       nock('http://valid2')
         .get('/hello')
-        .delayConnection(40)
+        .socketDelay(40)
         .times(2)
         .reply(200, { name: 'Norris' })
       nock('http://valid3')
         .get('/hello')
-        .delayConnection(80)
+        .socketDelay(80)
         .times(3)
         .reply(200, { name: 'Elthon' })
     })
@@ -89,6 +90,7 @@ describe('Servers sorting', function () {
       resilient.get('/hello', function (err, res) {
         expect(err).to.be.null
         expect(res.status).to.be.equal(200)
+        console.log(res.data);
         expect(res.data).to.be.deep.equal({ name: 'Chuck' })
         done()
       })

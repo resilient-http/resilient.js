@@ -1524,8 +1524,9 @@ var balancerOptions = require('./defaults').balancer
 
 module.exports = Server
 
-function Server (url) {
+function Server (url, index) {
   this.url = url
+  this.index = index
   this.resetStats()
 }
 
@@ -1545,7 +1546,7 @@ Server.prototype.balance = function (operation, options) {
   var stats = this.stats(operation)
   var weight = balancerOptions.weight
   var total = stats.request + stats.error
-  return total ? calculateStatsBalance(stats, weight, total) : 0
+  return total ? calculateStatsBalance(stats, weight, total, this.index) : 0
 }
 
 Server.prototype.stats = function (operation, field) {
@@ -1573,11 +1574,27 @@ function createStats () {
   }
 }
 
-function calculateStatsBalance (stats, weight, total) {
-  return round(
-    ((((stats.request * 100 / total) * weight.success) +
-    ((stats.error * 100 / total) * weight.error)) +
-    (stats.latency * weight.latency)) / 100)
+/**
+ * stats: {
+ *    latency: 0,
+ *    error: 0,
+ *    request: 0
+ *  }
+ *
+ *  weight: {
+ *    success: 15,
+ *    error: 50,
+ *    latency: 35
+ *  }
+ *
+ *  total: Number
+ */
+function calculateStatsBalance (stats, weight, total, index) {
+  var success = (stats.request * 100 / total) * weight.success
+  var error = (stats.error * 100 / total) * weight.error
+  var latency = (stats.latency * weight.latency)
+
+  return round((success + error + latency) / 100) + index
 }
 
 function calculateAvgLatency (latency, stats) {
@@ -1641,6 +1658,11 @@ Servers.prototype.resetStats = function () {
 }
 
 Servers.prototype.sort = function (operation, options) {
+  // var er = this.servers.map(function (item) {
+  //   return item.url
+  // })
+  // console.log(er)
+
   var servers = this.servers.slice(0)
   if (servers.length) {
     if (!options.get('disableWeight')) {
@@ -1656,6 +1678,12 @@ Servers.prototype.sort = function (operation, options) {
       servers = roundRobinSort(servers, options)
     }
   }
+
+  // var es = servers.map(function (item) {
+  //   return item.url
+  // })
+  // console.log(es)
+  // console.log('-----------')
   return servers
 }
 
@@ -1681,13 +1709,13 @@ function mapServers (servers) {
     .map(_.bind(this, mapServer))
 }
 
-function mapServer (data) {
+function mapServer (data, i) {
   var server
   if (data instanceof Server) {
     server = data
   } else {
     server = this.find(_.isObj(data) ? data.url : data)
-    if (!server) server = new Server(data)
+    if (!server) server = new Server(data, i)
   }
   return server
 }
@@ -1978,8 +2006,8 @@ function merger (target, key, value) {
 }))
 
 },{}],23:[function(require,module,exports){
-/*! lil-http - v0.1.16 - MIT License - https://github.com/lil-js/http */
-(function (root, factory) {
+/*! lil-http - v0.1.17 - MIT License - https://github.com/lil-js/http */
+;(function (root, factory) {
   if (typeof define === 'function' && define.amd) {
     define(['exports'], factory)
   } else if (typeof exports === 'object') {
@@ -1993,7 +2021,7 @@ function merger (target, key, value) {
 }(this, function (exports) {
   'use strict'
 
-  var VERSION = '0.1.16'
+  var VERSION = '0.1.17'
   var toStr = Object.prototype.toString
   var slicer = Array.prototype.slice
   var hasOwn = Object.prototype.hasOwnProperty
@@ -2014,11 +2042,11 @@ function merger (target, key, value) {
     responseType: 'text'
   }
 
-  function isObj(o) {
+  function isObj (o) {
     return o && toStr.call(o) === '[object Object]' || false
   }
 
-  function assign(target) {
+  function assign (target) {
     var i, l, x, cur, args = slicer.call(arguments).slice(1)
     for (i = 0, l = args.length; i < l; i += 1) {
       cur = args[i]
@@ -2027,7 +2055,7 @@ function merger (target, key, value) {
     return target
   }
 
-  function once(fn) {
+  function once (fn) {
     var called = false
     return function () {
       if (called === false) {
@@ -2037,16 +2065,35 @@ function merger (target, key, value) {
     }
   }
 
-  function setHeaders(xhr, headers) {
-    if (isObj(headers)) {
-      headers['Content-Type'] = headers['Content-Type'] || http.defaultContent
-      for (var field in headers) if (hasOwn.call(headers, field)) {
-        xhr.setRequestHeader(field, headers[field])
+  function setHeaders (xhr, headers) {
+    if (!isObj(headers)) return
+
+    // Set default content type
+    headers['Content-Type'] = headers['Content-Type'] ||
+      headers['content-type'] ||
+      http.defaultContent
+
+    var buf = Object.keys(headers).reduce(function (buf, field) {
+      var lowerField = field.toLowerCase()
+
+      // Remove duplicated headers
+      if (lowerField !== field) {
+        if (hasOwn.call(headers, lowerField)) {
+          delete headers[lowerField]
+          delete buf[lowerField]
+        }
       }
-    }
+
+      buf[field] = headers[field]
+      return buf
+    }, {})
+
+    Object.keys(buf).forEach(function (field) {
+      xhr.setRequestHeader(field, buf[field])
+    })
   }
 
-  function getHeaders(xhr) {
+  function getHeaders (xhr) {
     var headers = {}, rawHeaders = xhr.getAllResponseHeaders().trim().split('\n')
     rawHeaders.forEach(function (header) {
       var split = header.trim().split(':')
@@ -2057,11 +2104,11 @@ function merger (target, key, value) {
     return headers
   }
 
-  function isJSONResponse(xhr) {
+  function isJSONResponse (xhr) {
     return jsonMimeRegex.test(xhr.getResponseHeader('Content-Type'))
   }
 
-  function encodeParams(params) {
+  function encodeParams (params) {
     return Object.getOwnPropertyNames(params).filter(function (name) {
       return params[name] !== undefined
     }).map(function (name) {
@@ -2070,7 +2117,7 @@ function merger (target, key, value) {
     }).join('&').replace(/%20/g, '+')
   }
 
-  function parseData(xhr) {
+  function parseData (xhr) {
     var data = null
     if (xhr.responseType === 'text') {
       data = xhr.responseText
@@ -2081,11 +2128,11 @@ function merger (target, key, value) {
     return data
   }
 
-  function getStatus(status) {
+  function getStatus (status) {
     return status === 1223 ? 204 : status // IE9 fix
   }
 
-  function buildResponse(xhr) {
+  function buildResponse (xhr) {
     var response = {
       xhr: xhr,
       status: getStatus(xhr.status),
@@ -2100,29 +2147,29 @@ function merger (target, key, value) {
     return response
   }
 
-  function buildErrorResponse(xhr, error) {
+  function buildErrorResponse (xhr, error) {
     var response = buildResponse(xhr)
     response.error = error
     if (error.stack) response.stack = error.stack
     return response
   }
 
-  function cleanReferences(xhr) {
+  function cleanReferences (xhr) {
     xhr.onreadystatechange = xhr.onerror = xhr.ontimeout = null
   }
 
-  function isValidResponseStatus(xhr) {
+  function isValidResponseStatus (xhr) {
     var status = getStatus(xhr.status)
     return status >= 200 && status < 300 || status === 304
   }
 
-  function onError(xhr, cb) {
+  function onError (xhr, cb) {
     return once(function (err) {
       cb(buildErrorResponse(xhr, err), null)
     })
   }
 
-  function onLoad(config, xhr, cb) {
+  function onLoad (config, xhr, cb) {
     return function (ev) {
       if (xhr.readyState === 4) {
         cleanReferences(xhr)
@@ -2135,12 +2182,12 @@ function merger (target, key, value) {
     }
   }
 
-  function isCrossOrigin(url) {
+  function isCrossOrigin (url) {
     var match = url.match(originRegex)
     return match && match[1] === origin
   }
 
-  function getURL(config) {
+  function getURL (config) {
     var url = config.url
     if (isObj(config.params)) {
       url += (url.indexOf('?') === -1 ? '?' : '&') + encodeParams(config.params)
@@ -2148,7 +2195,7 @@ function merger (target, key, value) {
     return url
   }
 
-  function XHRFactory(url) {
+  function XHRFactory (url) {
     if (hasDomainRequest && isCrossOrigin(url)) {
       return new XDomainRequest()
     } else {
@@ -2156,10 +2203,14 @@ function merger (target, key, value) {
     }
   }
 
-  function createClient(config) {
+  function createClient (config) {
     var method = (config.method || 'GET').toUpperCase()
     var auth = config.auth
     var url = getURL(config)
+
+    if (!url || typeof url !== 'string') {
+      throw new TypeError('Missing required request URL')
+    }
 
     var xhr = XHRFactory(url)
     if (auth) {
@@ -2174,7 +2225,7 @@ function merger (target, key, value) {
     return xhr
   }
 
-  function updateProgress(xhr, cb) {
+  function updateProgress (xhr, cb) {
     return function (ev) {
       if (ev.lengthComputable) {
         cb(ev, ev.loaded / ev.total)
@@ -2184,13 +2235,13 @@ function merger (target, key, value) {
     }
   }
 
-  function hasContentTypeHeader(config) {
+  function hasContentTypeHeader (config) {
     return config && isObj(config.headers)
-      && (config.headers['content-type'] || config.headers['Content-Type'])
-      || false
+    && (config.headers['content-type'] || config.headers['Content-Type'])
+    || false
   }
 
-  function buildPayload(xhr, config) {
+  function buildPayload (xhr, config) {
     var data = config.data
     if (isObj(config.data) || Array.isArray(config.data)) {
       if (hasContentTypeHeader(config) === false) {
@@ -2201,14 +2252,14 @@ function merger (target, key, value) {
     return data
   }
 
-  function timeoutResolver(cb, timeoutId) {
+  function timeoutResolver (cb, timeoutId) {
     return function () {
       clearTimeout(timeoutId)
       cb.apply(null, arguments)
     }
   }
 
-  function request(config, cb, progress) {
+  function request (config, cb, progress) {
     var xhr = createClient(config)
     var data = buildPayload(xhr, config)
     var errorHandler = onError(xhr, cb)
@@ -2216,7 +2267,7 @@ function merger (target, key, value) {
     if (hasBind) {
       xhr.ontimeout = errorHandler
     } else {
-      var timeoutId = setTimeout(function abort() {
+      var timeoutId = setTimeout(function abort () {
         if (xhr.readyState !== 4) {
           xhr.abort()
         }
@@ -2240,7 +2291,7 @@ function merger (target, key, value) {
     return { xhr: xhr, config: config }
   }
 
-  function requestFactory(method) {
+  function requestFactory (method) {
     return function (url, options, cb, progress) {
       var i, l, cur = null
       var config = assign({}, defaults, { method: method })
@@ -2265,7 +2316,7 @@ function merger (target, key, value) {
     }
   }
 
-  function http(config, data, cb, progress) {
+  function http (config, data, cb, progress) {
     return requestFactory('GET').apply(null, arguments)
   }
 
