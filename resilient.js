@@ -193,11 +193,8 @@ defaults.balancer = {
   balanceStrategy: null,
   disableWeight: false,
   weight: {
-    // success: 15,
     success: 15,
-    error: 50,
-    // error: 50,
-    // latency: 1
+    error: 20,
     latency: 0.001
   }
 }
@@ -1546,17 +1543,12 @@ Server.prototype.reportError = function (operation, latency) {
   this.report(operation, latency, 'error')
 }
 
-Server.prototype.balance = function (operation, options, log) {
+Server.prototype.balance = function (operation, options) {
   var stats = this.stats(operation)
   var weight = balancerOptions.weight
   var total = stats.request + stats.error
 
-  var url = null
-  if (log) {
-    url = this.url
-  }
-
-  return total ? calculateStatsBalance(stats, weight, total, this.index, url) : 0
+  return total ? calculateStatsBalance(stats, weight, total, this.index) : 0
 }
 
 Server.prototype.stats = function (operation, field) {
@@ -1584,7 +1576,7 @@ function createStats () {
   }
 }
 
-function calculateStatsBalance (stats, weight, total, index, log) {
+function calculateStatsBalance (stats, weight, total, index) {
   var success = (stats.request / total) * weight.success
   var error = (stats.error / total) * weight.error
   var latency = (stats.latency * weight.latency)
@@ -1592,7 +1584,7 @@ function calculateStatsBalance (stats, weight, total, index, log) {
   return (success + error + latency + index + total).toFixed(2)
 }
 
-function calculateAvgLatency (latency, stats, url) {
+function calculateAvgLatency (latency, stats) {
   return (latency + stats.latency) / (stats.request + stats.error)
 }
 
@@ -1665,6 +1657,11 @@ Servers.prototype.sort = function (operation, options) {
     }
   }
 
+  var sr = servers.map(function (item) {
+    return item.balance(operation, null, true) + ' | ' + item.url
+  })
+
+  console.log(sr)
   return servers
 }
 

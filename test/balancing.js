@@ -7,28 +7,46 @@ var Resilient = require('../')
 var timer = _.timer;
 function stubTimer(time) {
   _.timer = function () {
-    console.log('stubTimer', time)
     return function () {
-      return time
+      return time || 1;
     }
   }
 }
 
+var results = {
+  valid1: { time: 100, name: 'Chuck' },
+  valid2: { time: 150, name: 'Norris' },
+  valid3: { time: 200, name: 'Elthon' }
+}
+
+var correctResults = [
+  'valid1',
+  'valid2',
+  'valid3',
+  'valid1',
+  'valid1',
+  'valid1',
+  'valid2',
+  'valid1',
+  'valid2',
+  'valid3'
+]
+
 describe('Servers sorting', function () {
   if (process.env.CI) return
 
-  describe('balance by best available server', function () {
+  describe.only('balance by best available server', function () {
 
     var resilient = Resilient({
       service: {
         timeout: 100,
         servers: [
-          // 'http://unavailable',
-          // 'http://timeout',
-          // 'http://unavailable',
-          // 'http://timeout',
+          'http://unavailable',
+          'http://timeout',
+          'http://unavailable',
+          'http://timeout',
           'http://valid1',
-          // 'http://unavailable',
+          'http://unavailable',
           'http://valid2',
           'http://valid3'
         ]
@@ -51,18 +69,16 @@ describe('Servers sorting', function () {
         .get('/')
         .reply(503)
 
-      nock('http://valid1')
-        .persist()
-        .get('/hello')
-        .reply(200, { name: 'Chuck' })
-      nock('http://valid2')
-        .persist()
-        .get('/hello')
-        .reply(200, { name: 'Norris' })
-      nock('http://valid3')
-        .persist()
-        .get('/hello')
-        .reply(200, { name: 'Elthon' })
+      nockCorrectServer('valid1')
+      nockCorrectServer('valid2')
+      nockCorrectServer('valid3')
+
+      function nockCorrectServer (server) {
+        nock('http://' + server)
+          .persist()
+          .get('/hello')
+          .reply(200, { name: results[server].name })
+      }
     })
 
     after(function () {
@@ -70,103 +86,18 @@ describe('Servers sorting', function () {
       nock.cleanAll()
     })
 
-    it('should resolve with the valid1 server', function (done) {
-      stubTimer(100)
+    correctResults.forEach(function (server) {
+      it('should resolve with the ' + server + ' server', function (done) {
+        stubTimer(results[server].time)
 
-      resilient.get('/hello', function (err, res) {
-        expect(err).to.be.null
-        expect(res.status).to.be.equal(200)
-        expect(res.data).to.be.deep.equal({ name: 'Chuck' })
-        done()
+        resilient.get('/hello', function (err, res) {
+          expect(err).to.be.null
+          expect(res.status).to.be.equal(200)
+          expect(res.data).to.be.deep.equal({ name: results[server].name })
+          done()
+        })
       })
     })
 
-    it('should then resolve with valid2 server', function (done) {
-      stubTimer(150)
-
-      resilient.get('/hello', function (err, res) {
-        expect(err).to.be.null
-        expect(res.status).to.be.equal(200)
-        expect(res.data).to.be.deep.equal({ name: 'Norris' })
-        done()
-      })
-    })
-
-    it('should then resolve with valid3 server', function (done) {
-      stubTimer(200)
-
-      resilient.get('/hello', function (err, res) {
-        expect(err).to.be.null
-        expect(res.status).to.be.equal(200)
-        expect(res.data).to.be.deep.equal({ name: 'Elthon' })
-        done()
-      })
-    })
-
-    it('should then resolve with the valid1 server', function (done) {
-      stubTimer(100)
-
-      resilient.get('/hello', function (err, res) {
-        expect(err).to.be.null
-        expect(res.status).to.be.equal(200)
-        expect(res.data).to.be.deep.equal({ name: 'Chuck' })
-        done()
-      })
-    })
-
-    it('should then resolve with the valid1 server', function (done) {
-      stubTimer(100)
-
-      resilient.get('/hello', function (err, res) {
-        expect(err).to.be.null
-        expect(res.status).to.be.equal(200)
-        expect(res.data).to.be.deep.equal({ name: 'Chuck' })
-        done()
-      })
-    })
-
-    it('should then resolve with the valid2 server', function (done) {
-      stubTimer(150)
-
-      resilient.get('/hello', function (err, res) {
-        expect(err).to.be.null
-        expect(res.status).to.be.equal(200)
-        expect(res.data).to.be.deep.equal({ name: 'Norris' })
-        done()
-      })
-    })
-
-    it('should then resolve with the valid1 server again', function (done) {
-      stubTimer(100)
-
-      resilient.get('/hello', function (err, res) {
-        expect(err).to.be.null
-        expect(res.status).to.be.equal(200)
-        expect(res.data).to.be.deep.equal({ name: 'Chuck' })
-        done()
-      })
-    })
-
-    it('should then resolve with the valid2 server again', function (done) {
-      stubTimer(150)
-
-      resilient.get('/hello', function (err, res) {
-        expect(err).to.be.null
-        expect(res.status).to.be.equal(200)
-        expect(res.data).to.be.deep.equal({ name: 'Norris' })
-        done()
-      })
-    })
-
-    it('should then resolve with the valid2 server again', function (done) {
-      stubTimer(200)
-
-      resilient.get('/hello', function (err, res) {
-        expect(err).to.be.null
-        expect(res.status).to.be.equal(200)
-        expect(res.data).to.be.deep.equal({ name: 'Elthon' })
-        done()
-      })
-    })
   })
 })
