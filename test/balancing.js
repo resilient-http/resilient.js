@@ -35,7 +35,7 @@ var correctResults = [
 describe('Servers sorting', function () {
   if (process.env.CI) return
 
-  describe.only('balance by best available server', function () {
+  describe('balance by best available server', function () {
 
     var resilient = Resilient({
       service: {
