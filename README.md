@@ -10,8 +10,6 @@ To get started, take a look to [how does it work](#how-does-it-work), [basic usa
 
 Resilient is conceptually similar to [Ribbon](https://github.com/Netflix/ribbon), a Netflix's project and it was inspired by Chaos Engineering.
 
-<a target='_blank' rel='nofollow' href='https://app.codesponsor.io/link/1MpD3pzt63uUeG43NP4tDHPY/resilient-http/resilient.js'>  <img alt='Sponsor' width='888' height='68' src='https://app.codesponsor.io/embed/1MpD3pzt63uUeG43NP4tDHPY/resilient-http/resilient.js.svg' /></a>
-
 ## Contents
 
 - [Features](#features)
