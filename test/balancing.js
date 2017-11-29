@@ -1,6 +1,36 @@
 var expect = require('chai').expect
 var nock = require('nock')
+var sinon = require('sinon')
+var _ = require('../lib/utils')
 var Resilient = require('../')
+
+var timer = _.timer;
+function stubTimer(time) {
+  _.timer = function () {
+    return function () {
+      return time || 1;
+    }
+  }
+}
+
+var results = {
+  valid1: { time: 100, name: 'Chuck' },
+  valid2: { time: 150, name: 'Norris' },
+  valid3: { time: 200, name: 'Elthon' }
+}
+
+var correctResults = [
+  'valid1',
+  'valid2',
+  'valid3',
+  'valid1',
+  'valid1',
+  'valid1',
+  'valid2',
+  'valid1',
+  'valid2',
+  'valid3'
+]
 
 describe('Servers sorting', function () {
   if (process.env.CI) return
@@ -18,7 +48,7 @@ describe('Servers sorting', function () {
           'http://valid1',
           'http://unavailable',
           'http://valid2',
-          'http://valid3',
+          'http://valid3'
         ]
       },
       balancer: {
@@ -28,97 +58,46 @@ describe('Servers sorting', function () {
 
     before(function () {
       nock('http://timeout')
+        .persist()
         .filteringPath(function () { return '/' })
         .get('/')
-        .times(1)
-        .delayConnection(150)
+        .socketDelay(150)
         .reply(200)
       nock('http://unavailable')
+        .persist()
         .filteringPath(function () { return '/' })
         .get('/')
-        .times(1)
         .reply(503)
-      nock('http://valid1')
-        .get('/hello')
-        .times(2)
-        .reply(200, { name: 'Chuck' })
-      nock('http://valid2')
-        .get('/hello')
-        .delayConnection(40)
-        .times(2)
-        .reply(200, { name: 'Norris' })
-      nock('http://valid3')
-        .get('/hello')
-        .delayConnection(80)
-        .times(3)
-        .reply(200, { name: 'Elthon' })
+
+      nockCorrectServer('valid1')
+      nockCorrectServer('valid2')
+      nockCorrectServer('valid3')
+
+      function nockCorrectServer (server) {
+        nock('http://' + server)
+          .persist()
+          .get('/hello')
+          .reply(200, { name: results[server].name })
+      }
     })
 
     after(function () {
+      _.timer = timer;
       nock.cleanAll()
     })
 
-    it('should resolve with the valid1 server', function (done) {
-      resilient.get('/hello', function (err, res) {
-        expect(err).to.be.null
-        expect(res.status).to.be.equal(200)
-        expect(res.data).to.be.deep.equal({ name: 'Chuck' })
-        done()
+    correctResults.forEach(function (server) {
+      it('should resolve with the ' + server + ' server', function (done) {
+        stubTimer(results[server].time)
+
+        resilient.get('/hello', function (err, res) {
+          expect(err).to.be.null
+          expect(res.status).to.be.equal(200)
+          expect(res.data).to.be.deep.equal({ name: results[server].name })
+          done()
+        })
       })
     })
 
-    it('should then resolve with valid2 server', function (done) {
-      resilient.get('/hello', function (err, res) {
-        expect(err).to.be.null
-        expect(res.status).to.be.equal(200)
-        expect(res.data).to.be.deep.equal({ name: 'Norris' })
-        done()
-      })
-    })
-
-    it('should then resolve with valid3 server', function (done) {
-      resilient.get('/hello', function (err, res) {
-        expect(err).to.be.null
-        expect(res.status).to.be.equal(200)
-        expect(res.data).to.be.deep.equal({ name: 'Elthon' })
-        done()
-      })
-    })
-
-    it('should then resolve with the valid1 server', function (done) {
-      resilient.get('/hello', function (err, res) {
-        expect(err).to.be.null
-        expect(res.status).to.be.equal(200)
-        expect(res.data).to.be.deep.equal({ name: 'Chuck' })
-        done()
-      })
-    })
-
-    it('should then resolve with the valid2 server', function (done) {
-      resilient.get('/hello', function (err, res) {
-        expect(err).to.be.null
-        expect(res.status).to.be.equal(200)
-        expect(res.data).to.be.deep.equal({ name: 'Norris' })
-        done()
-      })
-    })
-
-    it('should then resolve with the valid3 server', function (done) {
-      resilient.get('/hello', function (err, res) {
-        expect(err).to.be.null
-        expect(res.status).to.be.equal(200)
-        expect(res.data).to.be.deep.equal({ name: 'Elthon' })
-        done()
-      })
-    })
-
-    it('should then resolve with the valid3 server again', function (done) {
-      resilient.get('/hello', function (err, res) {
-        expect(err).to.be.null
-        expect(res.status).to.be.equal(200)
-        expect(res.data).to.be.deep.equal({ name: 'Elthon' })
-        done()
-      })
-    })
   })
 })
