@@ -48,6 +48,7 @@
   "devDependencies": {
     "browserify": "^14.5.0",
     "chai": "^1.9.1",
+    "console.table": "^0.9.1",
     "cucumber": "^0.4.9",
     "fw": "^0.1.2",
     "karma": "^0.12.37",
