@@ -374,7 +374,7 @@ See all HTTP options supported for `node.js` [here](https://github.com/mikeal/re
 - **random** `boolean` - Use random balance strategy using `Math.random()`. Default to `false`.
 - **balanceStrategy** `function` - Custom balance strategy function. Interface to be implemented: `function (servers []Server) => []Server`. Default to `null`.
 - **disableWeight** `boolean` - Disable emphirical built-in weight calculus based on server stats for balancing (latency, errors, success).
-- **roundRobin** `boolean` - Enable RobinRobin schedule algorithm (experimental). Default: `false`.
+- **roundRobin** `boolean` - Enable round robin schedule algorithm (experimental). Default: `false`.
 - **roundRobinSize** `number` - Round robin round size. Useful to increase requests distribution across different servers. Default to `3` servers.
 - **weight** `object` - Balacer calculus percentage weight used for best available server scoring policy:
   - **success** `number` - Percentage weight for success request. Default to `15`.
