@@ -59,7 +59,7 @@
     "karma-phantomjs-launcher": "^0.1.4",
     "karma-safari-launcher": "^0.1.1",
     "karma-sauce-launcher": "^0.2.14",
-    "lodash": "^2.4.2",
+    "lodash": "^4.17.5",
     "mocha": "^1.21.3",
     "mocha-phantomjs": "^3.6.0",
     "nock": "^9.0",
